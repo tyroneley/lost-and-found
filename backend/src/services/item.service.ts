@@ -1,0 +1,25 @@
+import { prisma } from '../lib/prisma'
+
+export const createItem = async (data: any) => {
+  return prisma.item.create({
+    data: {
+      name: data.name,
+      description: data.description,
+      color: data.color,
+      category_id: data.category_id,
+      found_location: data.found_location,
+      found_at: new Date(data.found_at),
+      recorded_by: data.recorded_by
+    }
+  })
+}
+
+export const getAllItems = async () => {
+  return prisma.item.findMany({
+    include: {
+      category: true,
+      recorder: true,
+      photos: true
+    }
+  })
+}
