@@ -1,0 +1,184 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enums
+enum UserRole {
+  PUBLIC
+  SECURITY
+  ADMIN
+}
+
+enum ItemStatus {
+  REPORTED
+  UNDER_REVIEW
+  APPROVED
+  CLAIMED
+  EXPIRED
+}
+
+enum ClaimStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  APPROVE
+  REJECT
+  CLAIM
+}
+
+// Models
+model User {
+  user_id        String   @id @default(uuid())
+  name           String
+  phone          String?
+  personal_email String?  @unique
+  uni_email      String?  @unique
+  role           UserRole @default(PUBLIC)
+  affiliation    String?
+
+  // Relations
+  itemsRecorded Item[]         @relation("RecordedBy")
+  itemsApproved Item[]         @relation("ApprovedBy")
+  itemsVerified Item[]         @relation("VerifiedBy")
+  claims        ClaimRequest[]
+  auditLogs     AuditLog[]
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+
+  @@index([role])
+}
+
+model Category {
+  category_id String  @id @default(uuid())
+  name        String
+  description String?
+
+  items Item[]
+
+  created_at DateTime @default(now())
+}
+
+model Item {
+  item_id     String  @id @default(uuid())
+  name        String
+  description String?
+  color       String?
+
+  status ItemStatus @default(REPORTED)
+
+  // Category
+  category_id String
+  category    Category @relation(fields: [category_id], references: [category_id])
+
+  // Found info
+  found_location String
+  found_at       DateTime
+  expires_at     DateTime?
+
+  // Ownership verification
+  ownership_proof    String?
+  verification_notes String?
+  verified_by        String?
+  verified_user      User?     @relation("VerifiedBy", fields: [verified_by], references: [user_id])
+  verified_at        DateTime?
+
+  // Tracking users
+  recorded_by String
+  recorder    User   @relation("RecordedBy", fields: [recorded_by], references: [user_id])
+
+  approved_by String?
+  approver    User?   @relation("ApprovedBy", fields: [approved_by], references: [user_id])
+
+  // Relations
+  claims     ClaimRequest[]
+  photos     ItemPhoto[]
+  audit_logs AuditLog[]
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+
+  @@index([status])
+  @@index([category_id])
+  @@index([recorded_by])
+  @@index([approved_by])
+}
+
+model ItemPhoto {
+  photo_id String @id @default(uuid())
+
+  item_id String
+  item    Item   @relation(fields: [item_id], references: [item_id])
+
+  storage_url String
+  file_key    String?
+  mime_type   String?
+  size        Int?
+
+  uploaded_at DateTime @default(now())
+
+  @@index([item_id])
+}
+
+model ClaimRequest {
+  claim_id String @id @default(uuid())
+
+  item_id String
+  item    Item   @relation(fields: [item_id], references: [item_id])
+
+  claimer_id String
+  claimer    User   @relation(fields: [claimer_id], references: [user_id])
+
+  status ClaimStatus @default(PENDING)
+
+  // Ownership explanation
+  ownership_desc     String
+  verification_notes String?
+
+  requested_at DateTime  @default(now())
+  resolved_at  DateTime?
+
+  @@index([item_id])
+  @@index([claimer_id])
+  @@index([status])
+}
+
+model AuditLog {
+  log_id String @id @default(uuid())
+
+  item_id String
+  item    Item   @relation(fields: [item_id], references: [item_id])
+
+  changed_by String
+  user       User   @relation(fields: [changed_by], references: [user_id])
+
+  action     AuditAction
+  old_status ItemStatus?
+  new_status ItemStatus?
+
+  notes String?
+
+  created_at DateTime @default(now())
+
+  @@index([item_id])
+  @@index([changed_by])
+}
