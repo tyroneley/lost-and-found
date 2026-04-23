@@ -14,12 +14,33 @@ export const createItem = async (data: any) => {
   })
 }
 
-export const getAllItems = async () => {
+export const getItems = async () => {
   return prisma.item.findMany({
     include: {
       category: true,
       recorder: true,
       photos: true
+    }
+  })
+}
+
+export const getItemById = async (id: string) => {
+  return prisma.item.findUnique({
+    where: { item_id: id },
+    include: {
+      category: true,
+      recorder: true,
+      photos: true
+    }
+  })
+}
+
+export const updateItemStatus = async (id: string, data: any) => {
+  return prisma.item.update({
+    where: { item_id: id },
+    data: {
+      status: data.status,
+      approved_by: data.approved_by || null
     }
   })
 }
