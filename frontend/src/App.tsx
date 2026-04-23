@@ -1,29 +1,104 @@
 import './App.css'
+import { useState } from 'react'
+import { ItemDetails } from './ItemDetails'
+import { Navbar } from './components/Navbar'
+import { ItemCard } from './components/ItemCard'
+import { StepCard } from './components/StepCard'
+
+interface Item {
+  id: number;
+  name: string;
+  description: string;
+  color: string;
+  category: string;
+  location: string;
+  foundAt: string;
+  expiry: string;
+  status: string;
+  image: string;
+}
 
 function App() {
+  const [selectedItem, setSelectedItem] = useState<Item | null>(null)
+
+  {/* Recent Items */}
+  const items = [
+    {
+      id: 1,
+      name: 'Black laptop bag',
+      description: 'A black leather laptop bag with multiple compartments and padded shoulder straps. Found with personal documents inside.',
+      color: 'Black',
+      category: 'Electronics',
+      location: 'Student Lounge',
+      foundAt: 'April 21, 2026',
+      expiry: 'May 21, 2026',
+      status: 'Active Ticket',
+      image: '/placeholder.png',
+    },
+    {
+      id: 2,
+      name: 'Student ID card',
+      description: 'Blue BINUS student ID card with photo. Name visible on card.',
+      color: 'Blue',
+      category: 'Personal Belonging',
+      location: 'Auditorium',
+      foundAt: 'April 20, 2026',
+      expiry: 'May 20, 2026',
+      status: 'Active Ticket',
+      image: '/placeholder.png',
+    },
+    {
+      id: 3,
+      name: 'Blue water bottle',
+      description: 'Stainless steel water bottle with blue exterior and white logo print. Lightly used.',
+      color: 'Blue',
+      category: 'Personal Belonging',
+      location: 'Room 622',
+      foundAt: 'April 19, 2026',
+      expiry: 'May 19, 2026',
+      status: 'Active Ticket',
+      image: '/placeholder.png',
+    },
+    {
+      id: 4,
+      name: 'Wireless earbuds',
+      description: 'White wireless earbuds with charging case. Brand name visible on case.',
+      color: 'White',
+      category: 'Electronics',
+      location: 'Library',
+      foundAt: 'April 18, 2026',
+      expiry: 'May 18, 2026',
+      status: 'Active Ticket',
+      image: '/placeholder.png',
+    },
+  ]
+
+  {/* How it Works */}
+  const steps = [
+    {
+      number: 1,
+      title: 'Item is found & recorded',
+      description: 'Security or BM staff find an item and log it in the system with photos and details.',
+    },
+    {
+      number: 2,
+      title: 'Browse & identify',
+      description: 'Search the public listings by category, color, or location to find your item.',
+    },
+    {
+      number: 3,
+      title: 'Claim & collect',
+      description: 'Submit a claim request and schedule an appointment to verify ownership and pick it up.',
+    },
+  ]
+
+  if (selectedItem) {
+    return <ItemDetails item={selectedItem} onBack={() => setSelectedItem(null)} />
+  }
+  
   return (
     <>
-      <nav className="navbar">
-        <div className="navbar-container">
-          {/* Logo */}
-          <div className="navbar-logo">
-            <div className="logo">
-              <img src="/Logo_Binus_University.png" alt="Binus University" style={{width: '100%', height: '100%'}} />
-            </div>
-          </div>
-
-          {/* Title
-          <div className="navbar-title">Binus University Lost and Found</div> */}
-
-          {/* Menu */}
-          <ul className="navbar-menu">
-            <li><a href="#">Report Lost Item</a></li>
-            <li><a href="#">Browse Lost Items</a></li>
-            <li><a href="#">My Claims</a></li>
-            <li><a href="#">Contact</a></li>
-          </ul>
-        </div>
-      </nav>
+      <Navbar />
 
       <main>
         {/* Banner Section */}
@@ -46,7 +121,7 @@ function App() {
           </div>
         </section>
 
-        {/* Featured Items Section */}
+        {/* Featured Section */}
         <section className="items-section">
           <div className="items-container">
             <div className="section-header">
@@ -55,64 +130,35 @@ function App() {
             </div>
             
             <div className="items-grid">
-              <div className="item-card">
-                <img src="/placeholder.png" alt="Black laptop bag" className="item-image" />
-                <h3>Black laptop bag</h3>
-                <p className="item-location">Student Lounge · 2 days ago</p>
-                <p className="item-date">2-3d</p>
-                <span className="item-tag">Electronics</span>
-              </div>
-              
-              <div className="item-card">
-                <img src="/placeholder.png" alt="Student ID card" className="item-image" />
-                <h3>Student ID card</h3>
-                <p className="item-location">Auditorium · 3 days ago</p>
-                <p className="item-date">3d</p>
-                <span className="item-tag personal">Personal</span>
-              </div>
-              
-              <div className="item-card">
-                <img src="/placeholder.png" alt="Blue water bottle" className="item-image" />
-                <h3>Blue water bottle</h3>
-                <p className="item-location">Room 622 · 4 days ago</p>
-                <p className="item-date">4d</p>
-                <span className="item-tag personal">Personal</span>
-              </div>
-              
-              <div className="item-card">
-                <img src="/placeholder.png" alt="Wireless earbuds" className="item-image" />
-                <h3>Wireless earbuds</h3>
-                <p className="item-location">Library · 5 days ago</p>
-                <p className="item-date">5d</p>
-                <span className="item-tag">Electronics</span>
-              </div>
+              {items.map((item) => (
+                <ItemCard
+                  key={item.id}
+                  image={item.image}
+                  name={item.name}
+                  location={item.location}
+                  foundAt={item.foundAt}
+                  category={item.category}
+                  onClick={() => setSelectedItem(item)}
+                />
+              ))}
             </div>
           </div>
         </section>
 
-        {/* How It Works Section */}
+        {/* "How It Works" Section */}
         <section className="how-it-works-section">
           <div className="how-it-works-container">
             <h2 className="how-it-works-title">HOW IT WORKS</h2>
             
             <div className="steps-grid">
-              <div className="step-card">
-                <div className="step-number">1</div>
-                <h3>Item is found & recorded</h3>
-                <p>Security or BM staff find an item and log it in the system with photos and details.</p>
-              </div>
-              
-              <div className="step-card">
-                <div className="step-number">2</div>
-                <h3>Browse & identify</h3>
-                <p>Search the public listings by category, color, or location to find your item.</p>
-              </div>
-              
-              <div className="step-card">
-                <div className="step-number">3</div>
-                <h3>Claim & collect</h3>
-                <p>Submit a claim request and schedule an appointment to verify ownership and pick it up.</p>
-              </div>
+              {steps.map((step) => (
+                <StepCard
+                  key={step.number}
+                  number={step.number}
+                  title={step.title}
+                  description={step.description}
+                />
+              ))}
             </div>
           </div>
         </section>
