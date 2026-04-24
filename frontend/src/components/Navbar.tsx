@@ -55,7 +55,7 @@ export function Navbar({ isSignedIn = false, userName = '', onLogout }: NavbarPr
 
         {/* Desktop Menu - only shown on larger screens */}
         <ul className={`navbar-menu ${menuOpen ? 'active' : ''}`}>
-          <li><a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('/report') }}>Report Lost Item</a></li>
+          <li><a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('/staff/report') }}>Report Lost Item</a></li>
           <li><a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('/browse') }}>Browse Lost Items</a></li>
           {isSignedIn && <li><a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('/my-claims') }}>My Claims</a></li>}
         </ul>
