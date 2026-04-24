@@ -1,11 +1,14 @@
 import './App.css'
 import { useState } from 'react'
-import { ItemDetails } from './ItemDetails'
+import { Routes, Route } from 'react-router-dom'
 import { Navbar } from './components/Navbar'
-import { ItemCard } from './components/ItemCard'
-import { StepCard } from './components/StepCard'
+import { HomePage } from './pages/HomePage'
+import { BrowsePage } from './pages/BrowsePage'
+import { ItemDetailsPage } from './pages/ItemDetailsPage'
+import { LoginPage } from './pages/LoginPage'
+import { SignUpPage } from './pages/SignUpPage'
 
-interface Item {
+export interface Item {
   id: number;
   name: string;
   description: string;
@@ -19,10 +22,10 @@ interface Item {
 }
 
 function App() {
-  const [selectedItem, setSelectedItem] = useState<Item | null>(null)
+  const [isSignedIn, setIsSignedIn] = useState(false)
+  const [userName, setUserName] = useState('')
 
-  {/* Recent Items */}
-  const items = [
+  const items: Item[] = [
     {
       id: 1,
       name: 'Black laptop bag',
@@ -73,96 +76,26 @@ function App() {
     },
   ]
 
-  {/* How it Works */}
-  const steps = [
-    {
-      number: 1,
-      title: 'Item is found & recorded',
-      description: 'Security or BM staff find an item and log it in the system with photos and details.',
-    },
-    {
-      number: 2,
-      title: 'Browse & identify',
-      description: 'Search the public listings by category, color, or location to find your item.',
-    },
-    {
-      number: 3,
-      title: 'Claim & collect',
-      description: 'Submit a claim request and schedule an appointment to verify ownership and pick it up.',
-    },
-  ]
-
-  if (selectedItem) {
-    return <ItemDetails item={selectedItem} onBack={() => setSelectedItem(null)} />
+  const handleLogout = () => {
+    setIsSignedIn(false)
+    setUserName('')
   }
-  
+
+  const handleLoginSuccess = (name: string) => {
+    setUserName(name)
+    setIsSignedIn(true)
+  }
+
   return (
     <>
-      <Navbar />
-
-      <main>
-        {/* Banner Section */}
-        <section className="banner">
-          <div className="banner-container">
-            <h1 className="banner-title">Lost something on campus?</h1>
-            <p className="banner-subtitle">Browse items found and submitted by security across Campus. Submit a claim and arrange a pickup.</p>
-            
-            {/* Action Buttons */}
-            <div className="banner-buttons">
-              <button className="btn btn-primary">Browse lost items</button>
-              <button className="btn btn-secondary">Report a found item</button>
-            </div>
-            
-            {/* Search Bar */}
-            <div className="search-container">
-              <input type="text" placeholder="Search by item name, color, or location..." className="search-input" />
-              <button className="search-btn">Search</button>
-            </div>
-          </div>
-        </section>
-
-        {/* Featured Section */}
-        <section className="items-section">
-          <div className="items-container">
-            <div className="section-header">
-              <h2>Recently Found Items</h2>
-              <a href="#" className="see-all-link">See all items →</a>
-            </div>
-            
-            <div className="items-grid">
-              {items.map((item) => (
-                <ItemCard
-                  key={item.id}
-                  image={item.image}
-                  name={item.name}
-                  location={item.location}
-                  foundAt={item.foundAt}
-                  category={item.category}
-                  onClick={() => setSelectedItem(item)}
-                />
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* "How It Works" Section */}
-        <section className="how-it-works-section">
-          <div className="how-it-works-container">
-            <h2 className="how-it-works-title">HOW IT WORKS</h2>
-            
-            <div className="steps-grid">
-              {steps.map((step) => (
-                <StepCard
-                  key={step.number}
-                  number={step.number}
-                  title={step.title}
-                  description={step.description}
-                />
-              ))}
-            </div>
-          </div>
-        </section>
-      </main>
+      <Navbar isSignedIn={isSignedIn} userName={userName} onLogout={handleLogout} />
+      <Routes>
+        <Route path="/" element={<HomePage items={items} />} />
+        <Route path="/browse" element={<BrowsePage items={items} />} />
+        <Route path="/items/:id" element={<ItemDetailsPage items={items} />} />
+        <Route path="/login" element={<LoginPage onLoginSuccess={handleLoginSuccess} />} />
+        <Route path="/signup" element={<SignUpPage onSignUpSuccess={handleLoginSuccess} />} />
+      </Routes>
     </>
   )
 }
