@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import {
   createClaimHandler,
+  deleteClaimHandler,
   getClaimsHandler,
   updateClaimStatusHandler
 } from '../controllers/claim.controller'
