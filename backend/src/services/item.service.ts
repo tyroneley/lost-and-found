@@ -14,6 +14,19 @@ export const createItem = async (data: any) => {
   })
 }
 
+export const updateItem = async (id: string, data: any) => {
+  return prisma.item.update({
+    where: { item_id: id },
+    data
+  })
+}
+
+export const deleteItem = async (id: string) => {
+  return prisma.item.delete({
+    where: { item_id: id }
+  })
+}
+
 export const getItems = async () => {
   return prisma.item.findMany({
     include: {

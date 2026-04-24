@@ -1,8 +1,9 @@
 import { Hono } from 'hono'
-import { getCategoriesHandler } from '../controllers/category.controller'
+import { createCategoryHandler, getCategoriesHandler } from '../controllers/category.controller'
 
 const categoryRoutes = new Hono()
 
 categoryRoutes.get('/', getCategoriesHandler)
+categoryRoutes.post('/', createCategoryHandler)
 
 export default categoryRoutes

@@ -1,5 +1,6 @@
 import {
   createClaim,
+  deleteClaim,
   getClaims,
   updateClaimStatus
 } from '../services/claim.service'
@@ -15,9 +16,20 @@ export const createClaimHandler = async (c: any) => {
   }
 }
 
-export const getClaimsHandler = async () => {
-  const claims = await getClaims()
-  return new Response(JSON.stringify(claims))
+export const getClaimsHandler = async (c: any) => {
+  const query = c.req.query()
+  const claims = await getClaims(query)
+  return c.json(claims)
+}
+
+export const deleteClaimHandler = async (c: any) => {
+  try {
+    const id = c.req.param('id')
+    await deleteClaim(id)
+    return c.json({ message: 'Claim deleted' })
+  } catch {
+    return c.json({ error: 'Failed to delete claim' }, 500)
+  }
 }
 
 export const updateClaimStatusHandler = async (c: any) => {

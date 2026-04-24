@@ -1,5 +1,7 @@
 import {
   createItem,
+  updateItem,
+  deleteItem,
   getItems,
   getItemById,
   updateItemStatus
@@ -13,6 +15,26 @@ export const createItemHandler = async (c: any) => {
   } catch (error) {
     console.error(error)
     return c.json({ error: 'Failed to create item' }, 500)
+  }
+}
+export const updateItemHandler = async (c: any) => {
+  try {
+    const id = c.req.param('id')
+    const body = await c.req.json()
+    const item = await updateItem(id, body)
+    return c.json(item)
+  } catch {
+    return c.json({ error: 'Failed to update item' }, 500)
+  }
+}
+
+export const deleteItemHandler = async (c: any) => {
+  try {
+    const id = c.req.param('id')
+    await deleteItem(id)
+    return c.json({ message: 'Item deleted' })
+  } catch {
+    return c.json({ error: 'Failed to delete item' }, 500)
   }
 }
 

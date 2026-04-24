@@ -10,12 +10,22 @@ export const createClaim = async (data: any) => {
   })
 }
 
-export const getClaims = async () => {
+export const getClaims = async (query: any) => {
   return prisma.claimRequest.findMany({
+    where: {
+      item_id: query.item_id || undefined,
+      claimer_id: query.user_id || undefined
+    },
     include: {
       item: true,
       claimer: true
     }
+  })
+}
+
+export const deleteClaim = async (id: string) => {
+  return prisma.claimRequest.delete({
+    where: { claim_id: id }
   })
 }
 
@@ -28,7 +38,6 @@ export const updateClaimStatus = async (id: string, data: any) => {
     }
   })
 
-  // If approved → mark item as claimed
   if (data.status === 'APPROVED') {
     await prisma.item.update({
       where: { item_id: claim.item_id },
