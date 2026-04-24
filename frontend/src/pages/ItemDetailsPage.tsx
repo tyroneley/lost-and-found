@@ -4,6 +4,10 @@ import { Item } from '../App'
 export function ItemDetailsPage({ items, isSignedIn }: { items: Item[]; isSignedIn: boolean }) {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+
+    const handleNavClick = (path: string) => {
+    navigate(path)
+  }
   
   const item = items.find(i => i.id === parseInt(id || '0'))
 
@@ -98,8 +102,8 @@ export function ItemDetailsPage({ items, isSignedIn }: { items: Item[]; isSigned
               <button className="item-detail-btn-claim">Claim this item</button>
               {!isSignedIn && (
                 <>
-                  <button className="item-detail-btn-login">Log in to your account</button>
-                  <p className="item-detail-login-note">Don't have an account? <span style={{ color: '#004a87', cursor: 'pointer' }}>Register here</span> — it only takes a minute.</p>
+                  <button onClick={() => handleNavClick('/signup')} className="item-detail-btn-login">Log in to your account</button>
+                  <p className="item-detail-login-note auth-divider">Don't have an account? <a onClick={() => navigate('/login')} style={{cursor: 'pointer'}}>Register here</a> </p>
                 </>
               )}
             </div>

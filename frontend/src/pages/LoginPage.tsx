@@ -78,6 +78,7 @@ export function LoginPage({ onLoginSuccess }: { onLoginSuccess: (name: string) =
 
               <div className="auth-divider">
                 <span>Don't have an account?</span>
+                <a onClick={() => navigate('/signup')} style={{cursor: 'pointer'}}> Register here</a>
               </div>
             </div>
           </div>
