@@ -11,6 +11,8 @@ export function BrowsePage({ items }: { items: Item[] }) {
   const [selectedLocations, setSelectedLocations] = useState<string[]>([])
   const [filterByRoom, setFilterByRoom] = useState(false)
   const [roomNumber, setRoomNumber] = useState('')
+  const [foundAfter, setFoundAfter] = useState('')
+  const [foundBefore, setFoundBefore] = useState('')
   const [sortBy, setSortBy] = useState('newest')
   const [currentPage, setCurrentPage] = useState(1)
   const [showFilters, setShowFilters] = useState(false)
@@ -18,7 +20,7 @@ export function BrowsePage({ items }: { items: Item[] }) {
   const itemsPerPage = 6
 
   const categories = ['Electronics', 'Personal Belonging', 'Clothing', 'Sports Equipment', 'Other']
-  const locations = ['Student Lounge', 'Auditorium', 'Library', 'Cafeteria', 'Lobby']
+  const locations = ['Auditorium', 'Lobby', 'Student Lounge', 'Sleeping Pods', 'Photography Room', 'Meeting Room', 'Library']
   const colors = [
     { name: 'Black', hex: '#222222' },
     { name: 'White', hex: '#ffffff' },
@@ -36,11 +38,16 @@ export function BrowsePage({ items }: { items: Item[] }) {
       const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(item.category)
       const matchesColor = selectedColors.length === 0 || selectedColors.includes(item.color)
       const matchesLocation = selectedLocations.length === 0 || selectedLocations.includes(item.location)
-      const matchesRoom = !filterByRoom || (item.location.includes('Room') && (!roomNumber || item.location.includes(`Room ${roomNumber}`)))
+      const matchesRoom = !filterByRoom || (item.location.match(/^Room \d+/) && (!roomNumber || item.location.includes(`Room ${roomNumber}`)))
+      
+      // Date filtering
+      const itemDate = new Date(item.foundAt)
+      const matchesDateAfter = !foundAfter || itemDate >= new Date(foundAfter)
+      const matchesDateBefore = !foundBefore || itemDate <= new Date(foundBefore)
 
-      return matchesSearch && matchesCategory && matchesColor && matchesLocation && matchesRoom
+      return matchesSearch && matchesCategory && matchesColor && matchesLocation && matchesRoom && matchesDateAfter && matchesDateBefore
     })
-  }, [items, searchTerm, selectedCategories, selectedColors, selectedLocations, filterByRoom, roomNumber])
+  }, [items, searchTerm, selectedCategories, selectedColors, selectedLocations, filterByRoom, roomNumber, foundAfter, foundBefore])
 
   // Sort items
   const sortedItems = useMemo(() => {
@@ -84,6 +91,8 @@ export function BrowsePage({ items }: { items: Item[] }) {
     setSelectedLocations([])
     setFilterByRoom(false)
     setRoomNumber('')
+    setFoundAfter('')
+    setFoundBefore('')
     setSearchTerm('')
     setCurrentPage(1)
   }
@@ -250,8 +259,41 @@ export function BrowsePage({ items }: { items: Item[] }) {
               )}
             </div>
 
+            {/* Date Filter */}
+            <div className="filter-group">
+              <h3 className="filter-label">Found date</h3>
+              <div className="date-filter-wrapper">
+                <div className="date-filter-row">
+                  <label htmlFor="found-after" style={{ fontSize: '0.85rem', color: '#546e7a', fontWeight: '500', marginBottom: '0.3rem' }}>After</label>
+                  <input
+                    type="date"
+                    id="found-after"
+                    value={foundAfter}
+                    onChange={(e) => {
+                      setFoundAfter(e.target.value)
+                      setCurrentPage(1)
+                    }}
+                    className="date-input"
+                  />
+                </div>
+                <div className="date-filter-row">
+                  <label htmlFor="found-before" style={{ fontSize: '0.85rem', color: '#546e7a', fontWeight: '500', marginBottom: '0.3rem' }}>Before</label>
+                  <input
+                    type="date"
+                    id="found-before"
+                    value={foundBefore}
+                    onChange={(e) => {
+                      setFoundBefore(e.target.value)
+                      setCurrentPage(1)
+                    }}
+                    className="date-input"
+                  />
+                </div>
+              </div>
+            </div>
+
             {/* Clear Filters */}
-            {(selectedCategories.length > 0 || selectedColors.length > 0 || selectedLocations.length > 0 || filterByRoom || searchTerm) && (
+            {(selectedCategories.length > 0 || selectedColors.length > 0 || selectedLocations.length > 0 || filterByRoom || searchTerm || foundAfter || foundBefore) && (
               <button onClick={clearFilters} className="clear-filters-btn">
                 Clear all filters
               </button>
@@ -261,7 +303,7 @@ export function BrowsePage({ items }: { items: Item[] }) {
           {/* Main Content */}
           <div className="browse-main">
             {/* Active Filters Tags */}
-            {(selectedCategories.length > 0 || selectedColors.length > 0 || selectedLocations.length > 0 || filterByRoom) && (
+            {(selectedCategories.length > 0 || selectedColors.length > 0 || selectedLocations.length > 0 || filterByRoom || foundAfter || foundBefore) && (
               <div className="active-filters">
                 {selectedCategories.map(cat => (
                   <div key={cat} className="filter-tag">
@@ -287,6 +329,24 @@ export function BrowsePage({ items }: { items: Item[] }) {
                     <span onClick={() => {
                       setFilterByRoom(false)
                       setRoomNumber('')
+                      setCurrentPage(1)
+                    }}>×</span>
+                  </div>
+                )}
+                {foundAfter && (
+                  <div className="filter-tag">
+                    After {new Date(foundAfter).toLocaleDateString()}
+                    <span onClick={() => {
+                      setFoundAfter('')
+                      setCurrentPage(1)
+                    }}>×</span>
+                  </div>
+                )}
+                {foundBefore && (
+                  <div className="filter-tag">
+                    Before {new Date(foundBefore).toLocaleDateString()}
+                    <span onClick={() => {
+                      setFoundBefore('')
                       setCurrentPage(1)
                     }}>×</span>
                   </div>

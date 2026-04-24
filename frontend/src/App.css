@@ -1109,35 +1109,40 @@ main {
 
 /* Browse Items Page */
 .browse-section {
-  background: #ffffff;
+  background: linear-gradient(135deg, #f0f6fc 0%, #f8fafb 50%, #f0f4f7 100%);
+  min-height: 100vh;
 }
 
 .browse-header {
-  padding: 2rem 3rem 0;
-  border-bottom: 1px solid #e8ecf0;
+  padding: 3rem 3rem 2rem;
+  background: linear-gradient(135deg, #004a87 0%, #0066b8 100%);
+  color: white;
+  border-bottom: none;
+  box-shadow: 0 4px 12px rgba(0, 74, 135, 0.15);
 }
 
 .breadcrumb {
   font-size: 0.85rem;
-  color: #90a4ae;
+  color: rgba(255, 255, 255, 0.7);
   margin-bottom: 0.75rem;
 }
 
 .breadcrumb span {
-  color: #546e7a;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .browse-title {
   font-size: 2rem;
   font-weight: 700;
-  color: #2c3e50;
+  color: white;
   margin-bottom: 1.5rem;
 }
 
 .browse-search-bar {
   display: flex;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 0 0 1.5rem 0;
 }
 
 .browse-search-bar .search-wrap {
@@ -1145,10 +1150,10 @@ main {
   display: flex;
   align-items: center;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   padding: 0 1rem;
   background: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 }
 
 .browse-search-bar .search-input {
@@ -1169,8 +1174,12 @@ main {
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding-bottom: 1.5rem;
+  padding: 1.5rem 0;
   justify-content: space-between;
+  background: linear-gradient(135deg, #004a87 0%, #0066b8 100%);
+  margin: 0 -3rem;
+  padding: 1.5rem 3rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .controls-left {
@@ -1190,14 +1199,14 @@ main {
 }
 
 .sort-dropdown-btn {
-  padding: 0.65rem 1rem;
-  border: 1px solid #d0d8e0;
+  padding: 0.65rem 1.2rem;
+  border: 2px solid white;
   border-radius: 6px;
-  background: #ffffff;
-  color: #546e7a;
+  background: transparent;
+  color: white;
   font-size: 0.9rem;
   cursor: pointer;
-  font-weight: 500;
+  font-weight: 600;
   transition: all 0.2s ease;
   font-family: inherit;
   display: flex;
@@ -1207,8 +1216,9 @@ main {
 }
 
 .sort-dropdown-btn:hover {
-  border-color: #004a87;
-  color: #004a87;
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .sort-menu {
@@ -1274,7 +1284,7 @@ main {
 
 .result-count {
   font-size: 0.9rem;
-  color: #90a4ae;
+  color: rgba(255, 255, 255, 0.85);
   white-space: nowrap;
 }
 
@@ -1289,26 +1299,33 @@ main {
 .browse-sidebar {
   border-right: 1px solid #e8ecf0;
   padding: 2rem 1.5rem;
-  background: #f8fafb;
+  background: linear-gradient(135deg, #f8fafb 0%, #f0f4f7 100%);
   overflow-y: auto;
   max-height: calc(100vh - 140px);
   position: sticky;
   top: 80px;
   align-self: start;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
 }
 
 .filter-toggle-btn {
   display: none;
-  padding: 0.6rem 1rem;
-  border: 1px solid #d0d8e0;
-  background: #ffffff;
-  color: #004a87;
+  padding: 0.65rem 1.2rem;
+  border: 2px solid white;
+  background: transparent;
+  color: white;
   border-radius: 6px;
   font-weight: 600;
   font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
+}
+
+.filter-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .filter-close-btn {
@@ -1379,6 +1396,41 @@ main {
 }
 
 .room-input:focus {
+  outline: none;
+  border-color: #004a87;
+  box-shadow: 0 0 0 3px rgba(0, 74, 135, 0.1);
+}
+
+.date-filter-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.date-filter-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.date-input {
+  padding: 0.65rem 0.85rem;
+  border: 1px solid #d0d8e0;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: #2c3e50;
+  background: white;
+  font-family: inherit;
+  transition: border-color 0.2s ease;
+  cursor: pointer;
+}
+
+.date-input:hover {
+  border-color: #004a87;
+}
+
+.date-input:focus {
   outline: none;
   border-color: #004a87;
   box-shadow: 0 0 0 3px rgba(0, 74, 135, 0.1);
