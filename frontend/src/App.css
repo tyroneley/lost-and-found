@@ -1134,14 +1134,13 @@ main {
   margin-bottom: 1.5rem;
 }
 
-.browse-toolbar {
+.browse-search-bar {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
-.browse-toolbar .search-wrap {
+.browse-search-bar .search-wrap {
   flex: 1;
   display: flex;
   align-items: center;
@@ -1152,7 +1151,7 @@ main {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.browse-toolbar .search-input {
+.browse-search-bar .search-input {
   flex: 1;
   border: none;
   outline: none;
@@ -1162,8 +1161,93 @@ main {
   color: #2c3e50;
 }
 
-.browse-toolbar .search-input::placeholder {
+.browse-search-bar .search-input::placeholder {
   color: #90a4ae;
+}
+
+.browse-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-bottom: 1.5rem;
+  justify-content: space-between;
+}
+
+.controls-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.sort-buttons {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.sort-dropdown {
+  position: relative;
+}
+
+.sort-dropdown-btn {
+  padding: 0.65rem 1rem;
+  border: 1px solid #d0d8e0;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #546e7a;
+  font-size: 0.9rem;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.sort-dropdown-btn:hover {
+  border-color: #004a87;
+  color: #004a87;
+}
+
+.sort-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid #d0d8e0;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 50;
+  min-width: 140px;
+  margin-top: 0.5rem;
+  overflow: hidden;
+}
+
+.sort-option {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: none;
+  background: #ffffff;
+  color: #546e7a;
+  font-size: 0.9rem;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.sort-option:hover {
+  background: #f0f4f7;
+  color: #004a87;
+}
+
+.sort-option.active {
+  background: #004a87;
+  color: #ffffff;
 }
 
 .browse-select {
@@ -1199,6 +1283,7 @@ main {
   grid-template-columns: 240px 1fr;
   gap: 0;
   min-height: calc(100vh - 300px);
+  position: relative;
 }
 
 .browse-sidebar {
@@ -1210,6 +1295,24 @@ main {
   position: sticky;
   top: 80px;
   align-self: start;
+}
+
+.filter-toggle-btn {
+  display: none;
+  padding: 0.6rem 1rem;
+  border: 1px solid #d0d8e0;
+  background: #ffffff;
+  color: #004a87;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.filter-close-btn {
+  display: none;
 }
 
 .filter-group {
@@ -1518,6 +1621,88 @@ main {
   .btn-large {
     width: 100%;
     padding: 1rem 1.5rem;
+  }
+
+  /* Browse Page Mobile */
+  .browse-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .browse-header {
+    padding: 2rem 1.5rem 0;
+  }
+
+  .browse-title {
+    font-size: 1.5rem;
+  }
+
+  .browse-search-bar {
+    margin-bottom: 1rem;
+  }
+
+  .browse-search-bar .search-wrap {
+    flex: 1;
+  }
+
+  .browse-controls {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding-bottom: 1rem;
+  }
+
+  .controls-left {
+    flex: 1;
+    gap: 0.75rem;
+  }
+
+  .filter-toggle-btn {
+    display: block;
+    flex: 0 0 auto;
+  }
+
+  .result-count {
+    flex: 0 0 100%;
+    font-size: 0.85rem;
+  }
+
+  .browse-sidebar {
+    position: fixed;
+    left: -300px;
+    top: 80px;
+    width: 280px;
+    height: calc(100vh - 80px);
+    border-right: 1px solid #e8ecf0;
+    border-bottom: none;
+    z-index: 100;
+    transition: left 0.3s ease;
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .browse-sidebar.open {
+    left: 0;
+  }
+
+  .filter-close-btn {
+    display: block;
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #2c3e50;
+    cursor: pointer;
+    padding: 0.5rem;
+    z-index: 101;
+  }
+
+  .browse-main {
+    padding: 1.5rem 1.5rem;
+  }
+
+  .browse-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
   }
 
   .auth-card {

@@ -13,6 +13,8 @@ export function BrowsePage({ items }: { items: Item[] }) {
   const [roomNumber, setRoomNumber] = useState('')
   const [sortBy, setSortBy] = useState('newest')
   const [currentPage, setCurrentPage] = useState(1)
+  const [showFilters, setShowFilters] = useState(false)
+  const [showSortMenu, setShowSortMenu] = useState(false)
   const itemsPerPage = 6
 
   const categories = ['Electronics', 'Personal Belonging', 'Clothing', 'Sports Equipment', 'Other']
@@ -97,8 +99,8 @@ export function BrowsePage({ items }: { items: Item[] }) {
           <div className="breadcrumb">Home <span>/ Browse items</span></div>
           <h1 className="browse-title">Lost items</h1>
 
-          {/* Search and Sort Toolbar */}
-          <div className="browse-toolbar">
+          {/* Search Bar */}
+          <div className="browse-search-bar">
             <div className="search-wrap">
               <input
                 type="text"
@@ -111,10 +113,49 @@ export function BrowsePage({ items }: { items: Item[] }) {
                 className="search-input"
               />
             </div>
-            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="browse-select">
-              <option value="newest">Newest first</option>
-              <option value="oldest">Oldest first</option>
-            </select>
+          </div>
+
+          {/* Controls Toolbar */}
+          <div className="browse-controls">
+            <div className="controls-left">
+              <button 
+                className="filter-toggle-btn"
+                onClick={() => setShowFilters(!showFilters)}
+                title="Toggle filters"
+              >
+                ☰ Filters
+              </button>
+              <div className="sort-dropdown">
+                <button 
+                  className="sort-dropdown-btn"
+                  onClick={() => setShowSortMenu(!showSortMenu)}
+                >
+                  Sort: {sortBy === 'newest' ? 'Newest' : 'Oldest'} ▼
+                </button>
+                {showSortMenu && (
+                  <div className="sort-menu">
+                    <button 
+                      className={`sort-option ${sortBy === 'newest' ? 'active' : ''}`}
+                      onClick={() => {
+                        setSortBy('newest')
+                        setShowSortMenu(false)
+                      }}
+                    >
+                      Newest
+                    </button>
+                    <button 
+                      className={`sort-option ${sortBy === 'oldest' ? 'active' : ''}`}
+                      onClick={() => {
+                        setSortBy('oldest')
+                        setShowSortMenu(false)
+                      }}
+                    >
+                      Oldest
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
             <span className="result-count">{sortedItems.length} items</span>
           </div>
         </div>
@@ -122,7 +163,16 @@ export function BrowsePage({ items }: { items: Item[] }) {
         {/* Layout */}
         <div className="browse-layout">
           {/* Sidebar */}
-          <aside className="browse-sidebar">
+          <aside className={`browse-sidebar ${showFilters ? 'open' : ''}`}>
+            {/* Close Button for filter menu in smaller screens */}
+            <button 
+              className="filter-close-btn"
+              onClick={() => setShowFilters(false)}
+              title="Close filters"
+            >
+              ✕
+            </button>
+
             {/* Category Filter */}
             <div className="filter-group">
               <h3 className="filter-label">Category</h3>
