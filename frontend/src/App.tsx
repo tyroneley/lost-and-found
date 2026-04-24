@@ -7,6 +7,7 @@ import { BrowsePage } from './pages/BrowsePage'
 import { ItemDetailsPage } from './pages/ItemDetailsPage'
 import { LoginPage } from './pages/LoginPage'
 import { SignUpPage } from './pages/SignUpPage'
+import { StaffReportPage } from './pages/StaffReportPage'
 
 export interface Item {
   id: number;
@@ -404,9 +405,10 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage items={items} />} />
         <Route path="/browse" element={<BrowsePage items={items} />} />
-        <Route path="/items/:id" element={<ItemDetailsPage items={items} />} />
+        <Route path="/items/:id" element={<ItemDetailsPage items={items} isSignedIn={isSignedIn} />} />
         <Route path="/login" element={<LoginPage onLoginSuccess={handleLoginSuccess} />} />
         <Route path="/signup" element={<SignUpPage onSignUpSuccess={handleLoginSuccess} />} />
+        <Route path="/staff/report" element={<StaffReportPage />} />
       </Routes>
     </>
   )
