@@ -6,11 +6,14 @@ import {
   getItemById,
   updateItemStatus
 } from '../services/item.service'
+import { createItemSchema } from '../validators/item.validator'
+import { handleError } from '../utils/errorHandler'
 
 export const createItemHandler = async (c: any) => {
   try {
     const body = await c.req.json()
-    const item = await createItem(body)
+    const validated = createItemSchema.parse(body)
+    const item = await createItem(validated)
     return c.json(item, 201)
   } catch (error) {
     console.error(error)
@@ -22,9 +25,9 @@ export const updateItemHandler = async (c: any) => {
     const id = c.req.param('id')
     const body = await c.req.json()
     const item = await updateItem(id, body)
-    return c.json(item)
-  } catch {
-    return c.json({ error: 'Failed to update item' }, 500)
+    return c.json(item, 201)
+  } catch (error) {
+    return handleError(c, error)
   }
 }
 

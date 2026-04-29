@@ -8,7 +8,7 @@ import userRoutes from './routes/user.routes'
 
 const app = new Hono()
 
-app.get('/', (c) => c.text('API running'))
+app.get('/', (c) => c.text('running'))
 
 app.route('/items', itemRoutes)
 app.route('/claims', claimRoutes)

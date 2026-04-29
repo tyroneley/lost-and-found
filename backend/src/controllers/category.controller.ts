@@ -1,16 +1,24 @@
 import { createCategory, getCategories } from '../services/category.service'
+import { createCategorySchema } from '../validators/category.validator'
+import { handleError } from '../utils/errorHandler'
 
 export const createCategoryHandler = async (c: any) => {
   try {
     const body = await c.req.json()
-    const category = await createCategory(body)
+    const validated = createCategorySchema.parse(body)
+    const category = await createCategory(validated)
+
     return c.json(category, 201)
-  } catch {
-    return c.json({ error: 'Failed to create category' }, 500)
+  } catch (error) {
+    return handleError(c, error)
   }
 }
 
 export const getCategoriesHandler = async (c: any) => {
-  const categories = await getCategories()
-  return c.json(categories)
+  try {
+    const categories = await getCategories()
+    return c.json(categories)
+  } catch (error) {
+    return handleError(c, error)
+  }
 }
