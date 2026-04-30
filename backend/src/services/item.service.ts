@@ -1,11 +1,17 @@
 import { prisma } from '../lib/prisma'
+import { getColorBucket } from '../utils/color'
 
 export const createItem = async (data: any) => {
+  const colorBucket = data.color_hex
+    ? getColorBucket(data.color_hex)
+    : null
+
   return prisma.item.create({
     data: {
       name: data.name,
       description: data.description,
-      color: data.color,
+      color_hex: data.color_hex || null,
+      color_bucket: colorBucket,
       category_id: data.category_id,
       found_location: data.found_location,
       found_at: new Date(data.found_at),

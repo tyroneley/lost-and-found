@@ -80,7 +80,8 @@ model Item {
   item_id        String     @id @default(uuid())
   name           String
   description    String?
-  color          String?
+  color_hex    String?
+  color_bucket String?
 
   status         ItemStatus @default(REPORTED)
 
