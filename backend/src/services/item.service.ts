@@ -33,8 +33,11 @@ export const deleteItem = async (id: string) => {
   })
 }
 
-export const getItems = async () => {
+export const getItems = async (query?: any) => {
   return prisma.item.findMany({
+    where: {
+      color_bucket: query.color || undefined
+    },
     include: {
       category: true,
       recorder: true,

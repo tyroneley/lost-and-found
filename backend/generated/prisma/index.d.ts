@@ -3535,7 +3535,8 @@ export namespace Prisma {
     item_id: string | null
     name: string | null
     description: string | null
-    color: string | null
+    color_hex: string | null
+    color_bucket: string | null
     status: $Enums.ItemStatus | null
     category_id: string | null
     found_location: string | null
@@ -3556,7 +3557,8 @@ export namespace Prisma {
     item_id: string | null
     name: string | null
     description: string | null
-    color: string | null
+    color_hex: string | null
+    color_bucket: string | null
     status: $Enums.ItemStatus | null
     category_id: string | null
     found_location: string | null
@@ -3577,7 +3579,8 @@ export namespace Prisma {
     item_id: number
     name: number
     description: number
-    color: number
+    color_hex: number
+    color_bucket: number
     status: number
     category_id: number
     found_location: number
@@ -3600,7 +3603,8 @@ export namespace Prisma {
     item_id?: true
     name?: true
     description?: true
-    color?: true
+    color_hex?: true
+    color_bucket?: true
     status?: true
     category_id?: true
     found_location?: true
@@ -3621,7 +3625,8 @@ export namespace Prisma {
     item_id?: true
     name?: true
     description?: true
-    color?: true
+    color_hex?: true
+    color_bucket?: true
     status?: true
     category_id?: true
     found_location?: true
@@ -3642,7 +3647,8 @@ export namespace Prisma {
     item_id?: true
     name?: true
     description?: true
-    color?: true
+    color_hex?: true
+    color_bucket?: true
     status?: true
     category_id?: true
     found_location?: true
@@ -3736,7 +3742,8 @@ export namespace Prisma {
     item_id: string
     name: string
     description: string | null
-    color: string | null
+    color_hex: string | null
+    color_bucket: string | null
     status: $Enums.ItemStatus
     category_id: string
     found_location: string
@@ -3774,7 +3781,8 @@ export namespace Prisma {
     item_id?: boolean
     name?: boolean
     description?: boolean
-    color?: boolean
+    color_hex?: boolean
+    color_bucket?: boolean
     status?: boolean
     category_id?: boolean
     found_location?: boolean
@@ -3803,7 +3811,8 @@ export namespace Prisma {
     item_id?: boolean
     name?: boolean
     description?: boolean
-    color?: boolean
+    color_hex?: boolean
+    color_bucket?: boolean
     status?: boolean
     category_id?: boolean
     found_location?: boolean
@@ -3828,7 +3837,8 @@ export namespace Prisma {
     item_id?: boolean
     name?: boolean
     description?: boolean
-    color?: boolean
+    color_hex?: boolean
+    color_bucket?: boolean
     status?: boolean
     category_id?: boolean
     found_location?: boolean
@@ -3877,7 +3887,8 @@ export namespace Prisma {
       item_id: string
       name: string
       description: string | null
-      color: string | null
+      color_hex: string | null
+      color_bucket: string | null
       status: $Enums.ItemStatus
       category_id: string
       found_location: string
@@ -4295,7 +4306,8 @@ export namespace Prisma {
     readonly item_id: FieldRef<"Item", 'String'>
     readonly name: FieldRef<"Item", 'String'>
     readonly description: FieldRef<"Item", 'String'>
-    readonly color: FieldRef<"Item", 'String'>
+    readonly color_hex: FieldRef<"Item", 'String'>
+    readonly color_bucket: FieldRef<"Item", 'String'>
     readonly status: FieldRef<"Item", 'ItemStatus'>
     readonly category_id: FieldRef<"Item", 'String'>
     readonly found_location: FieldRef<"Item", 'String'>
@@ -7717,7 +7729,8 @@ export namespace Prisma {
     item_id: 'item_id',
     name: 'name',
     description: 'description',
-    color: 'color',
+    color_hex: 'color_hex',
+    color_bucket: 'color_bucket',
     status: 'status',
     category_id: 'category_id',
     found_location: 'found_location',
@@ -8071,7 +8084,8 @@ export namespace Prisma {
     item_id?: StringFilter<"Item"> | string
     name?: StringFilter<"Item"> | string
     description?: StringNullableFilter<"Item"> | string | null
-    color?: StringNullableFilter<"Item"> | string | null
+    color_hex?: StringNullableFilter<"Item"> | string | null
+    color_bucket?: StringNullableFilter<"Item"> | string | null
     status?: EnumItemStatusFilter<"Item"> | $Enums.ItemStatus
     category_id?: StringFilter<"Item"> | string
     found_location?: StringFilter<"Item"> | string
@@ -8099,7 +8113,8 @@ export namespace Prisma {
     item_id?: SortOrder
     name?: SortOrder
     description?: SortOrderInput | SortOrder
-    color?: SortOrderInput | SortOrder
+    color_hex?: SortOrderInput | SortOrder
+    color_bucket?: SortOrderInput | SortOrder
     status?: SortOrder
     category_id?: SortOrder
     found_location?: SortOrder
@@ -8130,7 +8145,8 @@ export namespace Prisma {
     NOT?: ItemWhereInput | ItemWhereInput[]
     name?: StringFilter<"Item"> | string
     description?: StringNullableFilter<"Item"> | string | null
-    color?: StringNullableFilter<"Item"> | string | null
+    color_hex?: StringNullableFilter<"Item"> | string | null
+    color_bucket?: StringNullableFilter<"Item"> | string | null
     status?: EnumItemStatusFilter<"Item"> | $Enums.ItemStatus
     category_id?: StringFilter<"Item"> | string
     found_location?: StringFilter<"Item"> | string
@@ -8158,7 +8174,8 @@ export namespace Prisma {
     item_id?: SortOrder
     name?: SortOrder
     description?: SortOrderInput | SortOrder
-    color?: SortOrderInput | SortOrder
+    color_hex?: SortOrderInput | SortOrder
+    color_bucket?: SortOrderInput | SortOrder
     status?: SortOrder
     category_id?: SortOrder
     found_location?: SortOrder
@@ -8185,7 +8202,8 @@ export namespace Prisma {
     item_id?: StringWithAggregatesFilter<"Item"> | string
     name?: StringWithAggregatesFilter<"Item"> | string
     description?: StringNullableWithAggregatesFilter<"Item"> | string | null
-    color?: StringNullableWithAggregatesFilter<"Item"> | string | null
+    color_hex?: StringNullableWithAggregatesFilter<"Item"> | string | null
+    color_bucket?: StringNullableWithAggregatesFilter<"Item"> | string | null
     status?: EnumItemStatusWithAggregatesFilter<"Item"> | $Enums.ItemStatus
     category_id?: StringWithAggregatesFilter<"Item"> | string
     found_location?: StringWithAggregatesFilter<"Item"> | string
@@ -8583,7 +8601,8 @@ export namespace Prisma {
     item_id?: string
     name: string
     description?: string | null
-    color?: string | null
+    color_hex?: string | null
+    color_bucket?: string | null
     status?: $Enums.ItemStatus
     found_location: string
     found_at: Date | string
@@ -8607,7 +8626,8 @@ export namespace Prisma {
     item_id?: string
     name: string
     description?: string | null
-    color?: string | null
+    color_hex?: string | null
+    color_bucket?: string | null
     status?: $Enums.ItemStatus
     category_id: string
     found_location: string
@@ -8631,7 +8651,8 @@ export namespace Prisma {
     item_id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    color?: NullableStringFieldUpdateOperationsInput | string | null
+    color_hex?: NullableStringFieldUpdateOperationsInput | string | null
+    color_bucket?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumItemStatusFieldUpdateOperationsInput | $Enums.ItemStatus
     found_location?: StringFieldUpdateOperationsInput | string
     found_at?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -8655,7 +8676,8 @@ export namespace Prisma {
     item_id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    color?: NullableStringFieldUpdateOperationsInput | string | null
+    color_hex?: NullableStringFieldUpdateOperationsInput | string | null
+    color_bucket?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumItemStatusFieldUpdateOperationsInput | $Enums.ItemStatus
     category_id?: StringFieldUpdateOperationsInput | string
     found_location?: StringFieldUpdateOperationsInput | string
@@ -8679,7 +8701,8 @@ export namespace Prisma {
     item_id?: string
     name: string
     description?: string | null
-    color?: string | null
+    color_hex?: string | null
+    color_bucket?: string | null
     status?: $Enums.ItemStatus
     category_id: string
     found_location: string
@@ -8700,7 +8723,8 @@ export namespace Prisma {
     item_id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    color?: NullableStringFieldUpdateOperationsInput | string | null
+    color_hex?: NullableStringFieldUpdateOperationsInput | string | null
+    color_bucket?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumItemStatusFieldUpdateOperationsInput | $Enums.ItemStatus
     found_location?: StringFieldUpdateOperationsInput | string
     found_at?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -8717,7 +8741,8 @@ export namespace Prisma {
     item_id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    color?: NullableStringFieldUpdateOperationsInput | string | null
+    color_hex?: NullableStringFieldUpdateOperationsInput | string | null
+    color_bucket?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumItemStatusFieldUpdateOperationsInput | $Enums.ItemStatus
     category_id?: StringFieldUpdateOperationsInput | string
     found_location?: StringFieldUpdateOperationsInput | string
@@ -9217,7 +9242,8 @@ export namespace Prisma {
     item_id?: SortOrder
     name?: SortOrder
     description?: SortOrder
-    color?: SortOrder
+    color_hex?: SortOrder
+    color_bucket?: SortOrder
     status?: SortOrder
     category_id?: SortOrder
     found_location?: SortOrder
@@ -9238,7 +9264,8 @@ export namespace Prisma {
     item_id?: SortOrder
     name?: SortOrder
     description?: SortOrder
-    color?: SortOrder
+    color_hex?: SortOrder
+    color_bucket?: SortOrder
     status?: SortOrder
     category_id?: SortOrder
     found_location?: SortOrder
@@ -9259,7 +9286,8 @@ export namespace Prisma {
     item_id?: SortOrder
     name?: SortOrder
     description?: SortOrder
-    color?: SortOrder
+    color_hex?: SortOrder
+    color_bucket?: SortOrder
     status?: SortOrder
     category_id?: SortOrder
     found_location?: SortOrder
@@ -10275,7 +10303,8 @@ export namespace Prisma {
     item_id?: string
     name: string
     description?: string | null
-    color?: string | null
+    color_hex?: string | null
+    color_bucket?: string | null
     status?: $Enums.ItemStatus
     found_location: string
     found_at: Date | string
@@ -10298,7 +10327,8 @@ export namespace Prisma {
     item_id?: string
     name: string
     description?: string | null
-    color?: string | null
+    color_hex?: string | null
+    color_bucket?: string | null
     status?: $Enums.ItemStatus
     category_id: string
     found_location: string
@@ -10331,7 +10361,8 @@ export namespace Prisma {
     item_id?: string
     name: string
     description?: string | null
-    color?: string | null
+    color_hex?: string | null
+    color_bucket?: string | null
     status?: $Enums.ItemStatus
     found_location: string
     found_at: Date | string
@@ -10354,7 +10385,8 @@ export namespace Prisma {
     item_id?: string
     name: string
     description?: string | null
-    color?: string | null
+    color_hex?: string | null
+    color_bucket?: string | null
     status?: $Enums.ItemStatus
     category_id: string
     found_location: string
@@ -10387,7 +10419,8 @@ export namespace Prisma {
     item_id?: string
     name: string
     description?: string | null
-    color?: string | null
+    color_hex?: string | null
+    color_bucket?: string | null
     status?: $Enums.ItemStatus
     found_location: string
     found_at: Date | string
@@ -10410,7 +10443,8 @@ export namespace Prisma {
     item_id?: string
     name: string
     description?: string | null
-    color?: string | null
+    color_hex?: string | null
+    color_bucket?: string | null
     status?: $Enums.ItemStatus
     category_id: string
     found_location: string
@@ -10522,7 +10556,8 @@ export namespace Prisma {
     item_id?: StringFilter<"Item"> | string
     name?: StringFilter<"Item"> | string
     description?: StringNullableFilter<"Item"> | string | null
-    color?: StringNullableFilter<"Item"> | string | null
+    color_hex?: StringNullableFilter<"Item"> | string | null
+    color_bucket?: StringNullableFilter<"Item"> | string | null
     status?: EnumItemStatusFilter<"Item"> | $Enums.ItemStatus
     category_id?: StringFilter<"Item"> | string
     found_location?: StringFilter<"Item"> | string
@@ -10635,7 +10670,8 @@ export namespace Prisma {
     item_id?: string
     name: string
     description?: string | null
-    color?: string | null
+    color_hex?: string | null
+    color_bucket?: string | null
     status?: $Enums.ItemStatus
     found_location: string
     found_at: Date | string
@@ -10658,7 +10694,8 @@ export namespace Prisma {
     item_id?: string
     name: string
     description?: string | null
-    color?: string | null
+    color_hex?: string | null
+    color_bucket?: string | null
     status?: $Enums.ItemStatus
     found_location: string
     found_at: Date | string
@@ -11152,7 +11189,8 @@ export namespace Prisma {
     item_id?: string
     name: string
     description?: string | null
-    color?: string | null
+    color_hex?: string | null
+    color_bucket?: string | null
     status?: $Enums.ItemStatus
     found_location: string
     found_at: Date | string
@@ -11175,7 +11213,8 @@ export namespace Prisma {
     item_id?: string
     name: string
     description?: string | null
-    color?: string | null
+    color_hex?: string | null
+    color_bucket?: string | null
     status?: $Enums.ItemStatus
     category_id: string
     found_location: string
@@ -11214,7 +11253,8 @@ export namespace Prisma {
     item_id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    color?: NullableStringFieldUpdateOperationsInput | string | null
+    color_hex?: NullableStringFieldUpdateOperationsInput | string | null
+    color_bucket?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumItemStatusFieldUpdateOperationsInput | $Enums.ItemStatus
     found_location?: StringFieldUpdateOperationsInput | string
     found_at?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -11237,7 +11277,8 @@ export namespace Prisma {
     item_id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    color?: NullableStringFieldUpdateOperationsInput | string | null
+    color_hex?: NullableStringFieldUpdateOperationsInput | string | null
+    color_bucket?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumItemStatusFieldUpdateOperationsInput | $Enums.ItemStatus
     category_id?: StringFieldUpdateOperationsInput | string
     found_location?: StringFieldUpdateOperationsInput | string
@@ -11260,7 +11301,8 @@ export namespace Prisma {
     item_id?: string
     name: string
     description?: string | null
-    color?: string | null
+    color_hex?: string | null
+    color_bucket?: string | null
     status?: $Enums.ItemStatus
     found_location: string
     found_at: Date | string
@@ -11283,7 +11325,8 @@ export namespace Prisma {
     item_id?: string
     name: string
     description?: string | null
-    color?: string | null
+    color_hex?: string | null
+    color_bucket?: string | null
     status?: $Enums.ItemStatus
     category_id: string
     found_location: string
@@ -11361,7 +11404,8 @@ export namespace Prisma {
     item_id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    color?: NullableStringFieldUpdateOperationsInput | string | null
+    color_hex?: NullableStringFieldUpdateOperationsInput | string | null
+    color_bucket?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumItemStatusFieldUpdateOperationsInput | $Enums.ItemStatus
     found_location?: StringFieldUpdateOperationsInput | string
     found_at?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -11384,7 +11428,8 @@ export namespace Prisma {
     item_id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    color?: NullableStringFieldUpdateOperationsInput | string | null
+    color_hex?: NullableStringFieldUpdateOperationsInput | string | null
+    color_bucket?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumItemStatusFieldUpdateOperationsInput | $Enums.ItemStatus
     category_id?: StringFieldUpdateOperationsInput | string
     found_location?: StringFieldUpdateOperationsInput | string
@@ -11452,7 +11497,8 @@ export namespace Prisma {
     item_id?: string
     name: string
     description?: string | null
-    color?: string | null
+    color_hex?: string | null
+    color_bucket?: string | null
     status?: $Enums.ItemStatus
     found_location: string
     found_at: Date | string
@@ -11475,7 +11521,8 @@ export namespace Prisma {
     item_id?: string
     name: string
     description?: string | null
-    color?: string | null
+    color_hex?: string | null
+    color_bucket?: string | null
     status?: $Enums.ItemStatus
     category_id: string
     found_location: string
@@ -11553,7 +11600,8 @@ export namespace Prisma {
     item_id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    color?: NullableStringFieldUpdateOperationsInput | string | null
+    color_hex?: NullableStringFieldUpdateOperationsInput | string | null
+    color_bucket?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumItemStatusFieldUpdateOperationsInput | $Enums.ItemStatus
     found_location?: StringFieldUpdateOperationsInput | string
     found_at?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -11576,7 +11624,8 @@ export namespace Prisma {
     item_id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    color?: NullableStringFieldUpdateOperationsInput | string | null
+    color_hex?: NullableStringFieldUpdateOperationsInput | string | null
+    color_bucket?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumItemStatusFieldUpdateOperationsInput | $Enums.ItemStatus
     category_id?: StringFieldUpdateOperationsInput | string
     found_location?: StringFieldUpdateOperationsInput | string
@@ -11644,7 +11693,8 @@ export namespace Prisma {
     item_id?: string
     name: string
     description?: string | null
-    color?: string | null
+    color_hex?: string | null
+    color_bucket?: string | null
     status?: $Enums.ItemStatus
     category_id: string
     found_location: string
@@ -11664,7 +11714,8 @@ export namespace Prisma {
     item_id?: string
     name: string
     description?: string | null
-    color?: string | null
+    color_hex?: string | null
+    color_bucket?: string | null
     status?: $Enums.ItemStatus
     category_id: string
     found_location: string
@@ -11684,7 +11735,8 @@ export namespace Prisma {
     item_id?: string
     name: string
     description?: string | null
-    color?: string | null
+    color_hex?: string | null
+    color_bucket?: string | null
     status?: $Enums.ItemStatus
     category_id: string
     found_location: string
@@ -11724,7 +11776,8 @@ export namespace Prisma {
     item_id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    color?: NullableStringFieldUpdateOperationsInput | string | null
+    color_hex?: NullableStringFieldUpdateOperationsInput | string | null
+    color_bucket?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumItemStatusFieldUpdateOperationsInput | $Enums.ItemStatus
     found_location?: StringFieldUpdateOperationsInput | string
     found_at?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -11747,7 +11800,8 @@ export namespace Prisma {
     item_id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    color?: NullableStringFieldUpdateOperationsInput | string | null
+    color_hex?: NullableStringFieldUpdateOperationsInput | string | null
+    color_bucket?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumItemStatusFieldUpdateOperationsInput | $Enums.ItemStatus
     category_id?: StringFieldUpdateOperationsInput | string
     found_location?: StringFieldUpdateOperationsInput | string
@@ -11770,7 +11824,8 @@ export namespace Prisma {
     item_id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    color?: NullableStringFieldUpdateOperationsInput | string | null
+    color_hex?: NullableStringFieldUpdateOperationsInput | string | null
+    color_bucket?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumItemStatusFieldUpdateOperationsInput | $Enums.ItemStatus
     category_id?: StringFieldUpdateOperationsInput | string
     found_location?: StringFieldUpdateOperationsInput | string
@@ -11790,7 +11845,8 @@ export namespace Prisma {
     item_id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    color?: NullableStringFieldUpdateOperationsInput | string | null
+    color_hex?: NullableStringFieldUpdateOperationsInput | string | null
+    color_bucket?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumItemStatusFieldUpdateOperationsInput | $Enums.ItemStatus
     found_location?: StringFieldUpdateOperationsInput | string
     found_at?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -11813,7 +11869,8 @@ export namespace Prisma {
     item_id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    color?: NullableStringFieldUpdateOperationsInput | string | null
+    color_hex?: NullableStringFieldUpdateOperationsInput | string | null
+    color_bucket?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumItemStatusFieldUpdateOperationsInput | $Enums.ItemStatus
     category_id?: StringFieldUpdateOperationsInput | string
     found_location?: StringFieldUpdateOperationsInput | string
@@ -11836,7 +11893,8 @@ export namespace Prisma {
     item_id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    color?: NullableStringFieldUpdateOperationsInput | string | null
+    color_hex?: NullableStringFieldUpdateOperationsInput | string | null
+    color_bucket?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumItemStatusFieldUpdateOperationsInput | $Enums.ItemStatus
     category_id?: StringFieldUpdateOperationsInput | string
     found_location?: StringFieldUpdateOperationsInput | string
@@ -11856,7 +11914,8 @@ export namespace Prisma {
     item_id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    color?: NullableStringFieldUpdateOperationsInput | string | null
+    color_hex?: NullableStringFieldUpdateOperationsInput | string | null
+    color_bucket?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumItemStatusFieldUpdateOperationsInput | $Enums.ItemStatus
     found_location?: StringFieldUpdateOperationsInput | string
     found_at?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -11879,7 +11938,8 @@ export namespace Prisma {
     item_id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    color?: NullableStringFieldUpdateOperationsInput | string | null
+    color_hex?: NullableStringFieldUpdateOperationsInput | string | null
+    color_bucket?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumItemStatusFieldUpdateOperationsInput | $Enums.ItemStatus
     category_id?: StringFieldUpdateOperationsInput | string
     found_location?: StringFieldUpdateOperationsInput | string
@@ -11902,7 +11962,8 @@ export namespace Prisma {
     item_id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    color?: NullableStringFieldUpdateOperationsInput | string | null
+    color_hex?: NullableStringFieldUpdateOperationsInput | string | null
+    color_bucket?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumItemStatusFieldUpdateOperationsInput | $Enums.ItemStatus
     category_id?: StringFieldUpdateOperationsInput | string
     found_location?: StringFieldUpdateOperationsInput | string
@@ -11982,7 +12043,8 @@ export namespace Prisma {
     item_id?: string
     name: string
     description?: string | null
-    color?: string | null
+    color_hex?: string | null
+    color_bucket?: string | null
     status?: $Enums.ItemStatus
     found_location: string
     found_at: Date | string
@@ -12002,7 +12064,8 @@ export namespace Prisma {
     item_id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    color?: NullableStringFieldUpdateOperationsInput | string | null
+    color_hex?: NullableStringFieldUpdateOperationsInput | string | null
+    color_bucket?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumItemStatusFieldUpdateOperationsInput | $Enums.ItemStatus
     found_location?: StringFieldUpdateOperationsInput | string
     found_at?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12025,7 +12088,8 @@ export namespace Prisma {
     item_id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    color?: NullableStringFieldUpdateOperationsInput | string | null
+    color_hex?: NullableStringFieldUpdateOperationsInput | string | null
+    color_bucket?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumItemStatusFieldUpdateOperationsInput | $Enums.ItemStatus
     found_location?: StringFieldUpdateOperationsInput | string
     found_at?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -12048,7 +12112,8 @@ export namespace Prisma {
     item_id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    color?: NullableStringFieldUpdateOperationsInput | string | null
+    color_hex?: NullableStringFieldUpdateOperationsInput | string | null
+    color_bucket?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumItemStatusFieldUpdateOperationsInput | $Enums.ItemStatus
     found_location?: StringFieldUpdateOperationsInput | string
     found_at?: DateTimeFieldUpdateOperationsInput | Date | string

@@ -59,14 +59,13 @@ export const getColorBucket = (hex: string): string => {
   const { r, g, b } = hexToRgb(hex)
   const { h, s, l } = rgbToHsl(r, g, b)
 
-  // grayscale (low saturation)
   if (s < 0.15) {
-    if (l < 0.2) return 'BLACK'
-    if (l > 0.8) return 'WHITE'
+    if (l < 0.15) return 'BLACK'
+    if (l > 0.85) return 'WHITE'
     return 'GRAY'
   }
-
-  // hue ranges
+  if (l < 0.15) return 'BLACK'
+  if (h >= 20 && h <= 45 && l < 0.5) return 'BROWN'
   if (h < 15 || h >= 345) return 'RED'
   if (h < 45) return 'ORANGE'
   if (h < 65) return 'YELLOW'

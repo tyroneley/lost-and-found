@@ -14,6 +14,7 @@ import {
 
 import { handleError } from '../utils/errorHandler'
 import { idParamSchema } from '../validators/common.validator'
+import { itemQuerySchema } from '../validators/common.validator'
 
 export const createItemHandler = async (c: any) => {
   try {
@@ -29,7 +30,9 @@ export const createItemHandler = async (c: any) => {
 
 export const getItemsHandler = async (c: any) => {
   try {
-    const items = await getItems()
+    const query = itemQuerySchema.parse(c.req.query())
+    const items = await getItems(query)
+
     return c.json(items)
   } catch (error) {
     return handleError(c, error)
