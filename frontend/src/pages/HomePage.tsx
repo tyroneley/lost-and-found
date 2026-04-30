@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom'
 import { ItemCard } from '../components/ItemCard'
-import { StepCard } from '../components/StepCard'
 import { Item } from '../App'
 
 interface HomePageProps {
@@ -13,39 +12,68 @@ export function HomePage({ items }: HomePageProps) {
   const steps = [
     {
       number: 1, 
-      title: 'Item is found & recorded',
-      description: 'Security or BM staff find an item and log it in the system with photos and details.',
+      title: 'Item is found & handed in',
+      description: 'Someone finds a lost item and brings it to the security desk. Security logs it with photos, a description, and where it was found.',
+      actor: 'Security staff',
+      actorClass: 'actor-security'
     },
     {
       number: 2,
-      title: 'Browse & identify',
-      description: 'Search the public listings by category, color, or location to find your item.',
+      title: 'Browse & identify your item',
+      description: 'Search the public listings by name, category, color, or location. No account needed to browse — just look through what\'s been found.',
+      actor: 'Anyone',
+      actorClass: 'actor-public'
     },
     {
       number: 3,
-      title: 'Claim & collect',
-      description: 'Submit a claim request and schedule an appointment to verify ownership and pick it up.',
+      title: 'Submit a claim',
+      description: 'Found your item? Create a free account, describe why it\'s yours, and request an appointment with security to verify and collect it.',
+      actor: 'Registered users',
+      actorClass: 'actor-public'
     },
   ]
 
   return (
     <main>
-      {/* Banner Section */}
-      <section className="banner">
-        <div className="banner-container">
-          <h1 className="banner-title">Lost something on campus?</h1>
-          <p className="banner-subtitle">Browse items found and submitted by security across Campus. Submit a claim and arrange a pickup.</p>
-          
-          {/* Action Buttons */}
-          <div className="banner-buttons">
-            <button className="btn btn-primary" onClick={() => navigate('/browse')}>Browse lost items</button>
-            <button className="btn btn-secondary">Report a found item</button>
-          </div>
+      {/* Hero Section */}
+      <section className="hero">
+        <div className="hero-container">
+          <p className="hero-eyebrow">BINUS University International · Lost & Found</p>
+          <h1 className="hero-title">Lost something on campus?</h1>
+          <p className="hero-subtitle">Browse items found and held by security across BINUS @ Senayan. Find your item and submit a claim to arrange a pickup.</p>
           
           {/* Search Bar */}
           <div className="search-container">
-            <input type="text" placeholder="Search by item name, color, or location..." className="search-input" />
-            <button className="search-btn">Search</button>
+            <input 
+              type="text" 
+              placeholder="Search by item name, color, location…" 
+              className="search-input" 
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  navigate('/browse')
+                }
+              }}
+            />
+            <button className="search-btn" onClick={() => navigate('/browse')}>Search items</button>
+          </div>
+        </div>
+      </section>
+
+      {/* "How It Works" Section */}
+      <section className="how-it-works-section">
+        <div className="how-it-works-container">
+          <p className="section-eyebrow">The process</p>
+          <h2 className="how-it-works-title">How it works</h2>
+          
+          <div className="steps-grid">
+            {steps.map((step) => (
+              <div key={step.number} className="step-card">
+                <div className="step-number">{step.number}</div>
+                <h3>{step.title}</h3>
+                <p>{step.description}</p>
+                <span className={`actor-pill ${step.actorClass}`}>{step.actor}</span>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -54,12 +82,15 @@ export function HomePage({ items }: HomePageProps) {
       <section className="items-section">
         <div className="items-container">
           <div className="section-header">
-            <h2>Recently Found Items</h2>
+            <div>
+              <p className="section-eyebrow">Just added</p>
+              <h2>Recently found items</h2>
+            </div>
             <a href="#" className="see-all-link" onClick={(e) => { e.preventDefault(); navigate('/browse') }}>See all items →</a>
           </div>
           
           <div className="items-grid">
-            {items.map((item) => (
+            {items.slice(0, 4).map((item) => (
               <ItemCard
                 key={item.id}
                 image={item.image}
@@ -71,26 +102,19 @@ export function HomePage({ items }: HomePageProps) {
               />
             ))}
           </div>
+
+          {items.length === 0 && (
+            <div className="empty-state">
+              <p>No items found yet. Check back soon!</p>
+            </div>
+          )}
         </div>
       </section>
 
-      {/* "How It Works" Section */}
-      <section className="how-it-works-section">
-        <div className="how-it-works-container">
-          <h2 className="how-it-works-title">HOW IT WORKS</h2>
-          
-          <div className="steps-grid">
-            {steps.map((step) => (
-              <StepCard
-                key={step.number}
-                number={step.number}
-                title={step.title}
-                description={step.description}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Footer Section */}
+      <footer className="footer">
+        <span className="footer-text">Footer text | Lorem ipsum dolor sit amet nostrud nonumy consequat.</span>
+      </footer>
     </main>
   )
 }

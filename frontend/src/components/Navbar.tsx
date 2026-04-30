@@ -1,13 +1,15 @@
 import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { UserRole } from '../App'
 
 interface NavbarProps {
   isSignedIn?: boolean;
   userName?: string;
+  userRole?: UserRole;
   onLogout?: () => void;
 }
 
-export function Navbar({ isSignedIn = false, userName = '', onLogout }: NavbarProps) {
+export function Navbar({ isSignedIn = false, userName = '', userRole = 'public', onLogout }: NavbarProps) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
   const navigate = useNavigate()
@@ -32,6 +34,15 @@ export function Navbar({ isSignedIn = false, userName = '', onLogout }: NavbarPr
     setMenuOpen(false)
   }
 
+  const getRoleLabel = (role: UserRole) => {
+    const roleLabels: Record<UserRole, string> = {
+      public: 'User',
+      staff: 'Security Staff',
+      superadmin: 'Admin'
+    }
+    return roleLabels[role]
+  }
+
   return (
     <nav className="navbar">
       <div className="navbar-container">
@@ -53,14 +64,41 @@ export function Navbar({ isSignedIn = false, userName = '', onLogout }: NavbarPr
           </div>
         </div>
 
-        {/* Desktop Menu - only shown on larger screens */}
+        {/* Desktop Menu - Role-based Navigation */}
         <ul className={`navbar-menu ${menuOpen ? 'active' : ''}`}>
-          <li><a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('/staff/report') }}>Report Lost Item</a></li>
-          <li><a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('/browse') }}>Browse Lost Items</a></li>
-          {isSignedIn && <li><a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('/my-claims') }}>My Claims</a></li>}
+          {!isSignedIn && (
+            <>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('/browse') }}>Browse Items</a></li>
+            </>
+          )}
+          
+          {isSignedIn && userRole === 'public' && (
+            <>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('/browse') }}>Browse Items</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('/my-claims') }}>My Claims</a></li>
+            </>
+          )}
+          
+          {isSignedIn && userRole === 'staff' && (
+            <>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('/staff/dashboard') }}>Dashboard</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('/staff/items') }}>Items</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('/staff/claims') }}>Claims</a></li>
+            </>
+          )}
+          
+          {isSignedIn && userRole === 'superadmin' && (
+            <>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('/admin/overview') }}>Overview</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('/admin/users') }}>Users</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('/admin/items') }}>All Items</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('/admin/audit') }}>Audit Log</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('/admin/settings') }}>Settings</a></li>
+            </>
+          )}
         </ul>
 
-        {/* Right Side - Profile Icon */}
+        {/* Right Side - Profile Icon or Auth Buttons */}
         <div className="navbar-right">
           {!isSignedIn ? (
             <>
@@ -71,18 +109,23 @@ export function Navbar({ isSignedIn = false, userName = '', onLogout }: NavbarPr
               )}
               {location.pathname !== '/signup' && (
                 <button onClick={() => handleNavClick('/signup')} className="navbar-btn navbar-btn-signup">
-                  Sign Up
+                  Register
                 </button>
               )}
             </>
           ) : (
             <div className="navbar-profile-wrapper">
-              <button 
-                className="navbar-profile-btn"
-                onClick={() => setProfileOpen(!profileOpen)}
-              >
-                <img src="/placeholder.png" alt="Profile" className="profile-icon" />
-              </button>
+              <div className="navbar-profile-section">
+                {(userRole === 'staff' || userRole === 'superadmin') && (
+                  <span className={`role-pill role-${userRole}`}>{getRoleLabel(userRole)}</span>
+                )}
+                <button 
+                  className="navbar-profile-btn"
+                  onClick={() => setProfileOpen(!profileOpen)}
+                >
+                  <img src="/placeholder.png" alt="Profile" className="profile-icon" />
+                </button>
+              </div>
               
               {profileOpen && (
                 <div className="profile-dropdown">

@@ -9,6 +9,8 @@ import { LoginPage } from './pages/LoginPage'
 import { SignUpPage } from './pages/SignUpPage'
 import { StaffReportPage } from './pages/StaffReportPage'
 
+export type UserRole = 'public' | 'staff' | 'superadmin';
+
 export interface Item {
   id: number;
   name: string;
@@ -25,6 +27,7 @@ export interface Item {
 function App() {
   const [isSignedIn, setIsSignedIn] = useState(false)
   const [userName, setUserName] = useState('')
+  const [userRole, setUserRole] = useState<UserRole>('public')
 
   const items: Item[] = [
     {
@@ -392,22 +395,24 @@ function App() {
   const handleLogout = () => {
     setIsSignedIn(false)
     setUserName('')
+    setUserRole('public')
   }
 
-  const handleLoginSuccess = (name: string) => {
+  const handleLoginSuccess = (name: string, role: UserRole = 'public') => {
     setUserName(name)
+    setUserRole(role)
     setIsSignedIn(true)
   }
 
   return (
     <>
-      <Navbar isSignedIn={isSignedIn} userName={userName} onLogout={handleLogout} />
+      <Navbar isSignedIn={isSignedIn} userName={userName} userRole={userRole} onLogout={handleLogout} />
       <Routes>
         <Route path="/" element={<HomePage items={items} />} />
         <Route path="/browse" element={<BrowsePage items={items} />} />
         <Route path="/items/:id" element={<ItemDetailsPage items={items} isSignedIn={isSignedIn} />} />
         <Route path="/login" element={<LoginPage onLoginSuccess={handleLoginSuccess} />} />
-        <Route path="/signup" element={<SignUpPage onSignUpSuccess={handleLoginSuccess} />} />
+        <Route path="/signup" element={<SignUpPage onSignUpSuccess={(name) => handleLoginSuccess(name, 'public')} />} />
         <Route path="/staff/report" element={<StaffReportPage />} />
       </Routes>
     </>
