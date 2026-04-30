@@ -17,7 +17,7 @@ export function BrowsePage({ items }: { items: Item[] }) {
   const [currentPage, setCurrentPage] = useState(1)
   const [showFilters, setShowFilters] = useState(false)
   const [showSortMenu, setShowSortMenu] = useState(false)
-  const itemsPerPage = 6
+  const itemsPerPage = 20
 
   const categories = ['Electronics', 'Personal Belonging', 'Clothing', 'Sports Equipment', 'Other']
   const locations = ['Auditorium', 'Lobby', 'Student Lounge', 'Sleeping Pods', 'Photography Room', 'Meeting Room', 'Library']
