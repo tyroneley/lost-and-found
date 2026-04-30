@@ -1,11 +1,29 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { UserRole } from '../App'
 
-export function LoginPage({ onLoginSuccess }: { onLoginSuccess: (name: string) => void }) {
+interface LoginPageProps {
+  onLoginSuccess: (name: string, role: UserRole) => void;
+}
+
+// Mock accounts for testing different roles
+const MOCK_ACCOUNTS = [
+  { email: 'student@binus', password: '123', name: 'John Student', role: 'public' as UserRole },
+  { email: 'security@binus', password: '123', name: 'Sir Security', role: 'staff' as UserRole },
+  { email: 'admin@binus', password: '123', name: 'Admin User', role: 'superadmin' as UserRole },
+]
+
+export function LoginPage({ onLoginSuccess }: LoginPageProps) {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [showTestAccounts, setShowTestAccounts] = useState(true)
+
+  const handleQuickLogin = (account: typeof MOCK_ACCOUNTS[0]) => {
+    onLoginSuccess(account.name, account.role)
+    navigate('/')
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -20,9 +38,17 @@ export function LoginPage({ onLoginSuccess }: { onLoginSuccess: (name: string) =
       return
     }
 
-    // Mock authentication
+    // Check against mock accounts
+    const mockAccount = MOCK_ACCOUNTS.find(acc => acc.email === email && acc.password === password)
+    if (mockAccount) {
+      onLoginSuccess(mockAccount.name, mockAccount.role)
+      navigate('/')
+      return
+    }
+
+    // Default mock authentication
     const name = email.split('@')[0].replace(/[._]/g, ' ')
-    onLoginSuccess(name)
+    onLoginSuccess(name, 'public')
     navigate('/')
   }
 
@@ -35,6 +61,33 @@ export function LoginPage({ onLoginSuccess }: { onLoginSuccess: (name: string) =
               <h1>Welcome Back</h1>
               <p>Sign in to your Lost & Found account</p>
             </div>
+
+            {showTestAccounts && (
+              <div className="test-accounts-section">
+                <p className="test-accounts-title">Test Accounts (Mock RBA):</p>
+                <div className="test-accounts-grid">
+                  {MOCK_ACCOUNTS.map((account) => (
+                    <button
+                      key={account.email}
+                      type="button"
+                      className={`test-account-btn test-account-${account.role}`}
+                      onClick={() => handleQuickLogin(account)}
+                    >
+                      <div className="test-account-role">{account.role.toUpperCase()}</div>
+                      <div className="test-account-name">{account.name}</div>
+                      <div className="test-account-email">{account.email}</div>
+                    </button>
+                  ))}
+                </div>
+                <button 
+                  type="button"
+                  className="toggle-test-btn"
+                  onClick={() => setShowTestAccounts(false)}
+                >
+                  Hide
+                </button>
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} className="auth-form">
               {error && <div className="auth-error">{error}</div>}
