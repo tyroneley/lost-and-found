@@ -22,7 +22,11 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
 
   const handleQuickLogin = (account: typeof MOCK_ACCOUNTS[0]) => {
     onLoginSuccess(account.name, account.role)
-    navigate('/')
+    if (account.role === 'staff' || account.role === 'superadmin') {
+      navigate('/staff')
+    } else {
+      navigate('/')
+    }
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -42,7 +46,11 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
     const mockAccount = MOCK_ACCOUNTS.find(acc => acc.email === email && acc.password === password)
     if (mockAccount) {
       onLoginSuccess(mockAccount.name, mockAccount.role)
-      navigate('/')
+      if (mockAccount.role === 'staff' || mockAccount.role === 'superadmin') {
+        navigate('/staff')
+      } else {
+        navigate('/')
+      }
       return
     }
 

@@ -81,7 +81,7 @@ export function Navbar({ isSignedIn = false, userName = '', userRole = 'public',
           
           {isSignedIn && userRole === 'staff' && (
             <>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('/staff/dashboard') }}>Dashboard</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('/staff') }}>Dashboard</a></li>
               <li><a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('/staff/items') }}>Items</a></li>
               <li><a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('/staff/claims') }}>Claims</a></li>
             </>

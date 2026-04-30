@@ -8,6 +8,7 @@ import { ItemDetailsPage } from './pages/ItemDetailsPage'
 import { LoginPage } from './pages/LoginPage'
 import { SignUpPage } from './pages/SignUpPage'
 import { StaffReportPage } from './pages/StaffReportPage'
+import { StaffDashboardPage } from './pages/StaffDashboardPage'
 
 export type UserRole = 'public' | 'staff' | 'superadmin';
 
@@ -413,6 +414,7 @@ function App() {
         <Route path="/items/:id" element={<ItemDetailsPage items={items} isSignedIn={isSignedIn} />} />
         <Route path="/login" element={<LoginPage onLoginSuccess={handleLoginSuccess} />} />
         <Route path="/signup" element={<SignUpPage onSignUpSuccess={(name) => handleLoginSuccess(name, 'public')} />} />
+        <Route path="/staff" element={<StaffDashboardPage items={items} userName={userName} />} />
         <Route path="/staff/report" element={<StaffReportPage />} />
       </Routes>
     </>
