@@ -27,7 +27,6 @@ export function ItemCard({ image, name, location, foundAt, category, onClick }: 
     <div className="item-card" onClick={onClick}>
       <div className="item-image">
         {image && <img src={image} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
-        <span className="card-photo-count">1 photo</span>
       </div>
       <div style={{ padding: '0.75rem' }}>
         <h3>{name}</h3>
