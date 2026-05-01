@@ -1,9 +1,10 @@
 import { useState } from 'react'
+import { ItemCard } from '../components/ItemCard'
 
 interface ReportFormState {
   itemName: string
   category: string
-  color: string
+  colorHex: string
   description: string
   notes: string
   building: string
@@ -12,28 +13,73 @@ interface ReportFormState {
   dateFound: string
   timeFound: string
   photos: File[]
-  finderType: 'anonymous' | 'known'
   finderName: string
   finderContact: string
   finderAffiliation: string
 }
 
-const COLORS = [
-  { name: 'Black', hex: '#222' },
-  { name: 'White', hex: '#fff' },
-  { name: 'Blue', hex: '#2563eb' },
-  { name: 'Red', hex: '#dc2626' },
-  { name: 'Green', hex: '#16a34a' },
-  { name: 'Yellow', hex: '#ca8a04' },
-  { name: 'Purple', hex: '#9333ea' },
-  { name: 'Grey', hex: '#94a3b8' },
-]
+// Color bucket mapping - maps hex colors to named color categories
+const hexToColorBucket = (hex: string): string => {
+  const rgb = parseInt(hex.slice(1), 16)
+  const r = (rgb >> 16) & 255
+  const g = (rgb >> 8) & 255
+  const b = rgb & 255
+
+  // Normalize RGB to 0-1
+  const rNorm = r / 255
+  const gNorm = g / 255
+  const bNorm = b / 255
+
+  // Calculate HSL
+  const max = Math.max(rNorm, gNorm, bNorm)
+  const min = Math.min(rNorm, gNorm, bNorm)
+  let h = 0
+  let s = 0
+  const l = (max + min) / 2
+
+  if (max !== min) {
+    const d = max - min
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min)
+
+    switch (max) {
+      case rNorm:
+        h = (gNorm - bNorm) / d + (gNorm < bNorm ? 6 : 0)
+        break
+      case gNorm:
+        h = (bNorm - rNorm) / d + 2
+        break
+      case bNorm:
+        h = (rNorm - gNorm) / d + 4
+        break
+    }
+    h /= 6
+  }
+
+  // Convert to degrees (0-360)
+  h = Math.round(h * 360)
+  s = Math.round(s * 100)
+  const lPercent = Math.round(l * 100)
+
+  // Map HSL to color buckets
+  if (lPercent < 15) return 'Black'
+  if (lPercent > 85) return 'White'
+  if (s < 10) return 'Grey'
+
+  if (h >= 0 && h < 15) return 'Red'
+  if (h >= 15 && h < 45) return 'Orange'
+  if (h >= 45 && h < 65) return 'Yellow'
+  if (h >= 65 && h < 150) return 'Green'
+  if (h >= 150 && h < 200) return 'Blue'
+  if (h >= 200 && h < 280) return 'Purple'
+  if (h >= 280 && h < 330) return 'Pink'
+  return 'Red' // Default for remaining hues
+}
 
 export function StaffReportPage() {
   const [form, setForm] = useState<ReportFormState>({
     itemName: '',
     category: '',
-    color: 'Black',
+    colorHex: '#2563eb',
     description: '',
     notes: '',
     building: '',
@@ -42,13 +88,14 @@ export function StaffReportPage() {
     dateFound: '',
     timeFound: '',
     photos: [],
-    finderType: 'anonymous',
     finderName: '',
     finderContact: '',
     finderAffiliation: '',
   })
 
   const [photoPreview, setPhotoPreview] = useState<string[]>([])
+
+  // const [showDebug, setShowDebug] = useState(false)
 
   const handleInputChange = (e: React.ChangeEvent<any>) => {
     const { name, value } = e.target
@@ -83,7 +130,7 @@ export function StaffReportPage() {
     const checks = [
       { name: 'Item name', done: !!form.itemName },
       { name: 'Category', done: !!form.category },
-      { name: 'Color', done: !!form.color },
+      { name: 'Color', done: !!form.colorHex },
       { name: 'Description', done: !!form.description },
       {
         name: 'Location',
@@ -94,24 +141,55 @@ export function StaffReportPage() {
       },
       { name: 'Date found', done: !!form.dateFound },
       { name: 'At least 1 photo', done: form.photos.length > 0 },
+      { name: 'Finder name', done: !!form.finderName },
+      { name: 'Finder contact', done: !!form.finderContact },
     ]
     return checks
   }
 
   const isFormComplete = getCompletionStatus().every(c => c.done)
 
+  const generatePayload = () => {
+    const colorBucket = hexToColorBucket(form.colorHex)
+    return {
+      item: {
+        name: form.itemName,
+        description: form.description,
+        category: form.category,
+        color_hex: form.colorHex,
+        color_bucket: colorBucket,
+        notes: form.notes,
+        found_location: form.specificLocation === 'Room' ? `Room ${form.roomNumber}` : form.specificLocation,
+        found_at: form.dateFound + (form.timeFound ? `T${form.timeFound}` : 'T00:00'),
+        building: form.building,
+      },
+      finder: {
+        name: form.finderName,
+        contact: form.finderContact,
+        affiliation: form.finderAffiliation || null,
+      },
+      photos: form.photos.map(f => f.name),
+    }
+  }
+
+  // const handleDebugClick = () => {
+  //   setShowDebug(!showDebug)
+  // }
+
   const handleSubmit = () => {
     if (!isFormComplete) {
       alert('Please complete all required fields')
       return
     }
+    const payload = generatePayload()
+    console.log('Submitting payload:', payload)
     alert('Item submitted for approval!')
-    // Here you would send to backend
+    // send payload to backend
   }
 
   const handleSaveDraft = () => {
     alert('Item saved as draft!')
-    // Here you would save to backend
+    // send to backend
   }
 
   return (
@@ -160,16 +238,22 @@ export function StaffReportPage() {
               <label>
                 Color <span className="staff-report-required">*</span>
               </label>
-              <div className="staff-report-color-swatches">
-                {COLORS.map(c => (
-                  <div
-                    key={c.name}
-                    className={`staff-report-swatch ${form.color === c.name ? 'active' : ''}`}
-                    style={{ background: c.hex }}
-                    onClick={() => setForm(prev => ({ ...prev, color: c.name }))}
-                    title={c.name}
-                  />
-                ))}
+              <div className="staff-report-color-input-container">
+                <input
+                  type="color"
+                  name="colorHex"
+                  value={form.colorHex}
+                  onChange={handleInputChange}
+                  className="staff-report-color-input"
+                />
+                <div className="staff-report-color-info">
+                  <span className="staff-report-color-bucket">
+                    {hexToColorBucket(form.colorHex)}
+                  </span>
+                  <span className="staff-report-color-hex">
+                    {form.colorHex.toUpperCase()}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -195,7 +279,7 @@ export function StaffReportPage() {
               placeholder="Any other observations."
               value={form.notes}
               onChange={handleInputChange}
-              style={{ minHeight: '54px' }}
+              className="staff-report-notes"
             />
           </div>
         </div>
@@ -269,11 +353,11 @@ export function StaffReportPage() {
           <h2 className="staff-report-section-title">Photos</h2>
 
           <label className="staff-report-photo-zone">
-            {/* <svg className="staff-report-photo-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <svg className="staff-report-photo-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.5">
               <rect x="2" y="8" width="28" height="20" rx="3" />
               <circle cx="16" cy="18" r="5" />
               <path d="M11 8l2-4h6l2 4" />
-            </svg> */}
+            </svg>
             <div className="staff-report-photo-label">Click to upload photos</div>
             <div className="staff-report-photo-hint">JPG, PNG up to 10MB each · Recommended: 3–5 photos from different angles</div>
             <input type="file" multiple accept="image/*" onChange={handlePhotoUpload} style={{ display: 'none' }} />
@@ -295,93 +379,58 @@ export function StaffReportPage() {
         <div className="staff-report-section">
           <h2 className="staff-report-section-title">Finder information</h2>
 
-          <div className="staff-report-finder-toggle">
-            <button
-              className={`staff-report-finder-opt ${form.finderType === 'anonymous' ? 'active' : ''}`}
-              onClick={() => setForm(prev => ({ ...prev, finderType: 'anonymous' }))}
-            >
-              Anonymous / unknown
-            </button>
-            <button
-              className={`staff-report-finder-opt ${form.finderType === 'known' ? 'active' : ''}`}
-              onClick={() => setForm(prev => ({ ...prev, finderType: 'known' }))}
-            >
-              Finder details known
-            </button>
-          </div>
-
-          {form.finderType === 'known' && (
-            <div className="staff-report-finder-fields">
-              <div className="staff-report-field-row">
-                <div className="staff-report-field">
-                  <label>Finder name</label>
-                  <input
-                    type="text"
-                    name="finderName"
-                    placeholder="Full name"
-                    value={form.finderName}
-                    onChange={handleInputChange}
-                  />
-                </div>
-                <div className="staff-report-field">
-                  <label>Finder contact</label>
-                  <input
-                    type="text"
-                    name="finderContact"
-                    placeholder="Phone or email"
-                    value={form.finderContact}
-                    onChange={handleInputChange}
-                  />
-                </div>
-              </div>
-              <div className="staff-report-field">
-                <label>
-                  Finder affiliation <span className="staff-report-optional">optional</span>
-                </label>
-                <select name="finderAffiliation" value={form.finderAffiliation} onChange={handleInputChange}>
-                  <option value="">Select</option>
-                  <option>Student</option>
-                  <option>Staff</option>
-                  <option>Visitor</option>
-                </select>
-              </div>
+          <div className="staff-report-field-row">
+            <div className="staff-report-field">
+              <label>
+                Finder name <span className="staff-report-required">*</span>
+              </label>
+              <input
+                type="text"
+                name="finderName"
+                placeholder="Full name"
+                value={form.finderName}
+                onChange={handleInputChange}
+              />
             </div>
-          )}
+            <div className="staff-report-field">
+              <label>
+                Finder contact <span className="staff-report-required">*</span>
+              </label>
+              <input
+                type="text"
+                name="finderContact"
+                placeholder="Phone or email"
+                value={form.finderContact}
+                onChange={handleInputChange}
+              />
+            </div>
+          </div>
+          <div className="staff-report-field">
+            <label>
+              Finder affiliation <span className="staff-report-optional">optional</span>
+            </label>
+            <select name="finderAffiliation" value={form.finderAffiliation} onChange={handleInputChange}>
+              <option value="">Select</option>
+              <option>Student</option>
+              <option>Staff</option>
+              <option>Visitor</option>
+            </select>
+          </div>
         </div>
       </div>
 
       {/* Sidebar */}
       <div className="staff-report-sidebar">
         <div className="staff-report-preview-title">Live preview</div>
-        <div className="staff-report-preview-card">
-          <div className="staff-report-preview-img">
-            {photoPreview.length > 0 ? (
-              <img src={photoPreview[0]} alt="Preview" />
-            ) : (
-              <div className="staff-report-preview-placeholder"></div>
-            )}
-          </div>
-          <div className="staff-report-preview-body">
-            <div className="staff-report-preview-name">{form.itemName || 'Item name'}</div>
-            <div className="staff-report-preview-meta">
-              {form.building}
-              {form.specificLocation && (
-                `, ${form.specificLocation === 'Room'
-                  ? `Room ${form.roomNumber || ''}`
-                  : form.specificLocation}`
-              )}
-            </div>
-            <div className="staff-report-preview-tags">
-              <span className="staff-report-tag staff-report-tag-draft">Draft</span>
-              {form.category && <span className="staff-report-tag staff-report-tag-cat">{form.category}</span>}
-              {form.color && (
-                <span className="staff-report-tag staff-report-tag-color">
-                  <span className="staff-report-dot" style={{ background: COLORS.find(c => c.name === form.color)?.hex }} />
-                  {form.color}
-                </span>
-              )}
-            </div>
-          </div>
+        <div className="staff-report-live-preview">
+          <ItemCard
+            image={photoPreview[0] || ''}
+            name={form.itemName || 'Item name'}
+            location={form.building ? `${form.building}${form.specificLocation ? `, ${form.specificLocation === 'Room' ? `Room ${form.roomNumber || ''}` : form.specificLocation}` : ''}` : 'Location'}
+            foundAt={form.dateFound || new Date().toISOString()}
+            category={form.category || 'Uncategorized'}
+            onClick={() => {}}
+          />
         </div>
 
         <div className="staff-report-preview-title">Completion checklist</div>
@@ -400,9 +449,30 @@ export function StaffReportPage() {
           Save as draft
         </button>
         <button className="staff-report-submit-btn" onClick={handleSubmit} disabled={!isFormComplete}>
-          Submit for approval →
+          Submit →
         </button>
-        <div className="staff-report-submit-note">This will be sent to ISS admin for review before going public.</div>
+
+        {/* DEBUG START: button and panel for debug */}
+        {/* <button 
+          className="staff-report-debug-btn" 
+          onClick={handleDebugClick}
+        >
+          {showDebug ? '▼ Hide' : '▶ Show'} Debug Info
+        </button>
+
+        {showDebug && (
+          <div className="staff-report-debug-panel">
+            <label className="staff-report-debug-label">
+              JSON Payload:
+            </label>
+            <textarea
+              readOnly
+              value={JSON.stringify(generatePayload(), null, 2)}
+              className="staff-report-debug-textarea"
+            />
+          </div>
+        )} */}
+        {/* DEBUG END */}
       </div>
     </div>
   )
