@@ -71,7 +71,7 @@ export function ItemDetailsPage({ items, isSignedIn }: { items: Item[]; isSigned
               <h1 className="item-detail-title">{item.name}</h1>
               
               <div className="item-detail-tags">
-                <span className="item-detail-tag item-detail-tag-status">Active</span>
+                <span className="item-detail-tag item-detail-tag-status">{item.status}</span>
                 <span className="item-detail-tag item-detail-tag-cat">{item.category}</span>
                 <span className="item-detail-tag item-detail-tag-color">
                   <span className="item-detail-color-dot" style={{ background: item.color }}></span>
@@ -85,7 +85,6 @@ export function ItemDetailsPage({ items, isSignedIn }: { items: Item[]; isSigned
                 <tbody>
                   <tr><td>Found at</td><td>{item.location}</td></tr>
                   <tr><td>Date found</td><td>{formatDate(item.foundAt)}</td></tr>
-                  <tr><td>Reported by</td><td>Security staff</td></tr>
                   <tr><td>Item ID</td><td style={{ fontFamily: 'monospace', fontSize: '12px', color: '#90a4ae' }}>ITEM-{formatDate(item.foundAt).replace(/\s/g, '')}-{String(item.id).padStart(3, '0')}</td></tr>
                   <tr><td>Notes</td><td>{item.description.substring(0, 50)}...</td></tr>
                 </tbody>
@@ -102,8 +101,8 @@ export function ItemDetailsPage({ items, isSignedIn }: { items: Item[]; isSigned
               <button className="item-detail-btn-claim">Claim this item</button>
               {!isSignedIn && (
                 <>
-                  <button onClick={() => handleNavClick('/signup')} className="item-detail-btn-login">Log in to your account</button>
-                  <p className="item-detail-login-note auth-divider">Don't have an account? <a onClick={() => navigate('/login')} style={{cursor: 'pointer'}}>Register here</a> </p>
+                  <button onClick={() => handleNavClick('/login')} className="item-detail-btn-login">Log in to your account</button>
+                  <p className="item-detail-login-note auth-divider">Don't have an account? <a onClick={() => navigate('/signup')} style={{cursor: 'pointer'}}>Register here</a> </p>
                 </>
               )}
             </div>
@@ -132,7 +131,7 @@ export function ItemDetailsPage({ items, isSignedIn }: { items: Item[]; isSigned
               </div>
               <div className="item-detail-meta-row">
                 <span className="item-detail-meta-key">Status</span>
-                <span className="item-detail-meta-val" style={{ color: '#1a6b32' }}>Active</span>
+                <span className="item-detail-meta-val" style={{ color: '#1a6b32' }}>{item.status}</span>
               </div>
               <div className="item-detail-meta-row">
                 <span className="item-detail-meta-key">Claims</span>
@@ -140,7 +139,7 @@ export function ItemDetailsPage({ items, isSignedIn }: { items: Item[]; isSigned
               </div>
               <div className="item-detail-meta-row">
                 <span className="item-detail-meta-key">Stored at</span>
-                <span className="item-detail-meta-val">Security, FX campus</span>
+                <span className="item-detail-meta-val">{item.finder.affiliation}, {item.building}</span>
               </div>
             </div>
           </div>
