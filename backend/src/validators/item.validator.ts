@@ -11,10 +11,23 @@ export const createItemSchema = z.object({
   category_id: z.string().uuid('Invalid category_id'),
   found_location: z.string().min(1, 'Location is required'),
   found_at: z.string().datetime('Invalid date format'),
+  expires_at: z.string().datetime().optional(),
   recorded_by: z.string().uuid('Invalid user_id')
 })
 
 export const updateItemStatusSchema = z.object({
   status: z.enum(['REPORTED', 'UNDER_REVIEW', 'APPROVED', 'CLAIMED', 'EXPIRED']),
   approved_by: z.string().uuid().optional()
+})
+
+export const updateItemSchema = z.object({
+  name: z.string().min(1).optional(),
+  description: z.string().optional(),
+  color_hex: z.string().regex(/^#([0-9A-Fa-f]{6})$/, 'Invalid hex color').optional(),
+  category_id: z.string().uuid().optional(),
+  found_location: z.string().min(1).optional(),
+  found_at: z.string().datetime().optional(),
+  expires_at: z.string().datetime().optional(),
+  ownership_proof: z.string().optional(),
+  verification_notes: z.string().optional()
 })

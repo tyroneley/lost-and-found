@@ -5,11 +5,14 @@ import {
   getClaimsHandler,
   updateClaimStatusHandler
 } from '../controllers/claim.controller'
+import { authMiddleware, requireRole } from '../middleware/auth'
 
 const claimRoutes = new Hono()
 
+claimRoutes.use('/*', authMiddleware)
 claimRoutes.post('/', createClaimHandler)
 claimRoutes.get('/', getClaimsHandler)
-claimRoutes.patch('/:id', updateClaimStatusHandler)
-claimRoutes.delete('/:id', deleteClaimHandler)
+claimRoutes.patch('/:id', requireRole(['SECURITY', 'ADMIN']), updateClaimStatusHandler)
+claimRoutes.delete('/:id', requireRole(['ADMIN']), deleteClaimHandler)
+
 export default claimRoutes

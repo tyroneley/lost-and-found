@@ -9,18 +9,20 @@ import {
 
 import {
   createItemSchema,
+  updateItemSchema,
   updateItemStatusSchema
 } from '../validators/item.validator'
 
 import { handleError } from '../utils/errorHandler'
-import { idParamSchema } from '../validators/common.validator'
-import { itemQuerySchema } from '../validators/common.validator'
+import { idParamSchema, itemQuerySchema } from '../validators/common.validator'
+import type { AuthPayload } from '../middleware/auth'
 
 export const createItemHandler = async (c: any) => {
   try {
+    const payload = c.get('jwtPayload') as AuthPayload
     const body = await c.req.json()
     const validated = createItemSchema.parse(body)
-    const item = await createItem(validated)
+    const item = await createItem(validated, payload.sub)
 
     return c.json(item, 201)
   } catch (error) {
@@ -41,10 +43,7 @@ export const getItemsHandler = async (c: any) => {
 
 export const getItemByIdHandler = async (c: any) => {
   try {
-    const params = idParamSchema.parse({
-      id: c.req.param('id')
-    })
-
+    const params = idParamSchema.parse({ id: c.req.param('id') })
     const item = await getItemById(params.id)
 
     if (!item) {
@@ -59,13 +58,11 @@ export const getItemByIdHandler = async (c: any) => {
 
 export const updateItemStatusHandler = async (c: any) => {
   try {
-    const params = idParamSchema.parse({
-      id: c.req.param('id')
-    })
-
+    const payload = c.get('jwtPayload') as AuthPayload
+    const params = idParamSchema.parse({ id: c.req.param('id') })
     const body = await c.req.json()
     const validated = updateItemStatusSchema.parse(body)
-    const item = await updateItemStatus(params.id, validated)
+    const item = await updateItemStatus(params.id, validated, payload.sub)
 
     return c.json(item)
   } catch (error) {
@@ -75,10 +72,12 @@ export const updateItemStatusHandler = async (c: any) => {
 
 export const updateItemHandler = async (c: any) => {
   try {
-    const id = c.req.param('id')
+    const payload = c.get('jwtPayload') as AuthPayload
+    const params = idParamSchema.parse({ id: c.req.param('id') })
     const body = await c.req.json()
-    const item = await updateItem(id, body)
-    
+    const validated = updateItemSchema.parse(body)
+    const item = await updateItem(params.id, validated, payload.sub)
+
     return c.json(item)
   } catch (error) {
     return handleError(c, error)
@@ -87,11 +86,9 @@ export const updateItemHandler = async (c: any) => {
 
 export const deleteItemHandler = async (c: any) => {
   try {
-    const params = idParamSchema.parse({
-      id: c.req.param('id')
-    })
-
-    await deleteItem(params.id)
+    const payload = c.get('jwtPayload') as AuthPayload
+    const params = idParamSchema.parse({ id: c.req.param('id') })
+    await deleteItem(params.id, payload.sub)
 
     return c.json({ message: 'Item deleted' })
   } catch (error) {
