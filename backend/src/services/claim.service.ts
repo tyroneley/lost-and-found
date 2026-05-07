@@ -1,4 +1,5 @@
 import { prisma } from '../lib/prisma'
+import { logAudit } from './audit.service'
 
 export const createClaim = async (data: any) => {
   return prisma.claimRequest.create({
@@ -10,11 +11,12 @@ export const createClaim = async (data: any) => {
   })
 }
 
-export const getClaims = async (query: any) => {
+export const getClaims = async (query?: any) => {
   return prisma.claimRequest.findMany({
     where: {
-      item_id: query.item_id || undefined,
-      claimer_id: query.user_id || undefined
+      item_id: query?.item_id,
+      claimer_id: query?.user_id,
+      status: query?.status
     },
     include: {
       item: true,
@@ -29,7 +31,12 @@ export const deleteClaim = async (id: string) => {
   })
 }
 
-export const updateClaimStatus = async (id: string, data: any) => {
+export const updateClaimStatus = async (id: string, data: any, changed_by: string) => {
+  const existing = await prisma.claimRequest.findUnique({
+    where: { claim_id: id },
+    include: { item: { select: { status: true } } }
+  })
+
   const claim = await prisma.claimRequest.update({
     where: { claim_id: id },
     data: {
@@ -42,6 +49,23 @@ export const updateClaimStatus = async (id: string, data: any) => {
     await prisma.item.update({
       where: { item_id: claim.item_id },
       data: { status: 'CLAIMED' }
+    })
+
+    if (existing) {
+      await logAudit({
+        item_id: claim.item_id,
+        changed_by,
+        action: 'CLAIM',
+        old_status: existing.item.status,
+        new_status: 'CLAIMED'
+      })
+    }
+  } else if (data.status === 'REJECTED' && existing) {
+    await logAudit({
+      item_id: claim.item_id,
+      changed_by,
+      action: 'REJECT',
+      old_status: existing.item.status
     })
   }
 
