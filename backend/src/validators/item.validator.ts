@@ -11,6 +11,7 @@ export const createItemSchema = z.object({
   category_id: z.string().uuid('Invalid category_id'),
   found_location: z.string().min(1, 'Location is required'),
   found_at: z.string().datetime('Invalid date format'),
+  expires_at: z.string().datetime().optional(),
   recorded_by: z.string().uuid('Invalid user_id')
 })
 
@@ -26,6 +27,7 @@ export const updateItemSchema = z.object({
   category_id: z.string().uuid().optional(),
   found_location: z.string().min(1).optional(),
   found_at: z.string().datetime().optional(),
+  expires_at: z.string().datetime().optional(),
   ownership_proof: z.string().optional(),
   verification_notes: z.string().optional()
 })

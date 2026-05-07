@@ -15,6 +15,7 @@ export const createItem = async (data: any, changed_by: string) => {
       category_id: data.category_id,
       found_location: data.found_location,
       found_at: new Date(data.found_at),
+      expires_at: data.expires_at ? new Date(data.expires_at) : null,
       recorded_by: data.recorded_by
     }
   })
@@ -37,6 +38,7 @@ export const updateItem = async (id: string, data: any, changed_by: string) => {
       category_id: data.category_id,
       found_location: data.found_location,
       found_at: data.found_at !== undefined ? new Date(data.found_at) : undefined,
+      expires_at: data.expires_at !== undefined ? new Date(data.expires_at) : undefined,
       ownership_proof: data.ownership_proof,
       verification_notes: data.verification_notes
     }

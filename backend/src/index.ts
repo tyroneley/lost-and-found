@@ -11,6 +11,7 @@ import userRoutes from './routes/user.routes'
 import { prisma } from './lib/prisma'
 import { issueToken } from './middleware/auth'
 import { handleError } from './utils/errorHandler'
+import { expireItems } from './services/expiration.service'
 
 const app = new Hono()
 
@@ -44,3 +45,9 @@ serve({
   fetch: app.fetch,
   port: 3001
 })
+
+expireItems().then(n => { if (n > 0) console.log(`Expired ${n} items on startup`) })
+setInterval(async () => {
+  const n = await expireItems()
+  if (n > 0) console.log(`Expired ${n} items`)
+}, 60 * 60 * 1000)
