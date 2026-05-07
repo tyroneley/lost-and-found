@@ -10,6 +10,7 @@ import { SignUpPage } from './pages/SignUpPage'
 import { StaffReportPage } from './pages/StaffReportPage'
 import { StaffDashboardPage } from './pages/StaffDashboardPage'
 import { StaffItemsPage } from './pages/StaffItemsPage'
+import { ClaimPage } from './pages/ClaimPage'
 
 export type UserRole = 'public' | 'staff' | 'superadmin';
 
@@ -43,6 +44,7 @@ export interface Item {
 function App() {
   const [isSignedIn, setIsSignedIn] = useState(false)
   const [userName, setUserName] = useState('')
+  const [userEmail, setUserEmail] = useState('')
   const [userRole, setUserRole] = useState<UserRole>('public')
 
   const items: Item[] = [
@@ -651,11 +653,13 @@ function App() {
   const handleLogout = () => {
     setIsSignedIn(false)
     setUserName('')
+    setUserEmail('')
     setUserRole('public')
   }
 
-  const handleLoginSuccess = (name: string, role: UserRole = 'public') => {
+  const handleLoginSuccess = (name: string, email: string, role: UserRole = 'public') => {
     setUserName(name)
+    setUserEmail(email)
     setUserRole(role)
     setIsSignedIn(true)
   }
@@ -667,6 +671,7 @@ function App() {
         <Route path="/" element={<HomePage items={items} />} />
         <Route path="/browse" element={<BrowsePage items={items} />} />
         <Route path="/items/:id" element={<ItemDetailsPage items={items} isSignedIn={isSignedIn} />} />
+        <Route path="/items/:itemId/claim" element={<ClaimPage items={items} userName={userName} userEmail={userEmail} />} />
         <Route path="/login" element={<LoginPage onLoginSuccess={handleLoginSuccess} />} />
         <Route path="/signup" element={<SignUpPage onSignUpSuccess={(name) => handleLoginSuccess(name, 'public')} />} />
         <Route path="/staff" element={<StaffDashboardPage items={items} userName={userName} />} />

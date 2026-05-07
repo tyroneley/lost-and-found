@@ -98,7 +98,14 @@ export function ItemDetailsPage({ items, isSignedIn }: { items: Item[]; isSigned
             <div className="item-detail-card">
               <div className="item-detail-card-title">Claim this item</div>
               <p className="item-detail-claim-hint">If this is yours, log in and submit a claim. You'll need to describe the item and schedule an appointment with security to verify ownership.</p>
-              <button className="item-detail-btn-claim">Claim this item</button>
+              <button 
+                className="item-detail-btn-claim"
+                onClick={() => navigate(`/items/${item.id}/claim`)}
+                disabled={!isSignedIn}
+                style={{ opacity: !isSignedIn ? 0.5 : 1, cursor: !isSignedIn ? 'not-allowed' : 'pointer' }}
+              >
+                Claim this item
+              </button>
               {!isSignedIn && (
                 <>
                   <button onClick={() => handleNavClick('/login')} className="item-detail-btn-login">Log in to your account</button>

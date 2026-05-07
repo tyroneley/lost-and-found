@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { UserRole } from '../App'
 
 interface LoginPageProps {
-  onLoginSuccess: (name: string, role: UserRole) => void;
+  onLoginSuccess: (name: string, email: string, role: UserRole) => void;
 }
 
 // Mock accounts for testing different roles
@@ -21,7 +21,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
   const [showTestAccounts, setShowTestAccounts] = useState(true)
 
   const handleQuickLogin = (account: typeof MOCK_ACCOUNTS[0]) => {
-    onLoginSuccess(account.name, account.role)
+    onLoginSuccess(account.name, account.email, account.role)
     if (account.role === 'staff' || account.role === 'superadmin') {
       navigate('/staff')
     } else {
@@ -45,7 +45,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
     // Check against mock accounts
     const mockAccount = MOCK_ACCOUNTS.find(acc => acc.email === email && acc.password === password)
     if (mockAccount) {
-      onLoginSuccess(mockAccount.name, mockAccount.role)
+      onLoginSuccess(mockAccount.name, mockAccount.email, mockAccount.role)
       if (mockAccount.role === 'staff' || mockAccount.role === 'superadmin') {
         navigate('/staff')
       } else {
@@ -56,7 +56,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
 
     // Default mock authentication
     const name = email.split('@')[0].replace(/[._]/g, ' ')
-    onLoginSuccess(name, 'public')
+    onLoginSuccess(name, email, 'public')
     navigate('/')
   }
 
