@@ -1,5 +1,6 @@
 import 'dotenv/config'
 import { Hono } from 'hono'
+import { cors } from 'hono/cors'
 import { serve } from '@hono/node-server'
 import { z } from 'zod'
 
@@ -12,6 +13,12 @@ import { issueToken } from './middleware/auth'
 import { handleError } from './utils/errorHandler'
 
 const app = new Hono()
+
+app.use('/*', cors({
+  origin: process.env.CORS_ORIGIN ?? 'http://localhost:3000',
+  allowMethods: ['GET', 'POST', 'PATCH', 'DELETE'],
+  allowHeaders: ['Content-Type', 'Authorization'],
+}))
 
 app.get('/', (c) => c.text('running'))
 

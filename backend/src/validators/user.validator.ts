@@ -19,3 +19,12 @@ export const createUserSchema = z.object({
 
   affiliation: z.string().optional()
 })
+
+export const updateUserSchema = z.object({
+  name: z.string().min(1).optional(),
+  phone: z.string().optional(),
+  personal_email: z.string().email().optional(),
+  uni_email: z.string().email().optional(),
+  affiliation: z.string().optional(),
+  role: z.enum(['PUBLIC', 'SECURITY', 'ADMIN']).optional()
+})

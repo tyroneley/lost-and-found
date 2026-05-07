@@ -5,6 +5,24 @@ export const createUser = async (data: any) => {
   return prisma.user.create({ data })
 }
 
+export const getUserById = async (id: string) => {
+  return prisma.user.findUnique({ where: { user_id: id } })
+}
+
+export const updateUser = async (id: string, data: any) => {
+  return prisma.user.update({
+    where: { user_id: id },
+    data: {
+      name: data.name,
+      phone: data.phone,
+      personal_email: data.personal_email,
+      uni_email: data.uni_email,
+      affiliation: data.affiliation,
+      role: data.role
+    }
+  })
+}
+
 export const getUsers = async (query?: any) => {
   const limit: number = query?.limit ?? 20
   const offset: number = query?.offset ?? 0
