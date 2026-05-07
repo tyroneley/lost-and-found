@@ -7,7 +7,9 @@ export const idParamSchema = z.object({
 export const claimQuerySchema = z.object({
   item_id: z.string().uuid().optional(),
   user_id: z.string().uuid().optional(),
-  status: z.enum(['PENDING', 'APPROVED', 'REJECTED']).optional()
+  status: z.enum(['PENDING', 'APPROVED', 'REJECTED']).optional(),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  offset: z.coerce.number().int().min(0).default(0)
 })
 
 export const itemQuerySchema = z.object({
@@ -25,10 +27,14 @@ export const itemQuerySchema = z.object({
 
   category_id: z.string().uuid().optional(),
 
-  q: z.string().optional() // search
+  q: z.string().optional(), // search
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  offset: z.coerce.number().int().min(0).default(0)
 })
 
 export const userQuerySchema = z.object({
   role: z.enum(['PUBLIC','SECURITY','ADMIN']).optional(),
-  q: z.string().optional()
+  q: z.string().optional(),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  offset: z.coerce.number().int().min(0).default(0)
 })

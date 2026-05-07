@@ -1,4 +1,5 @@
 import { prisma } from '../lib/prisma'
+import type { Prisma } from '../../generated/prisma'
 import { getColorBucket } from '../utils/color'
 import { logAudit } from './audit.service'
 
@@ -58,25 +59,33 @@ export const deleteItem = async (id: string, changed_by: string) => {
 }
 
 export const getItems = async (query?: any) => {
-  return prisma.item.findMany({
-    where: {
-      deleted_at: null,
-      color_bucket: query?.color,
-      status: query?.status,
-      category_id: query?.category_id,
-      OR: query?.q
-        ? [
-            { name: { contains: query.q, mode: 'insensitive' } },
-            { description: { contains: query.q, mode: 'insensitive' } }
-          ]
-        : undefined
-    },
-    include: {
-      category: true,
-      recorder: true,
-      photos: true
-    }
-  })
+  const limit: number = query?.limit ?? 20
+  const offset: number = query?.offset ?? 0
+
+  const where: Prisma.ItemWhereInput = {
+    deleted_at: null,
+    color_bucket: query?.color,
+    status: query?.status,
+    category_id: query?.category_id,
+    OR: query?.q
+      ? [
+          { name: { contains: query.q, mode: 'insensitive' } },
+          { description: { contains: query.q, mode: 'insensitive' } }
+        ]
+      : undefined
+  }
+
+  const [total, data] = await prisma.$transaction([
+    prisma.item.count({ where }),
+    prisma.item.findMany({
+      where,
+      take: limit,
+      skip: offset,
+      include: { category: true, recorder: true, photos: true }
+    })
+  ])
+
+  return { data, total, limit, offset }
 }
 
 export const getItemById = async (id: string) => {
