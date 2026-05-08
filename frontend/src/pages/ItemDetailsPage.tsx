@@ -39,12 +39,6 @@ export function ItemDetailsPage({ items, isSignedIn }: { items: Item[]; isSigned
   return (
     <main className="item-detail-main">
       <div className="item-detail-wrapper">
-        {/* Breadcrumb */}
-        <div className="item-detail-breadcrumb">
-          Home <span>/ Browse items / {item.name}</span>
-        </div>
-
-        {/* Main Layout */}
         <div className="item-detail-layout">
           {/* Left Column: Gallery & Info */}
           <div>
