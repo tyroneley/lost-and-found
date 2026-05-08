@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { ItemCard } from '../components/ItemCard'
 
 interface ReportFormState {
@@ -76,6 +77,7 @@ const hexToColorBucket = (hex: string): string => {
 }
 
 export function StaffReportPage() {
+  const navigate = useNavigate()
   const [form, setForm] = useState<ReportFormState>({
     itemName: '',
     category: '',
@@ -196,7 +198,7 @@ export function StaffReportPage() {
     <div className="staff-report-layout">
       <div className="staff-report-main">
         <div className="staff-report-breadcrumb">
-          Dashboard <span>/ Record found item</span>
+          <button onClick={() => navigate('/staff')} className="staff-report-breadcrumb-link">Dashboard</button> <span>/ Record found item</span>
         </div>
         <div className="staff-report-header">
           <h1 className="staff-report-title">Record a found item</h1>
@@ -304,7 +306,7 @@ export function StaffReportPage() {
                 Specific location <span className="staff-report-required">*</span>
               </label>
               <select name="specificLocation" value={form.specificLocation} onChange={handleInputChange}>
-                <option value="" disabled>Select building</option>
+                <option value="" disabled>Select room </option>
                 <option>Auditorium</option>
                 <option>Lobby</option>
                 <option>Student Lounge</option>

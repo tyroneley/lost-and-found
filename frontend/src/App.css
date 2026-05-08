@@ -1245,23 +1245,22 @@ main {
 
 /* Item Details Page */
 .item-detail-main {
-  padding: 20px 24px;
-  min-height: calc(100vh - 52px);
+  background: #fafbfc;
+  padding: 2rem 1.5rem;
+}
+
+.item-detail-banner {
+  display: none;
 }
 
 .item-detail-wrapper {
-  max-width: 960px;
+  max-width: 1200px;
   margin: 0 auto;
+  padding: 0 0 2rem;
 }
 
 .item-detail-breadcrumb {
-  font-size: 12px;
-  color: #90a4ae;
-  margin-bottom: 16px;
-}
-
-.item-detail-breadcrumb span {
-  color: #546e7a;
+  display: none;
 }
 
 .item-detail-layout {
@@ -1277,7 +1276,7 @@ main {
 }
 
 .item-detail-main-photo {
-  height: 280px;
+  height: 380px;
   background: #f5f7fa;
   border-radius: 12px;
   border: 0.5px solid #e0e6ed;
@@ -1356,8 +1355,20 @@ main {
 }
 
 .item-detail-tag-status {
-  background: #e6f4ea;
-  color: #1a6b32;
+  background: #dcfce7;
+  color: #166534;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.item-detail-tag-status::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: #16a34a;
+  border-radius: 50%;
+  display: inline-block;
 }
 
 .item-detail-tag-cat {
@@ -1425,17 +1436,32 @@ main {
 }
 
 .item-detail-card {
-  border: 0.5px solid #e0e6ed;
-  border-radius: 12px;
-  padding: 20px;
+  border: none;
+  border-radius: 8px;
+  padding: 1.5rem;
   background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.item-detail-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #2563eb 0%, #3b82f6 100%);
 }
 
 .item-detail-card-title {
-  font-size: 13px;
-  font-weight: 500;
-  color: #2c3e50;
-  margin-bottom: 12px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #90a4ae;
+  font-weight: 600;
+  margin-bottom: 1rem;
 }
 
 /* Claim Card */
@@ -1443,41 +1469,51 @@ main {
   font-size: 13px;
   color: #546e7a;
   line-height: 1.5;
-  margin-bottom: 16px;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: #eff6ff;
+  border-radius: 6px;
+  border-left: 3px solid #2563eb;
 }
 
 .item-detail-btn-claim {
   width: 100%;
-  background: #004a87;
+  background: #2563eb;
   color: #fff;
   border: none;
-  padding: 11px 0;
-  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  border-radius: 6px;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  margin-bottom: 10px;
+  margin-bottom: 0.75rem;
   transition: background 0.2s ease;
 }
 
-.item-detail-btn-claim:hover {
-  background: #003d70;
+.item-detail-btn-claim:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.item-detail-btn-claim:disabled {
+  background: #cbd5e1;
+  cursor: not-allowed;
 }
 
 .item-detail-btn-login {
   width: 100%;
   background: transparent;
   color: #546e7a;
-  border: 0.5px solid #d0d8e0;
-  padding: 9px 0;
-  border-radius: 8px;
-  font-size: 13px;
+  border: 1px solid #d0d8e0;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
   transition: border-color 0.2s ease;
 }
 
 .item-detail-btn-login:hover {
-  border-color: #004a87;
+  border-color: #2563eb;
 }
 
 .item-detail-login-note {
@@ -1505,7 +1541,7 @@ main {
 
 .item-detail-expiry-fill {
   height: 100%;
-  background: #004a87;
+  background: linear-gradient(90deg, #2563eb 0%, #1d4ed8 100%);
   border-radius: 2px;
   transition: width 0.3s ease;
 }
@@ -2498,25 +2534,41 @@ main {
 .staff-report-layout {
   display: grid;
   grid-template-columns: 1fr 320px;
-  gap: 1rem;
+  gap: 1.5rem;
   min-height: calc(100vh - 52px);
-  background: #f8fafb;
-  padding: 1.5rem;
+  background: #fafbfc;
+  padding: 2rem 1.5rem;
 }
 
 .staff-report-main {
-  padding: 1.5rem;
+  padding: 2rem;
   overflow-y: auto;
-  border: 0.5px solid #e8ecf0;
+  border: none;
   background: #ffffff;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(44, 62, 80, 0.06);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .staff-report-breadcrumb {
   font-size: 0.85rem;
   color: #90a4ae;
   margin-bottom: 1.5rem;
+}
+
+.staff-report-breadcrumb-link {
+  background: none;
+  border: none;
+  color: #2563eb;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+  transition: color 0.2s ease;
+}
+
+.staff-report-breadcrumb-link:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
 }
 
 .staff-report-breadcrumb span {
@@ -2550,14 +2602,14 @@ main {
 }
 
 .staff-report-section-title {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   text-transform: uppercase;
-  letter-spacing: 0.09em;
+  letter-spacing: 0.08em;
   color: #90a4ae;
   font-weight: 600;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid #e8ecf0;
-  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #2563eb;
+  margin-bottom: 1.5rem;
 }
 
 .staff-report-field {
@@ -2592,13 +2644,21 @@ main {
 .staff-report-field textarea {
   width: 100%;
   font-size: 1rem;
-  padding: 0.95rem 1.25rem;
+  padding: 0.85rem 1rem;
   border: 1px solid #d0d8e0;
   border-radius: 6px;
   background: #ffffff;
   color: #2c3e50;
   font-family: inherit;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+}
+
+.staff-report-field input:focus,
+.staff-report-field select:focus,
+.staff-report-field textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 .staff-report-field textarea {
@@ -2979,10 +3039,10 @@ main {
 
 .staff-report-save-draft {
   width: 100%;
-  background: #ffffff;
+  background: transparent;
   color: #546e7a;
   border: 1px solid #d0d8e0;
-  padding: 0.85rem 1.25rem;
+  padding: 0.85rem 1rem;
   border-radius: 6px;
   font-size: 0.95rem;
   font-weight: 500;
@@ -2992,28 +3052,26 @@ main {
 }
 
 .staff-report-save-draft:hover {
-  background: #f8fafb;
-  border-color: #90a4ae;
-  color: #2c3e50;
+  border-color: #2563eb;
+  color: #2563eb;
+  background: #eff6ff;
 }
 
 .staff-report-submit-btn {
   width: 100%;
-  background: #004a87;
+  background: #2563eb;
   color: #ffffff;
   border: none;
-  padding: 0.95rem 1.25rem;
+  padding: 0.85rem 1rem;
   border-radius: 6px;
   font-size: 0.95rem;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  letter-spacing: -0.2px;
 }
 
 .staff-report-submit-btn:hover:not(:disabled) {
-  background: #003d70;
-  box-shadow: 0 4px 12px rgba(0, 74, 135, 0.3);
+  background: #1d4ed8;
 }
 
 .staff-report-submit-btn:disabled {
