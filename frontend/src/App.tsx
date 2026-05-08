@@ -11,6 +11,7 @@ import { StaffReportPage } from './pages/StaffReportPage'
 import { StaffDashboardPage } from './pages/StaffDashboardPage'
 import { StaffItemsPage } from './pages/StaffItemsPage'
 import { ClaimPage } from './pages/ClaimPage'
+import { MyClaimsPage } from './pages/MyClaimsPage'
 
 export type UserRole = 'public' | 'staff' | 'superadmin';
 
@@ -672,6 +673,7 @@ function App() {
         <Route path="/browse" element={<BrowsePage items={items} />} />
         <Route path="/items/:id" element={<ItemDetailsPage items={items} isSignedIn={isSignedIn} />} />
         <Route path="/items/:itemId/claim" element={<ClaimPage items={items} userName={userName} userEmail={userEmail} />} />
+        <Route path="/my-claims" element={<MyClaimsPage items={items} isSignedIn={isSignedIn} />} />
         <Route path="/login" element={<LoginPage onLoginSuccess={handleLoginSuccess} />} />
         <Route path="/signup" element={<SignUpPage onSignUpSuccess={(name) => handleLoginSuccess(name, 'public')} />} />
         <Route path="/staff" element={<StaffDashboardPage items={items} userName={userName} />} />
