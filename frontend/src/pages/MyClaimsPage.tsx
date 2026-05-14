@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Item } from '../App'
 import { ClaimCard } from '../components/ClaimCard'
@@ -10,7 +10,7 @@ interface Claim {
   item_location: string
   item_found_at: string
   item_category: string
-  item_image?: string
+  item_image: string
   status: 'pending' | 'approved' | 'rejected' | 'collected'
   ownership_desc: string
   staff_notes?: string
@@ -20,23 +20,16 @@ interface Claim {
   resolved_at?: string
 }
 
-export function MyClaimsPage({ isSignedIn: _isSignedIn }: { items: Item[]; isSignedIn: boolean }) {
+export function MyClaimsPage({ items, isSignedIn: _isSignedIn }: { items: Item[]; isSignedIn: boolean }) {
   const navigate = useNavigate()
-  const [claims, setClaims] = useState<Claim[]>([])
-  const [loading, setLoading] = useState(true)
   const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'approved' | 'collected' | 'rejected'>('all')
 
-  // Mock data - in real app, fetch from API
-  const mockClaims: Claim[] = [
+
+  const mockClaimsData = [
     {
       claim_id: 'CLM-20260408-001',
       item_id: 4,
-      item_name: 'White wireless earbuds',
-      item_location: 'Library',
-      item_found_at: '2026-04-08T14:30',
-      item_category: 'Electronics',
-      item_image: '/placeholder.png',
-      status: 'approved',
+      status: 'approved' as const,
       ownership_desc: 'They are Sony WF-1000XM5 earbuds. The right earbud has a small chip on the outer edge. My name "Rina" is written in marker inside the case lid.',
       requested_at: '2026-04-08T16:45',
       approved_at: '2026-04-09T09:15',
@@ -44,24 +37,14 @@ export function MyClaimsPage({ isSignedIn: _isSignedIn }: { items: Item[]; isSig
     {
       claim_id: 'CLM-20260407-002',
       item_id: 1,
-      item_name: 'Black laptop bag',
-      item_location: 'Student Lounge',
-      item_found_at: '2026-04-07T14:30',
-      item_category: 'Electronics',
-      item_image: '/placeholder.png',
-      status: 'pending',
+      status: 'pending' as const,
       ownership_desc: 'It\'s a Targus laptop bag, matte black with a red zipper pull on the main compartment. Has a BINUS sticker on the front pocket and contains a charger.',
       requested_at: '2026-04-07T15:20',
     },
     {
       claim_id: 'CLM-20260405-003',
       item_id: 2,
-      item_name: 'Student ID card',
-      item_location: 'Auditorium',
-      item_found_at: '2026-04-05T10:15',
-      item_category: 'Personal Belonging',
-      item_image: '/placeholder.png',
-      status: 'rejected',
+      status: 'rejected' as const,
       ownership_desc: 'My student ID card with my photo and student number on it.',
       staff_notes: 'Description too vague — please visit the security desk in person with your university email for verification.',
       requested_at: '2026-04-05T11:30',
@@ -70,12 +53,7 @@ export function MyClaimsPage({ isSignedIn: _isSignedIn }: { items: Item[]; isSig
     {
       claim_id: 'CLM-20260402-004',
       item_id: 5,
-      item_name: 'Red backpack',
-      item_location: 'Lobby',
-      item_found_at: '2026-04-02T11:00',
-      item_category: 'Other',
-      item_image: '/placeholder.png',
-      status: 'collected',
+      status: 'collected' as const,
       ownership_desc: 'Red canvas backpack with my name written on the inside pocket. Has music stickers on the front.',
       requested_at: '2026-04-02T12:15',
       approved_at: '2026-04-03T10:30',
@@ -83,15 +61,28 @@ export function MyClaimsPage({ isSignedIn: _isSignedIn }: { items: Item[]; isSig
     },
   ]
 
-  useEffect(() => {
-    // Simulate API fetch
-    const timer = setTimeout(() => {
-      setClaims(mockClaims)
-      setLoading(false)
-    }, 300)
-
-    return () => clearTimeout(timer)
-  }, [])
+  const claims = mockClaimsData
+    .map((claim) => {
+      const item = items.find((i) => i.id === claim.item_id)
+      if (!item) return null
+      return {
+        claim_id: claim.claim_id,
+        item_id: claim.item_id,
+        item_name: item.name,
+        item_location: item.location,
+        item_found_at: item.found_at,
+        item_category: item.category,
+        item_image: item.image,
+        status: claim.status,
+        ownership_desc: claim.ownership_desc,
+        staff_notes: claim.staff_notes,
+        requested_at: claim.requested_at,
+        approved_at: claim.approved_at,
+        rejected_at: claim.rejected_at,
+        resolved_at: claim.resolved_at,
+      } as Claim
+    })
+    .filter((claim): claim is Claim => claim !== null)
 
   const stats = {
     total: claims.length,
@@ -100,18 +91,6 @@ export function MyClaimsPage({ isSignedIn: _isSignedIn }: { items: Item[]; isSig
   }
 
   const filteredClaims = filterStatus === 'all' ? claims : claims.filter(c => c.status === filterStatus)
-
-  if (loading) {
-    return (
-      <main className="my-claims-main">
-        <div className="my-claims-container">
-          <div style={{ padding: '2rem 1.5rem', textAlign: 'center', color: '#90a4ae' }}>
-            Loading claims...
-          </div>
-        </div>
-      </main>
-    )
-  }
 
   return (
     <main className="my-claims-main">

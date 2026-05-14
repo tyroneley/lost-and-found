@@ -56,7 +56,7 @@ export function ClaimCard({ claim }: ClaimCardProps) {
       case 'approved':
         return 'Approved. Visit security to collect.'
       case 'rejected':
-        return 'Claim was rejected. Contact security for details.'
+        return 'Claim was rejected. Visit security for details.'
       case 'collected':
         return 'Item collected. Claim closed.'
       default:
