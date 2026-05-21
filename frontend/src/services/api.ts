@@ -156,15 +156,17 @@ export async function getItems(filters?: {
   color?: string
   location?: string
   status?: string
+  limit?: number
 }): Promise<PaginatedResponse<Item>> {
   const queryParams = new URLSearchParams()
-  
+
   if (filters) {
     if (filters.search) queryParams.append('search', filters.search)
     if (filters.category) queryParams.append('category', filters.category)
     if (filters.color) queryParams.append('color', filters.color)
     if (filters.location) queryParams.append('location', filters.location)
     if (filters.status) queryParams.append('status', filters.status)
+    if (filters.limit) queryParams.append('limit', String(filters.limit))
   }
   
   const endpoint = `/items${queryParams.toString() ? '?' + queryParams.toString() : ''}`

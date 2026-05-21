@@ -1,13 +1,13 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Item } from '../App'
+import { getItems } from '../services/api'
+import { transformBackendItems } from '../utils/transformData'
 
-interface StaffItemsPageProps {
-  items: Item[]
-}
-
-export function StaffItemsPage({ items }: StaffItemsPageProps) {
+export function StaffItemsPage() {
   const navigate = useNavigate()
+  const [allItems, setAllItems] = useState<Item[]>([])
+  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('All')
   const [statusFilter, setStatusFilter] = useState('All')
@@ -16,46 +16,59 @@ export function StaffItemsPage({ items }: StaffItemsPageProps) {
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 8
 
-  // Filter items
-  const filteredItems = items.filter(item => {
-    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.found_location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.item_id.includes(searchTerm)
+  useEffect(() => {
+    getItems({ limit: 500 })
+      .then((response: any) => {
+        const raw = Array.isArray(response) ? response : response.data ?? []
+        setAllItems(transformBackendItems(raw))
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false))
+  }, [])
+
+  const categories = ['All', ...Array.from(new Set(allItems.map(i => i.category)))]
+  const statuses = ['All', ...Array.from(new Set(allItems.map(i => i.status)))]
+  const buildings = ['All', ...Array.from(new Set(allItems.map(i => i.building)))]
+
+  const filteredItems = allItems.filter(item => {
+    const matchesSearch =
+      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.found_location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.item_id.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesCategory = categoryFilter === 'All' || item.category === categoryFilter
     const matchesStatus = statusFilter === 'All' || item.status === statusFilter
     const matchesBuilding = buildingFilter === 'All' || item.building === buildingFilter
     return matchesSearch && matchesCategory && matchesStatus && matchesBuilding
   })
 
-  // Sort items
   const sortedItems = [...filteredItems].sort((a, b) => {
-    const dateA = new Date(a.foundAt).getTime()
-    const dateB = new Date(b.foundAt).getTime()
+    const dateA = new Date(a.found_at).getTime()
+    const dateB = new Date(b.found_at).getTime()
     return sortBy === 'newest' ? dateB - dateA : dateA - dateB
   })
 
-  // Paginate items
   const totalPages = Math.ceil(sortedItems.length / itemsPerPage)
   const paginatedItems = sortedItems.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
 
-  const categories = ['All', ...new Set(items.map(item => item.category))]
-  const statuses = ['All', ...new Set(items.map(item => item.status))]
-  const buildings = ['All', ...new Set(items.map(item => item.building))]
-
   const getColorHex = (colorName: string): string => {
-    const colorMap: { [key: string]: string } = {
-      'Black': '#1a1a1a',
-      'White': '#f5f5f5',
-      'Red': '#ef4444',
-      'Blue': '#2563eb',
-      'Green': '#22c55e',
-      'Yellow': '#eab308',
-      'Orange': '#f97316',
-      'Purple': '#a855f7',
-      'Gray': '#94a3b8',
-      'Pink': '#ec4899',
+    const colorMap: Record<string, string> = {
+      'BLACK': '#1a1a1a', 'WHITE': '#f5f5f5', 'RED': '#ef4444',
+      'BLUE': '#2563eb', 'GREEN': '#22c55e', 'YELLOW': '#eab308',
+      'ORANGE': '#f97316', 'PURPLE': '#a855f7', 'GRAY': '#94a3b8',
+      'PINK': '#ec4899', 'CYAN': '#06b6d4', 'BROWN': '#92400e',
     }
-    return colorMap[colorName] || '#d0d8e0'
+    return colorMap[colorName?.toUpperCase()] || '#d0d8e0'
+  }
+
+  const statusBadgeClass = (status: string) =>
+    `staff-items-status-badge staff-items-status-${status.toLowerCase().replace(/\s+/g, '-')}`
+
+  if (loading) {
+    return (
+      <div className="staff-items-page" style={{ padding: '3rem', textAlign: 'center', color: '#90a4ae' }}>
+        Loading items…
+      </div>
+    )
   }
 
   return (
@@ -83,12 +96,9 @@ export function StaffItemsPage({ items }: StaffItemsPageProps) {
             </svg>
             <input
               type="text"
-              placeholder="Search by Name"
+              placeholder="Name, location, or ID"
               value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value)
-                setCurrentPage(1)
-              }}
+              onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1) }}
             />
           </div>
         </div>
@@ -98,12 +108,9 @@ export function StaffItemsPage({ items }: StaffItemsPageProps) {
             <select
               className="staff-items-select"
               value={categoryFilter}
-              onChange={(e) => {
-                setCategoryFilter(e.target.value)
-                setCurrentPage(1)
-              }}
+              onChange={(e) => { setCategoryFilter(e.target.value); setCurrentPage(1) }}
             >
-              {categories.map(cat => <option key={cat}>{cat}</option>)}
+              {categories.map(c => <option key={c}>{c}</option>)}
             </select>
           </div>
           <div className="staff-items-filter-group">
@@ -111,12 +118,9 @@ export function StaffItemsPage({ items }: StaffItemsPageProps) {
             <select
               className="staff-items-select"
               value={statusFilter}
-              onChange={(e) => {
-                setStatusFilter(e.target.value)
-                setCurrentPage(1)
-              }}
+              onChange={(e) => { setStatusFilter(e.target.value); setCurrentPage(1) }}
             >
-              {statuses.map(status => <option key={status}>{status}</option>)}
+              {statuses.map(s => <option key={s}>{s}</option>)}
             </select>
           </div>
           <div className="staff-items-filter-group">
@@ -124,12 +128,9 @@ export function StaffItemsPage({ items }: StaffItemsPageProps) {
             <select
               className="staff-items-select"
               value={buildingFilter}
-              onChange={(e) => {
-                setBuildingFilter(e.target.value)
-                setCurrentPage(1)
-              }}
+              onChange={(e) => { setBuildingFilter(e.target.value); setCurrentPage(1) }}
             >
-              {buildings.map(building => <option key={building}>{building}</option>)}
+              {buildings.map(b => <option key={b}>{b}</option>)}
             </select>
           </div>
           <div className="staff-items-filter-group">
@@ -137,7 +138,7 @@ export function StaffItemsPage({ items }: StaffItemsPageProps) {
             <select
               className="staff-items-select"
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
+              onChange={(e) => { setSortBy(e.target.value); setCurrentPage(1) }}
             >
               <option value="newest">Newest first</option>
               <option value="oldest">Oldest first</option>
@@ -182,13 +183,13 @@ export function StaffItemsPage({ items }: StaffItemsPageProps) {
                     <div className="staff-items-color-chip">
                       <div
                         className="staff-items-color-dot"
-                        style={{ backgroundColor: getColorHex(item.color) }}
+                        style={{ backgroundColor: getColorHex(item.color_bucket) }}
                       />
-                      <span className="staff-items-col-label">{item.color}</span>
+                      <span className="staff-items-col-label">{item.color_bucket}</span>
                     </div>
                   </td>
                   <td>
-                    <span className={`staff-items-status-badge staff-items-status-${item.status.toLowerCase().replace(/\s+/g, '-')}`}>
+                    <span className={statusBadgeClass(item.status)}>
                       {item.status}
                     </span>
                   </td>
@@ -196,10 +197,7 @@ export function StaffItemsPage({ items }: StaffItemsPageProps) {
                   <td>
                     <button
                       className="staff-items-action-btn"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        navigate(`/items/${item.item_id}`)
-                      }}
+                      onClick={(e) => { e.stopPropagation(); navigate(`/items/${item.item_id}`) }}
                     >
                       View
                     </button>
@@ -223,7 +221,7 @@ export function StaffItemsPage({ items }: StaffItemsPageProps) {
           <div className="staff-items-pg-btns">
             <button
               className="staff-items-pg-btn"
-              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
               disabled={currentPage === 1}
               style={{ opacity: currentPage === 1 ? 0.35 : 1 }}
             >
@@ -240,9 +238,9 @@ export function StaffItemsPage({ items }: StaffItemsPageProps) {
             ))}
             <button
               className="staff-items-pg-btn"
-              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-              disabled={currentPage === totalPages}
-              style={{ opacity: currentPage === totalPages ? 0.35 : 1 }}
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages || totalPages === 0}
+              style={{ opacity: currentPage === totalPages || totalPages === 0 ? 0.35 : 1 }}
             >
               ›
             </button>

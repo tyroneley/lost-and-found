@@ -73,9 +73,9 @@ export const getItems = async (query?: any) => {
 
   const where: Prisma.ItemWhereInput = {
     deleted_at: null,
-    color_bucket: query?.color,
-    status: query?.status ?? 'ACTIVE', // Default to ACTIVE for public browsing
-    category_id: query?.category_id,
+    ...(query?.color && { color_bucket: query.color }),
+    ...(query?.status && { status: query.status }),
+    ...(query?.category_id && { category_id: query.category_id }),
     OR: query?.q
       ? [
           { name: { contains: query.q, mode: 'insensitive' } },

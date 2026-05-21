@@ -59,7 +59,7 @@ function App() {
       try {
         setLoading(true)
         setError(null)
-        const response = await api.getItems()
+        const response = await api.getItems({ status: 'ACTIVE' })
         // Backend returns { data, total, limit, offset }, extract the data array
         const items = Array.isArray(response) ? response : response.data || []
         // Transform backend format to frontend format
@@ -104,7 +104,7 @@ function App() {
         <Route path="/login" element={<LoginPage onLoginSuccess={handleLoginSuccess} />} />
         <Route path="/signup" element={<SignUpPage onSignUpSuccess={(name) => handleLoginSuccess(name, 'public')} />} />
         <Route path="/staff" element={<StaffDashboardPage items={items} userName={userName} />} />
-        <Route path="/staff/items" element={<StaffItemsPage items={items} />} />
+        <Route path="/staff/items" element={<StaffItemsPage />} />
         <Route path="/staff/report" element={<StaffReportPage />} />
       </Routes>
     </>
