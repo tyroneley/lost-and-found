@@ -45,9 +45,12 @@ app.post('/auth/register', async (c) => {
       name: z.string().min(1, 'Name is required'),
       email: z.string().email('Invalid email'),
       password: z.string().min(8, 'Password must be at least 8 characters'),
+      phone: z.string().optional(),
+      uni_email: z.string().optional(),
+      affiliation: z.string().optional(),
     })
     
-    const { name, email, password } = schema.parse(body)
+    const { name, email, password, phone, uni_email, affiliation } = schema.parse(body)
     
     // Check if user already exists
     const existingUser = await prisma.user.findUnique({
@@ -68,6 +71,9 @@ app.post('/auth/register', async (c) => {
         name,
         personal_email: email,
         password: hashedPassword,
+        phone: phone || null,
+        uni_email: uni_email || null,
+        affiliation: affiliation || null,
         role: 'PUBLIC',
       }
     })

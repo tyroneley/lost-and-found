@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { register, storeAuthToken } from '../services/api'
 
 export function SignUpPage({ onSignUpSuccess }: { onSignUpSuccess: (name: string) => void }) {
   const navigate = useNavigate()
@@ -28,7 +29,7 @@ export function SignUpPage({ onSignUpSuccess }: { onSignUpSuccess: (name: string
     setError('')
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     // Validate required fields
@@ -61,11 +62,31 @@ export function SignUpPage({ onSignUpSuccess }: { onSignUpSuccess: (name: string
       return
     }
 
-    // Mock registration
-    console.log('Registration data:', formData)
-    const fullName = `${formData.firstName} ${formData.lastName}`
-    onSignUpSuccess(fullName)
-    navigate('/')
+    try {
+      // Call the actual API to register
+      const fullName = `${formData.firstName} ${formData.lastName}`
+      const response = await register(
+        fullName, 
+        formData.personalEmail, 
+        formData.password,
+        formData.phoneNumber,
+        formData.uniEmail || undefined,
+        formData.affiliation
+      )
+
+      // Store the auth token
+      storeAuthToken(response.token)
+
+      // Update app state
+      onSignUpSuccess(fullName)
+
+      // Redirect to home
+      navigate('/')
+    } catch (err: any) {
+      // Show error from API
+      const errorMessage = err?.message || 'Registration failed. Please try again.'
+      setError(errorMessage)
+    }
   }
 
   return (

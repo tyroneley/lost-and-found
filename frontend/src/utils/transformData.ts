@@ -55,6 +55,8 @@ export function transformBackendItem(backendItem: any): Item {
 function mapItemStatus(status: string): string {
   const statusMap: Record<string, string> = {
     'ACTIVE': 'Active',
+    'CLAIMED': 'Pending Verification',
+    'COLLECTED': 'Collected',
     'PENDING': 'Pending',
     'RETURNED': 'Returned',
   }

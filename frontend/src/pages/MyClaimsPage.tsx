@@ -35,8 +35,8 @@ export function MyClaimsPage({ isSignedIn: _isSignedIn }: { items?: Item[]; isSi
         setError(null)
         const response = await api.getUserClaims()
         
-        // Backend returns { data, total, limit, offset }, extract the data array
-        const claimsData = Array.isArray(response) ? response : response.data || []
+        // Backend returns { data, total, limit, offset }
+        const claimsData = response.data || []
         
         // Transform backend claims to frontend format
         const transformedClaims = (claimsData as any[]).map((claim: any) => {

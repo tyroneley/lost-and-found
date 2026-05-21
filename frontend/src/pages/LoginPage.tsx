@@ -7,39 +7,12 @@ interface LoginPageProps {
   onLoginSuccess: (name: string, email: string, role: UserRole) => void;
 }
 
-// Demo accounts for quick testing
-const DEMO_ACCOUNTS = [
-  { email: 'alex.tan@binus.ac.id', password: 'user@123456', name: 'Alex Tan', role: 'public' as UserRole },
-  { email: 'maya.sari@binus.ac.id', password: 'user@123456', name: 'Maya Sari', role: 'staff' as UserRole },
-]
-
 export function LoginPage({ onLoginSuccess }: LoginPageProps) {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [showDemoAccounts, setShowDemoAccounts] = useState(true)
-
-  const handleQuickLogin = async (account: typeof DEMO_ACCOUNTS[0]) => {
-    setLoading(true)
-    setError('')
-    try {
-      const response = await login(account.email, account.password)
-      // Save token for future requests
-      storeAuthToken(response.token)
-      onLoginSuccess(response.user.name, response.user.email, response.user.role as UserRole)
-      if (response.user.role === 'staff' || response.user.role === 'superadmin') {
-        navigate('/staff')
-      } else {
-        navigate('/')
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed')
-    } finally {
-      setLoading(false)
-    }
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -83,35 +56,6 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
               <h1>Welcome Back</h1>
               <p>Sign in to your Lost & Found account</p>
             </div>
-
-            {showDemoAccounts && (
-              <div className="test-accounts-section">
-                <p className="test-accounts-title">Demo Accounts (Real Database):</p>
-                <div className="test-accounts-grid">
-                  {DEMO_ACCOUNTS.map((account) => (
-                    <button
-                      key={account.email}
-                      type="button"
-                      className={`test-account-btn test-account-${account.role}`}
-                      onClick={() => handleQuickLogin(account)}
-                      disabled={loading}
-                    >
-                      <div className="test-account-role">{account.role.toUpperCase()}</div>
-                      <div className="test-account-name">{account.name}</div>
-                      <div className="test-account-email">{account.email}</div>
-                    </button>
-                  ))}
-                </div>
-                <button 
-                  type="button"
-                  className="toggle-test-btn"
-                  onClick={() => setShowDemoAccounts(false)}
-                  disabled={loading}
-                >
-                  Hide
-                </button>
-              </div>
-            )}
 
             <form onSubmit={handleSubmit} className="auth-form">
               {error && <div className="auth-error">{error}</div>}

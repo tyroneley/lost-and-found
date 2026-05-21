@@ -9,6 +9,13 @@ export interface ApiResponse<T> {
   error?: string
 }
 
+export interface PaginatedResponse<T> {
+  data: T[]
+  total: number
+  limit: number
+  offset: number
+}
+
 export interface AuthResponse {
   token: string
   user: {
@@ -112,11 +119,21 @@ export async function login(
 export async function register(
   name: string,
   email: string,
-  password: string
+  password: string,
+  phone?: string,
+  uni_email?: string,
+  affiliation?: string
 ): Promise<AuthResponse> {
   return apiFetch('/auth/register', {
     method: 'POST',
-    body: JSON.stringify({ name, email, password }),
+    body: JSON.stringify({ 
+      name, 
+      email, 
+      password,
+      phone,
+      uni_email,
+      affiliation,
+    }),
   })
 }
 
@@ -139,7 +156,7 @@ export async function getItems(filters?: {
   color?: string
   location?: string
   status?: string
-}): Promise<Item[]> {
+}): Promise<PaginatedResponse<Item>> {
   const queryParams = new URLSearchParams()
   
   if (filters) {
@@ -155,7 +172,7 @@ export async function getItems(filters?: {
 }
 
 // Get details for one specific item
-export async function getItemById(id: number): Promise<Item> {
+export async function getItemById(id: string): Promise<Item> {
   return apiFetch(`/items/${id}`)
 }
 
@@ -169,7 +186,7 @@ export async function createItem(itemData: Partial<Item>): Promise<Item> {
 
 // Update item info (description, location, etc.)
 export async function updateItem(
-  id: number,
+  id: string,
   updates: Partial<Item>
 ): Promise<Item> {
   return apiFetch(`/items/${id}`, {
@@ -180,7 +197,7 @@ export async function updateItem(
 
 // Change item status (active, claimed, returned, expired, etc.)
 export async function updateItemStatus(
-  id: number,
+  id: string,
   status: string
 ): Promise<Item> {
   return apiFetch(`/items/${id}/status`, {
@@ -190,7 +207,7 @@ export async function updateItemStatus(
 }
 
 // Remove an item from the system
-export async function deleteItem(id: number): Promise<void> {
+export async function deleteItem(id: string): Promise<void> {
   return apiFetch(`/items/${id}`, { method: 'DELETE' })
 }
 
@@ -198,7 +215,7 @@ export async function deleteItem(id: number): Promise<void> {
 
 // User says "this item is mine!" and submits proof
 export async function claimItem(
-  itemId: number,
+  itemId: string,
   ownershipDesc: string
 ): Promise<Claim> {
   return apiFetch('/claims', {
@@ -211,12 +228,12 @@ export async function claimItem(
 }
 
 // Get all the claims the logged-in user submitted
-export async function getUserClaims(): Promise<Claim[]> {
+export async function getUserClaims(): Promise<PaginatedResponse<Claim>> {
   return apiFetch('/user/claims')
 }
 
 // Get all claims in the system (staff/admin only)
-export async function getAllClaims(): Promise<Claim[]> {
+export async function getAllClaims(): Promise<PaginatedResponse<Claim>> {
   return apiFetch('/claims')
 }
 
