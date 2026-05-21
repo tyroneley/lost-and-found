@@ -126,7 +126,7 @@ export function StaffDashboardPage({ items, userName }: StaffDashboardPageProps)
                   <div key={item.id} className="staff-expiry-row">
                     <div className="staff-er-info">
                       <div className="staff-er-name">{item.name}</div>
-                      <div className="staff-er-meta">Found {item.foundAt} · {item.location}</div>
+                      <div className="staff-er-meta">Found {item.foundAt} · {item.found_location}</div>
                     </div>
                     <span className={`staff-er-days ${urgencyClass}`}>{daysLeft} days left</span>
                   </div>

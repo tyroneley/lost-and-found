@@ -2,7 +2,7 @@ import { useState } from 'react'
 
 interface Claim {
   claim_id: string
-  item_id: number
+  item_id: string
   item_name: string
   item_location: string
   item_found_at: string
@@ -12,8 +12,7 @@ interface Claim {
   ownership_desc: string
   staff_notes?: string
   requested_at: string
-  approved_at?: string
-  rejected_at?: string
+  decision_at?: string
   resolved_at?: string
 }
 
@@ -65,8 +64,7 @@ export function ClaimCard({ claim }: ClaimCardProps) {
   }
 
   const timelineEventCount = [
-    claim.approved_at,
-    claim.rejected_at,
+    claim.decision_at,
     claim.resolved_at,
   ].filter(Boolean).length + 1
 
@@ -122,21 +120,12 @@ export function ClaimCard({ claim }: ClaimCardProps) {
               <span className="timeline-date">{formatDate(claim.requested_at)}</span>
             </div>
           </div>
-          {claim.approved_at && (
+          {claim.decision_at && claim.status !== 'pending' && (
             <div className="timeline-event">
-              <div className="timeline-dot" style={{ background: '#16a34a' }}></div>
+              <div className="timeline-dot" style={{ background: claim.status === 'approved' ? '#16a34a' : '#c62828' }}></div>
               <div className="timeline-entry">
-                <span className="timeline-label">Approved</span>
-                <span className="timeline-date">{formatDate(claim.approved_at)}</span>
-              </div>
-            </div>
-          )}
-          {claim.rejected_at && (
-            <div className="timeline-event">
-              <div className="timeline-dot" style={{ background: '#c62828' }}></div>
-              <div className="timeline-entry">
-                <span className="timeline-label">Rejected</span>
-                <span className="timeline-date">{formatDate(claim.rejected_at)}</span>
+                <span className="timeline-label">{claim.status === 'approved' ? 'Approved' : 'Rejected'}</span>
+                <span className="timeline-date">{formatDate(claim.decision_at)}</span>
               </div>
             </div>
           )}

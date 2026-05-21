@@ -6,10 +6,10 @@ export const expireItems = async (): Promise<number> => {
   const result = await prisma.item.updateMany({
     where: {
       expires_at: { lte: new Date() },
-      status: { in: ['REPORTED', 'UNDER_REVIEW', 'APPROVED'] },
+      status: { in: ['ACTIVE', 'CLAIMED'] },
       deleted_at: null
     },
-    data: { status: 'EXPIRED' }
+    data: { status: 'RETURNED' }
   })
   return result.count
 }

@@ -22,7 +22,7 @@ export const itemQuerySchema = z.object({
     .optional(),
 
   status: z
-    .enum(['REPORTED','UNDER_REVIEW','APPROVED','CLAIMED','EXPIRED'])
+    .enum(['ACTIVE','PENDING','RETURNED'])
     .optional(),
 
   category_id: z.string().uuid().optional(),
@@ -33,7 +33,7 @@ export const itemQuerySchema = z.object({
 })
 
 export const userQuerySchema = z.object({
-  role: z.enum(['PUBLIC','SECURITY','ADMIN']).optional(),
+  role: z.enum(['PUBLIC','STAFF','SUPERADMIN']).optional(),
   q: z.string().optional(),
   limit: z.coerce.number().int().min(1).max(100).default(20),
   offset: z.coerce.number().int().min(0).default(0)

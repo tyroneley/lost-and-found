@@ -1,11 +1,12 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Item } from '../App'
 import { ClaimCard } from '../components/ClaimCard'
+import * as api from '../services/api'
 
 interface Claim {
   claim_id: string
-  item_id: number
+  item_id: string
   item_name: string
   item_location: string
   item_found_at: string
@@ -15,74 +16,72 @@ interface Claim {
   ownership_desc: string
   staff_notes?: string
   requested_at: string
-  approved_at?: string
-  rejected_at?: string
+  decision_at?: string
   resolved_at?: string
 }
 
-export function MyClaimsPage({ items, isSignedIn: _isSignedIn }: { items: Item[]; isSignedIn: boolean }) {
+export function MyClaimsPage({ isSignedIn: _isSignedIn }: { items?: Item[]; isSignedIn: boolean }) {
   const navigate = useNavigate()
   const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'approved' | 'collected' | 'rejected'>('all')
+  const [claims, setClaims] = useState<Claim[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
+  // Fetch user's claims from backend
+  useEffect(() => {
+    const fetchClaims = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        const response = await api.getUserClaims()
+        
+        // Backend returns { data, total, limit, offset }, extract the data array
+        const claimsData = Array.isArray(response) ? response : response.data || []
+        
+        // Transform backend claims to frontend format
+        const transformedClaims = (claimsData as any[]).map((claim: any) => {
+          // Format room display
+          const room = claim.item?.room
+          let roomDisplay = 'Unknown'
+          if (room) {
+            if (room.room_number && room.room_name) {
+              roomDisplay = `${room.room_number} — ${room.room_name}`
+            } else if (room.room_number) {
+              roomDisplay = String(room.room_number)
+            } else if (room.room_name) {
+              roomDisplay = room.room_name
+            }
+          }
+          
+          return {
+            claim_id: claim.claim_id,
+            item_id: claim.item_id,
+            item_name: claim.item?.name || 'Unknown',
+            item_location: roomDisplay,
+            item_found_at: claim.item?.found_at || new Date().toISOString(),
+            item_category: claim.item?.category?.name || 'Other',
+            item_image: '/placeholder.png', // TODO: Get from item.photos
+            status: claim.status.toLowerCase() as 'pending' | 'approved' | 'rejected' | 'collected',
+            ownership_desc: claim.ownership_desc,
+            staff_notes: claim.staff_notes,
+            requested_at: claim.requested_at,
+            decision_at: claim.decision_at,
+            resolved_at: claim.resolved_at,
+          }
+        })
+        
+        setClaims(transformedClaims)
+      } catch (err) {
+        console.error('Failed to fetch claims:', err)
+        setError(err instanceof Error ? err.message : 'Failed to load claims')
+        setClaims([])
+      } finally {
+        setLoading(false)
+      }
+    }
 
-  const mockClaimsData = [
-    {
-      claim_id: 'CLM-20260408-001',
-      item_id: 4,
-      status: 'approved' as const,
-      ownership_desc: 'They are Sony WF-1000XM5 earbuds. The right earbud has a small chip on the outer edge. My name "Rina" is written in marker inside the case lid.',
-      requested_at: '2026-04-08T16:45',
-      approved_at: '2026-04-09T09:15',
-    },
-    {
-      claim_id: 'CLM-20260407-002',
-      item_id: 1,
-      status: 'pending' as const,
-      ownership_desc: 'It\'s a Targus laptop bag, matte black with a red zipper pull on the main compartment. Has a BINUS sticker on the front pocket and contains a charger.',
-      requested_at: '2026-04-07T15:20',
-    },
-    {
-      claim_id: 'CLM-20260405-003',
-      item_id: 2,
-      status: 'rejected' as const,
-      ownership_desc: 'My student ID card with my photo and student number on it.',
-      staff_notes: 'Description too vague — please visit the security desk in person with your university email for verification.',
-      requested_at: '2026-04-05T11:30',
-      rejected_at: '2026-04-06T14:00',
-    },
-    {
-      claim_id: 'CLM-20260402-004',
-      item_id: 5,
-      status: 'collected' as const,
-      ownership_desc: 'Red canvas backpack with my name written on the inside pocket. Has music stickers on the front.',
-      requested_at: '2026-04-02T12:15',
-      approved_at: '2026-04-03T10:30',
-      resolved_at: '2026-04-06T10:30',
-    },
-  ]
-
-  const claims = mockClaimsData
-    .map((claim) => {
-      const item = items.find((i) => i.id === claim.item_id)
-      if (!item) return null
-      return {
-        claim_id: claim.claim_id,
-        item_id: claim.item_id,
-        item_name: item.name,
-        item_location: item.location,
-        item_found_at: item.found_at,
-        item_category: item.category,
-        item_image: item.image,
-        status: claim.status,
-        ownership_desc: claim.ownership_desc,
-        staff_notes: claim.staff_notes,
-        requested_at: claim.requested_at,
-        approved_at: claim.approved_at,
-        rejected_at: claim.rejected_at,
-        resolved_at: claim.resolved_at,
-      } as Claim
-    })
-    .filter((claim): claim is Claim => claim !== null)
+    fetchClaims()
+  }, [])
 
   const stats = {
     total: claims.length,
@@ -100,7 +99,20 @@ export function MyClaimsPage({ items, isSignedIn: _isSignedIn }: { items: Item[]
           <p className="page-sub">Track the status of items you've submitted a claim for.</p>
         </div>
 
-        {/* Summary Strip */}
+        {loading && (
+          <div style={{ padding: '2rem', textAlign: 'center' }}>
+            <p>Loading your claims...</p>
+          </div>
+        )}
+
+        {error && (
+          <div style={{ padding: '1rem', background: '#fee2e2', border: '1px solid #fecaca', borderRadius: '4px', marginBottom: '1rem' }}>
+            <p style={{ color: '#991b1b' }}>Error: {error}</p>
+          </div>
+        )}
+
+        {!loading && !error && (
+        <>
         <div className="summary-strip">
           <div className="summary-card">
             <div className="summary-label">Total claims</div>
@@ -172,6 +184,8 @@ export function MyClaimsPage({ items, isSignedIn: _isSignedIn }: { items: Item[]
               <ClaimCard key={claim.claim_id} claim={claim} />
             ))}
           </div>
+        )}
+        </>
         )}
         </div>
     </main>

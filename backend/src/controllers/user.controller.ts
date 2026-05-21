@@ -51,7 +51,7 @@ export const updateUserHandler = async (c: any) => {
     const params = idParamSchema.parse({ id: c.req.param('id') })
 
     const isSelf = params.id === payload.sub
-    const isAdmin = payload.role === 'ADMIN'
+    const isAdmin = payload.role === 'SUPERADMIN'
 
     if (!isSelf && !isAdmin) {
       return c.json({ error: 'Forbidden' }, 403)

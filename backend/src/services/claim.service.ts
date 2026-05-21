@@ -6,7 +6,7 @@ export const createClaim = async (data: any) => {
   const item = await prisma.item.findUnique({ where: { item_id: data.item_id } })
 
   if (!item || item.deleted_at) throw new AppError(404, 'Item not found')
-  if (item.status !== 'APPROVED') throw new AppError(400, `Item is not available for claiming (status: ${item.status})`)
+  if (item.status !== 'ACTIVE') throw new AppError(400, `Item is not available for claiming (status: ${item.status})`)
 
   const duplicate = await prisma.claimRequest.findFirst({
     where: { item_id: data.item_id, claimer_id: data.claimer_id, status: 'PENDING' }
@@ -38,7 +38,17 @@ export const getClaims = async (query?: any) => {
       where,
       take: limit,
       skip: offset,
-      include: { item: true, claimer: true }
+      include: { 
+        item: {
+          include: {
+            category: true,
+            building: true,
+            room: { include: { building: true } },
+            photos: true
+          }
+        },
+        claimer: true
+      }
     })
   ])
 
@@ -61,6 +71,7 @@ export const updateClaimStatus = async (id: string, data: any, changed_by: strin
     where: { claim_id: id },
     data: {
       status: data.status,
+      verification_notes: data.verification_notes || undefined,
       resolved_at: new Date()
     }
   })
@@ -68,14 +79,14 @@ export const updateClaimStatus = async (id: string, data: any, changed_by: strin
   if (data.status === 'APPROVED') {
     await prisma.item.update({
       where: { item_id: claim.item_id },
-      data: { status: 'CLAIMED' }
+      data: { status: 'CLAIMED', approved_by: changed_by }
     })
 
     if (existing) {
       await logAudit({
         item_id: claim.item_id,
         changed_by,
-        action: 'CLAIM',
+        action: 'APPROVE',
         old_status: existing.item.status,
         new_status: 'CLAIMED'
       })

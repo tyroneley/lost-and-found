@@ -3,7 +3,7 @@ import { jwt, sign } from 'hono/jwt'
 
 export type AuthPayload = {
   sub: string
-  role: 'PUBLIC' | 'SECURITY' | 'ADMIN'
+  role: 'PUBLIC' | 'STAFF' | 'SUPERADMIN'
   exp: number
 }
 

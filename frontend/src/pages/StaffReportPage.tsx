@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ItemCard } from '../components/ItemCard'
+import { createItem, getCategories, getBuildings } from '../services/api'
 
 interface ReportFormState {
   itemName: string
@@ -96,6 +97,23 @@ export function StaffReportPage() {
   })
 
   const [photoPreview, setPhotoPreview] = useState<string[]>([])
+  const [submitting, setSubmitting] = useState(false)
+  const [categories, setCategories] = useState<any[]>([])
+  const [buildings, setBuildings] = useState<any[]>([])
+
+  // Fetch categories and buildings on mount
+  useEffect(() => {
+    const fetchMetadata = async () => {
+      try {
+        const [cats, bldgs] = await Promise.all([getCategories(), getBuildings()])
+        setCategories(cats)
+        setBuildings(bldgs)
+      } catch (error) {
+        console.error('Failed to load categories/buildings:', error)
+      }
+    }
+    fetchMetadata()
+  }, [])
 
   // const [showDebug, setShowDebug] = useState(false)
 
@@ -151,47 +169,86 @@ export function StaffReportPage() {
 
   const isFormComplete = getCompletionStatus().every(c => c.done)
 
-  const generatePayload = () => {
-    const colorBucket = hexToColorBucket(form.colorHex)
-    return {
-      item: {
-        name: form.itemName,
-        description: form.description,
-        category: form.category,
-        color_hex: form.colorHex,
-        color_bucket: colorBucket,
-        notes: form.notes,
-        found_location: form.specificLocation === 'Room' ? `Room ${form.roomNumber}` : form.specificLocation,
-        found_at: form.dateFound + (form.timeFound ? `T${form.timeFound}` : 'T00:00'),
-        building: form.building,
-      },
-      finder: {
-        name: form.finderName,
-        contact: form.finderContact,
-        affiliation: form.finderAffiliation || null,
-      },
-      photos: form.photos.map(f => f.name),
-    }
-  }
-
   // const handleDebugClick = () => {
   //   setShowDebug(!showDebug)
   // }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!isFormComplete) {
       alert('Please complete all required fields')
       return
     }
-    const payload = generatePayload()
-    console.log('Submitting payload:', payload)
-    alert('Item submitted for approval!')
-    // send payload to backend
+
+    setSubmitting(true)
+    try {
+      // Look up category UUID
+      const category = categories.find(c => c.name === form.category)
+      if (!category) {
+        throw new Error('Category not found')
+      }
+
+      // Look up building UUID
+      const building = buildings.find(b => b.name === form.building)
+      if (!building) {
+        throw new Error('Building not found')
+      }
+
+      const colorBucket = hexToColorBucket(form.colorHex)
+      const foundAt = form.dateFound + (form.timeFound ? `T${form.timeFound}` : 'T00:00') + 'Z'
+      
+      const itemData = {
+        name: form.itemName,
+        description: form.description,
+        category_id: category.category_id, // Use UUID
+        building_id: building.building_id, // Use UUID
+        color_hex: form.colorHex,
+        color_bucket: colorBucket,
+        found_location: form.specificLocation === 'Room' ? `Room ${form.roomNumber}` : form.specificLocation,
+        found_at: foundAt, // ISO datetime
+        // Optional fields
+        ...(form.notes && { description: `${form.description}. ${form.notes}` }),
+      }
+      
+      // Call backend API to create item
+      await createItem(itemData)
+      
+      alert('Item submitted for approval!')
+      // Reset form
+      setForm({
+        itemName: '',
+        category: '',
+        colorHex: '#2563eb',
+        description: '',
+        notes: '',
+        building: '',
+        specificLocation: '',
+        roomNumber: '',
+        dateFound: '',
+        timeFound: '',
+        photos: [],
+        finderName: '',
+        finderContact: '',
+        finderAffiliation: '',
+      })
+      setPhotoPreview([])
+      navigate('/staff')
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Failed to submit item')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
-  const handleSaveDraft = () => {
-    alert('Item saved as draft!')
-    // send to backend
+  const handleSaveDraft = async () => {
+    try {
+      setSubmitting(true)
+      // TODO: Implement draft saving in backend
+      alert('Item saved as draft!')
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Failed to save draft')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -229,11 +286,11 @@ export function StaffReportPage() {
               </label>
               <select name="category" value={form.category} onChange={handleInputChange}>
                 <option value="" disabled>Select category</option>
-                <option>Electronics</option>
-                <option>Clothing</option>
-                <option>Personal belongings</option>
-                <option>Sports equipment</option>
-                <option>Other</option>
+                {categories.map(cat => (
+                  <option key={cat.category_id} value={cat.name}>
+                    {cat.name}
+                  </option>
+                ))}
               </select>
             </div>
             <div className="staff-report-field">
@@ -297,8 +354,11 @@ export function StaffReportPage() {
               </label>
               <select name="building" value={form.building} onChange={handleInputChange}>
                 <option value="" disabled>Select building</option>
-                <option>FX Campus</option>
-                <option>JWC Campus</option>
+                {buildings.map(bldg => (
+                  <option key={bldg.building_id} value={bldg.name}>
+                    {bldg.name}
+                  </option>
+                ))}
               </select>
             </div>
             <div className="staff-report-field">
@@ -447,11 +507,11 @@ export function StaffReportPage() {
           ))}
         </div>
 
-        <button className="staff-report-save-draft" onClick={handleSaveDraft}>
+        <button className="staff-report-save-draft" onClick={handleSaveDraft} disabled={submitting}>
           Save as draft
         </button>
-        <button className="staff-report-submit-btn" onClick={handleSubmit} disabled={!isFormComplete}>
-          Submit →
+        <button className="staff-report-submit-btn" onClick={handleSubmit} disabled={!isFormComplete || submitting}>
+          {submitting ? 'Submitting...' : 'Submit →'}
         </button>
 
         {/* DEBUG START: button and panel for debug */}

@@ -15,7 +15,7 @@ export const createUserSchema = z.object({
     .email('Invalid university email')
     .optional(),
 
-  role: z.enum(['PUBLIC', 'SECURITY', 'ADMIN']).optional(),
+  role: z.enum(['PUBLIC', 'STAFF', 'SUPERADMIN']).optional(),
 
   affiliation: z.string().optional()
 })
@@ -26,5 +26,5 @@ export const updateUserSchema = z.object({
   personal_email: z.string().email().optional(),
   uni_email: z.string().email().optional(),
   affiliation: z.string().optional(),
-  role: z.enum(['PUBLIC', 'SECURITY', 'ADMIN']).optional()
+  role: z.enum(['PUBLIC', 'STAFF', 'SUPERADMIN']).optional()
 })

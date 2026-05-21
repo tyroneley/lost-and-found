@@ -23,7 +23,7 @@ export function ItemStrip({ item }: { item: Item }) {
       <div>
         <p className="claim-item-name">{item.name}</p>
         <p className="claim-item-meta">
-          {item.location} · Found {formatDate(item.foundAt)}
+          {item.found_location} · Found {formatDate(item.foundAt)}
         </p>
       </div>
     </div>

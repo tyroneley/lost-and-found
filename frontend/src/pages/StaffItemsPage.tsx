@@ -19,7 +19,7 @@ export function StaffItemsPage({ items }: StaffItemsPageProps) {
   // Filter items
   const filteredItems = items.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         item.found_location.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          item.id.toString().includes(searchTerm)
     const matchesCategory = categoryFilter === 'All' || item.category === categoryFilter
     const matchesStatus = statusFilter === 'All' || item.status === statusFilter
@@ -177,7 +177,7 @@ export function StaffItemsPage({ items }: StaffItemsPageProps) {
                     <div className="staff-items-id">ITEM-{String(item.id).padStart(5, '0')}</div>
                   </td>
                   <td className="staff-items-col-hide-sm">{item.category}</td>
-                  <td className="staff-items-col-hide-md">{item.location}</td>
+                  <td className="staff-items-col-hide-md">{item.found_location}</td>
                   <td className="staff-items-col-hide-sm">
                     <div className="staff-items-color-chip">
                       <div

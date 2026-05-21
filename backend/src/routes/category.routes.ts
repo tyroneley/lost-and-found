@@ -6,6 +6,6 @@ const categoryRoutes = new Hono()
 
 categoryRoutes.use('/*', authMiddleware)
 categoryRoutes.get('/', getCategoriesHandler)
-categoryRoutes.post('/', requireRole(['ADMIN']), createCategoryHandler)
+categoryRoutes.post('/', requireRole(['SUPERADMIN']), createCategoryHandler)
 
 export default categoryRoutes

@@ -113,7 +113,7 @@ function StepReview({
           </div>
           <div className="claim-review-row">
             <span className="claim-review-key">Found at</span>
-            <span className="claim-review-val">{item.location}</span>
+            <span className="claim-review-val">{item.found_location}</span>
           </div>
           <div className="claim-review-row">
             <span className="claim-review-key">Item ID</span>
@@ -224,7 +224,7 @@ export function ClaimPage({ items, userName, userEmail }: { items: Item[]; userN
   const { itemId } = useParams()
   const navigate = useNavigate()
 
-  const item = items.find(i => i.id === parseInt(itemId || '0'))
+  const item = items.find(i => i.item_id === itemId)
 
   if (!item) {
     return (

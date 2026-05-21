@@ -92,13 +92,13 @@ export function HomePage({ items }: HomePageProps) {
           <div className="items-grid">
             {items.slice(0, 4).map((item) => (
               <ItemCard
-                key={item.id}
+                key={item.item_id}
                 image={item.image}
                 name={item.name}
-                location={item.location}
+                location={item.found_location}
                 foundAt={item.foundAt}
                 category={item.category}
-                onClick={() => navigate(`/items/${item.id}`)}
+                onClick={() => navigate(`/items/${item.item_id}`)}
               />
             ))}
           </div>

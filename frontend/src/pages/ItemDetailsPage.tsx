@@ -9,7 +9,7 @@ export function ItemDetailsPage({ items, isSignedIn }: { items: Item[]; isSigned
     navigate(path)
   }
   
-  const item = items.find(i => i.id === parseInt(id || '0'))
+  const item = items.find(i => i.item_id === id)
 
   if (!item) {
     return (
@@ -77,7 +77,7 @@ export function ItemDetailsPage({ items, isSignedIn }: { items: Item[]; isSigned
 
               <table className="item-detail-table">
                 <tbody>
-                  <tr><td>Found at</td><td>{item.location}</td></tr>
+                  <tr><td>Found at</td><td>{item.found_location}</td></tr>
                   <tr><td>Date found</td><td>{formatDate(item.foundAt)}</td></tr>
                   <tr><td>Item ID</td><td style={{ fontFamily: 'monospace', fontSize: '12px', color: '#90a4ae' }}>ITEM-{formatDate(item.foundAt).replace(/\s/g, '')}-{String(item.id).padStart(3, '0')}</td></tr>
                   <tr><td>Notes</td><td>{item.description.substring(0, 50)}...</td></tr>

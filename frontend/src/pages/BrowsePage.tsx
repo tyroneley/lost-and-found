@@ -1,7 +1,8 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ItemCard } from '../components/ItemCard'
 import { Item } from '../App'
+import { getCategories } from '../services/api'
 
 export function BrowsePage({ items }: { items: Item[] }) {
   const navigate = useNavigate()
@@ -17,9 +18,23 @@ export function BrowsePage({ items }: { items: Item[] }) {
   const [currentPage, setCurrentPage] = useState(1)
   const [showFilters, setShowFilters] = useState(false)
   const [showSortMenu, setShowSortMenu] = useState(false)
+  const [fetchedCategories, setFetchedCategories] = useState<any[]>([])
   const itemsPerPage = 20
 
-  const categories = ['Electronics', 'Personal Belonging', 'Clothing', 'Sports Equipment', 'Other']
+  // Fetch categories on mount
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const cats = await getCategories()
+        setFetchedCategories(cats)
+      } catch (error) {
+        console.error('Failed to load categories:', error)
+      }
+    }
+    fetchData()
+  }, [])
+
+  const categories = fetchedCategories.map(c => c.name)
   const locations = ['Auditorium', 'Lobby', 'Student Lounge', 'Sleeping Pods', 'Photography Room', 'Meeting Room', 'Library']
   const colors = [
     { name: 'Black', hex: '#222222' },
@@ -37,8 +52,8 @@ export function BrowsePage({ items }: { items: Item[] }) {
                            item.description.toLowerCase().includes(searchTerm.toLowerCase())
       const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(item.category)
       const matchesColor = selectedColors.length === 0 || selectedColors.includes(item.color)
-      const matchesLocation = selectedLocations.length === 0 || selectedLocations.includes(item.location)
-      const matchesRoom = !filterByRoom || (item.location.match(/^Room \d+/) && (!roomNumber || item.location.includes(`Room ${roomNumber}`)))
+      const matchesLocation = selectedLocations.length === 0 || selectedLocations.includes(item.found_location)
+      const matchesRoom = !filterByRoom || (item.found_location.match(/^Room \d+/) && (!roomNumber || item.found_location.includes(`Room ${roomNumber}`)))
       
       // Date filtering
       const itemDate = new Date(item.foundAt)
@@ -98,7 +113,7 @@ export function BrowsePage({ items }: { items: Item[] }) {
   }
 
   const getCategoryCount = (cat: string) => items.filter(i => i.category === cat).length
-  const getLocationCount = (loc: string) => items.filter(i => i.location === loc).length
+  const getLocationCount = (loc: string) => items.filter(i => i.found_location === loc).length
 
   return (
     <main>
@@ -359,14 +374,14 @@ export function BrowsePage({ items }: { items: Item[] }) {
               <>
                 <div className="browse-grid">
                   {paginatedItems.map((item) => (
-                    <div key={item.id} onClick={() => navigate(`/items/${item.id}`)} className="browse-card">
+                    <div key={item.item_id} onClick={() => navigate(`/items/${item.item_id}`)} className="browse-card">
                       <ItemCard
                         image={item.image}
                         name={item.name}
-                        location={item.location}
+                        location={item.found_location}
                         foundAt={item.foundAt}
                         category={item.category}
-                        onClick={() => navigate(`/items/${item.id}`)}
+                        onClick={() => navigate(`/items/${item.item_id}`)}
                       />
                     </div>
                   ))}

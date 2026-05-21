@@ -16,22 +16,22 @@ datasource db {
 // Enums
 enum UserRole {
   PUBLIC
-  SECURITY
-  ADMIN
+  STAFF
+  SUPERADMIN
 }
 
 enum ItemStatus {
-  REPORTED
-  UNDER_REVIEW
-  APPROVED
+  ACTIVE
   CLAIMED
-  EXPIRED
+  COLLECTED
+  RETURNED
 }
 
 enum ClaimStatus {
   PENDING
   APPROVED
   REJECTED
+  COLLECTED
 }
 
 enum AuditAction {
@@ -48,7 +48,8 @@ model User {
   user_id        String   @id @default(uuid())
   name           String
   phone          String?
-  personal_email String? @unique
+  personal_email String   @unique
+  password       String
   uni_email      String? @unique
   role           UserRole @default(PUBLIC)
   affiliation    String?
@@ -56,7 +57,6 @@ model User {
   // Relations
   itemsRecorded  Item[]   @relation("RecordedBy")
   itemsApproved  Item[]   @relation("ApprovedBy")
-  itemsVerified Item[] @relation("VerifiedBy")
   claims         ClaimRequest[]
   auditLogs      AuditLog[]
 
@@ -67,9 +67,35 @@ model User {
   @@index([role])
 }
 
+model Building {
+  building_id String @id @default(uuid())
+  name        String @unique
+  address     String?
+
+  rooms       Room[]
+  items       Item[]
+
+  created_at  DateTime @default(now())
+}
+
+model Room {
+  room_id     String  @id @default(uuid())
+  room_number Int?    // nullable for rooms with no number (e.g. Student Lounge)
+  room_name   String  // always present - display fallback when no number
+  
+  building_id String
+  building    Building @relation(fields: [building_id], references: [building_id])
+
+  items       Item[]
+
+  created_at  DateTime @default(now())
+
+  @@index([building_id])
+}
+
 model Category {
   category_id String @id @default(uuid())
-  name        String
+  name        String @unique
   description String?
 
   items       Item[]
@@ -81,31 +107,34 @@ model Item {
   item_id        String     @id @default(uuid())
   name           String
   description    String?
-  color_hex    String?
-  color_bucket String?
+  color_hex      String?
+  color_bucket   String?
 
-  status         ItemStatus @default(REPORTED)
+  status         ItemStatus @default(ACTIVE)
 
   // Category
   category_id    String
   category       Category   @relation(fields: [category_id], references: [category_id])
 
+  // Building & Room
+  building_id    String
+  building       Building   @relation(fields: [building_id], references: [building_id])
+  room_id        String
+  room           Room       @relation(fields: [room_id], references: [room_id])
+
   // Found info
-  found_location String
   found_at       DateTime
+  found_time_known Boolean @default(true)
   expires_at     DateTime?
 
-  // Ownership verification
-  ownership_proof   String?
-  verification_notes String?
-  verified_by       String?
-  verified_user     User?    @relation("VerifiedBy", fields: [verified_by], references: [user_id])
-  verified_at       DateTime?
+  // Finder details
+  finder_name    String?
+  finder_contact String?
+  finder_affiliation String?
 
   // Tracking users
   recorded_by    String
   recorder       User      @relation("RecordedBy", fields: [recorded_by], references: [user_id])
-
   approved_by    String?
   approver       User?     @relation("ApprovedBy", fields: [approved_by], references: [user_id])
 
@@ -120,8 +149,9 @@ model Item {
 
   @@index([status])
   @@index([category_id])
+  @@index([building_id])
+  @@index([room_id])
   @@index([recorded_by])
-  @@index([approved_by])
 }
 
 model ItemPhoto {
@@ -153,10 +183,11 @@ model ClaimRequest {
 
   // Ownership explanation
   ownership_desc String
-  verification_notes String?
+  staff_notes    String?
 
   requested_at   DateTime @default(now())
-  resolved_at    DateTime?
+  decision_at    DateTime?  // When approved or rejected
+  resolved_at    DateTime?  // When collected
 
   @@index([item_id])
   @@index([claimer_id])

@@ -74,3 +74,36 @@ export const deleteClaimHandler = async (c: any) => {
     return handleError(c, error)
   }
 }
+
+// Specific approve handler - marks claim as approved
+export const approveClaimHandler = async (c: any) => {
+  try {
+    const payload = c.get('jwtPayload') as AuthPayload
+    const params = idParamSchema.parse({
+      id: c.req.param('id')
+    })
+
+    const claim = await updateClaimStatus(params.id, { status: 'APPROVED' }, payload.sub)
+
+    return c.json(claim)
+  } catch (error) {
+    return handleError(c, error)
+  }
+}
+
+// Specific reject handler - marks claim as rejected
+export const rejectClaimHandler = async (c: any) => {
+  try {
+    const payload = c.get('jwtPayload') as AuthPayload
+    const params = idParamSchema.parse({
+      id: c.req.param('id')
+    })
+
+    const body = await c.req.json().catch(() => ({}))
+    const claim = await updateClaimStatus(params.id, { status: 'REJECTED' }, payload.sub)
+
+    return c.json(claim)
+  } catch (error) {
+    return handleError(c, error)
+  }
+}

@@ -9,15 +9,19 @@ export const createItemSchema = z.object({
   .optional(),
 
   category_id: z.string().uuid('Invalid category_id'),
-  found_location: z.string().min(1, 'Location is required'),
+  building_id: z.string().uuid('Invalid building_id'),
+  room_id: z.string().uuid('Invalid room_id'),
   found_at: z.string().datetime('Invalid date format'),
+  found_time_known: z.boolean().optional(),
   expires_at: z.string().datetime().optional(),
-  recorded_by: z.string().uuid('Invalid user_id')
+  finder_name: z.string().optional(),
+  finder_contact: z.string().optional(),
+  finder_affiliation: z.string().optional()
 })
 
 export const updateItemStatusSchema = z.object({
-  status: z.enum(['REPORTED', 'UNDER_REVIEW', 'APPROVED', 'CLAIMED', 'EXPIRED']),
-  approved_by: z.string().uuid().optional()
+  status: z.enum(['ACTIVE', 'PENDING', 'RETURNED']),
+  notes: z.string().optional()
 })
 
 export const updateItemSchema = z.object({
@@ -25,9 +29,11 @@ export const updateItemSchema = z.object({
   description: z.string().optional(),
   color_hex: z.string().regex(/^#([0-9A-Fa-f]{6})$/, 'Invalid hex color').optional(),
   category_id: z.string().uuid().optional(),
-  found_location: z.string().min(1).optional(),
+  room_id: z.string().uuid().optional(),
   found_at: z.string().datetime().optional(),
+  found_time_known: z.boolean().optional(),
   expires_at: z.string().datetime().optional(),
-  ownership_proof: z.string().optional(),
-  verification_notes: z.string().optional()
+  finder_name: z.string().optional(),
+  finder_contact: z.string().optional(),
+  finder_affiliation: z.string().optional()
 })

@@ -13,14 +13,19 @@ export const createItem = async (data: any, changed_by: string) => {
       color_hex: data.color_hex || null,
       color_bucket: colorBucket,
       category_id: data.category_id,
-      found_location: data.found_location,
+      building_id: data.building_id,
+      room_id: data.room_id,
       found_at: new Date(data.found_at),
+      found_time_known: data.found_time_known ?? true,
       expires_at: data.expires_at ? new Date(data.expires_at) : null,
-      recorded_by: data.recorded_by
+      finder_name: data.finder_name,
+      finder_contact: data.finder_contact,
+      finder_affiliation: data.finder_affiliation,
+      recorded_by: changed_by
     }
   })
 
-  await logAudit({ item_id: item.item_id, changed_by, action: 'CREATE', new_status: 'REPORTED' })
+  await logAudit({ item_id: item.item_id, changed_by, action: 'CREATE', new_status: 'ACTIVE' })
 
   return item
 }
@@ -36,11 +41,13 @@ export const updateItem = async (id: string, data: any, changed_by: string) => {
         ? (data.color_hex ? getColorBucket(data.color_hex) : null)
         : undefined,
       category_id: data.category_id,
-      found_location: data.found_location,
+      room_id: data.room_id,
       found_at: data.found_at !== undefined ? new Date(data.found_at) : undefined,
+      found_time_known: data.found_time_known,
       expires_at: data.expires_at !== undefined ? new Date(data.expires_at) : undefined,
-      ownership_proof: data.ownership_proof,
-      verification_notes: data.verification_notes
+      finder_name: data.finder_name,
+      finder_contact: data.finder_contact,
+      finder_affiliation: data.finder_affiliation
     }
   })
 
@@ -67,7 +74,7 @@ export const getItems = async (query?: any) => {
   const where: Prisma.ItemWhereInput = {
     deleted_at: null,
     color_bucket: query?.color,
-    status: query?.status,
+    status: query?.status ?? 'ACTIVE', // Default to ACTIVE for public browsing
     category_id: query?.category_id,
     OR: query?.q
       ? [
@@ -83,7 +90,13 @@ export const getItems = async (query?: any) => {
       where,
       take: limit,
       skip: offset,
-      include: { category: true, recorder: true, photos: true }
+      include: { 
+        category: true, 
+        building: true, 
+        room: { include: { building: true } },
+        recorder: true, 
+        photos: true 
+      }
     })
   ])
 
@@ -95,6 +108,8 @@ export const getItemById = async (id: string) => {
     where: { item_id: id, deleted_at: null },
     include: {
       category: true,
+      building: true,
+      room: { include: { building: true } },
       recorder: true,
       photos: true
     }
@@ -112,8 +127,8 @@ export const updateItemStatus = async (id: string, data: any, changed_by: string
     }
   })
 
-  const action = data.status === 'APPROVED' ? 'APPROVE'
-    : data.status === 'CLAIMED' ? 'CLAIM'
+  const action = data.status === 'PENDING' ? 'APPROVE'
+    : data.status === 'RETURNED' ? 'REJECT'
     : 'UPDATE'
 
   await logAudit({

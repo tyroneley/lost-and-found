@@ -1,16 +1,16 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { UserRole } from '../App'
+import { login, storeAuthToken } from '../services/api'
 
 interface LoginPageProps {
   onLoginSuccess: (name: string, email: string, role: UserRole) => void;
 }
 
-// Mock accounts for testing different roles
-const MOCK_ACCOUNTS = [
-  { email: 'student@binus', password: '123', name: 'John Student', role: 'public' as UserRole },
-  { email: 'security@binus', password: '123', name: 'Sir Security', role: 'staff' as UserRole },
-  { email: 'admin@binus', password: '123', name: 'Admin User', role: 'superadmin' as UserRole },
+// Demo accounts for quick testing
+const DEMO_ACCOUNTS = [
+  { email: 'alex.tan@binus.ac.id', password: 'user@123456', name: 'Alex Tan', role: 'public' as UserRole },
+  { email: 'maya.sari@binus.ac.id', password: 'user@123456', name: 'Maya Sari', role: 'staff' as UserRole },
 ]
 
 export function LoginPage({ onLoginSuccess }: LoginPageProps) {
@@ -18,18 +18,30 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
-  const [showTestAccounts, setShowTestAccounts] = useState(true)
+  const [loading, setLoading] = useState(false)
+  const [showDemoAccounts, setShowDemoAccounts] = useState(true)
 
-  const handleQuickLogin = (account: typeof MOCK_ACCOUNTS[0]) => {
-    onLoginSuccess(account.name, account.email, account.role)
-    if (account.role === 'staff' || account.role === 'superadmin') {
-      navigate('/staff')
-    } else {
-      navigate('/')
+  const handleQuickLogin = async (account: typeof DEMO_ACCOUNTS[0]) => {
+    setLoading(true)
+    setError('')
+    try {
+      const response = await login(account.email, account.password)
+      // Save token for future requests
+      storeAuthToken(response.token)
+      onLoginSuccess(response.user.name, response.user.email, response.user.role as UserRole)
+      if (response.user.role === 'staff' || response.user.role === 'superadmin') {
+        navigate('/staff')
+      } else {
+        navigate('/')
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Login failed')
+    } finally {
+      setLoading(false)
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
     if (!email || !password) {
@@ -42,22 +54,24 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
       return
     }
 
-    // Check against mock accounts
-    const mockAccount = MOCK_ACCOUNTS.find(acc => acc.email === email && acc.password === password)
-    if (mockAccount) {
-      onLoginSuccess(mockAccount.name, mockAccount.email, mockAccount.role)
-      if (mockAccount.role === 'staff' || mockAccount.role === 'superadmin') {
+    setLoading(true)
+    setError('')
+
+    try {
+      const response = await login(email, password)
+      // Save token for future requests
+      storeAuthToken(response.token)
+      onLoginSuccess(response.user.name, response.user.email, response.user.role as UserRole)
+      if (response.user.role === 'staff' || response.user.role === 'superadmin') {
         navigate('/staff')
       } else {
         navigate('/')
       }
-      return
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Invalid email or password')
+    } finally {
+      setLoading(false)
     }
-
-    // Default mock authentication
-    const name = email.split('@')[0].replace(/[._]/g, ' ')
-    onLoginSuccess(name, email, 'public')
-    navigate('/')
   }
 
   return (
@@ -70,16 +84,17 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
               <p>Sign in to your Lost & Found account</p>
             </div>
 
-            {showTestAccounts && (
+            {showDemoAccounts && (
               <div className="test-accounts-section">
-                <p className="test-accounts-title">Test Accounts (Mock RBA):</p>
+                <p className="test-accounts-title">Demo Accounts (Real Database):</p>
                 <div className="test-accounts-grid">
-                  {MOCK_ACCOUNTS.map((account) => (
+                  {DEMO_ACCOUNTS.map((account) => (
                     <button
                       key={account.email}
                       type="button"
                       className={`test-account-btn test-account-${account.role}`}
                       onClick={() => handleQuickLogin(account)}
+                      disabled={loading}
                     >
                       <div className="test-account-role">{account.role.toUpperCase()}</div>
                       <div className="test-account-name">{account.name}</div>
@@ -90,7 +105,8 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
                 <button 
                   type="button"
                   className="toggle-test-btn"
-                  onClick={() => setShowTestAccounts(false)}
+                  onClick={() => setShowDemoAccounts(false)}
+                  disabled={loading}
                 >
                   Hide
                 </button>
@@ -132,8 +148,8 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
 
                 <a href="#" className="forgot-password">Forgot password?</a>
 
-                <button type="submit" className="btn btn-auth-primary">
-                  Sign In
+                <button type="submit" className="btn btn-auth-primary" disabled={loading}>
+                  {loading ? 'Signing In...' : 'Sign In'}
                 </button>
               </form>
 
