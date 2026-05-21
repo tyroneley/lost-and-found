@@ -10,7 +10,8 @@ import {
 import {
   addPhotoHandler,
   getPhotosHandler,
-  deletePhotoHandler
+  deletePhotoHandler,
+  uploadPhotoHandler
 } from '../controllers/photo.controller'
 import { authMiddleware, requireRole } from '../middleware/auth'
 
@@ -25,6 +26,7 @@ itemRoutes.use('/*', authMiddleware)
 itemRoutes.post('/', createItemHandler)
 
 // Photo sub-routes registered before /:id to avoid pattern ambiguity
+itemRoutes.post('/:id/photos/upload', requireRole(['STAFF', 'SUPERADMIN']), uploadPhotoHandler)
 itemRoutes.get('/:id/photos', getPhotosHandler)
 itemRoutes.post('/:id/photos', addPhotoHandler)
 itemRoutes.delete('/:id/photos/:photoId', requireRole(['STAFF', 'SUPERADMIN']), deletePhotoHandler)

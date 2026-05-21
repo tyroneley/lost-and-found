@@ -1,4 +1,5 @@
 import { Item } from '../App'
+import { API_URL } from '../services/api'
 
 /**
  * Format room display based on room_number and room_name
@@ -24,6 +25,10 @@ function formatRoomDisplay(room: any): string {
  * Backend uses UUID strings for IDs, frontend uses strings (no conversion needed)
  */
 export function transformBackendItem(backendItem: any): Item {
+  const photos: string[] = backendItem.photos?.map((p: any) =>
+    p.storage_url.startsWith('http') ? p.storage_url : `${API_URL}${p.storage_url}`
+  ) ?? []
+
   return {
     item_id: backendItem.item_id || '',
     name: backendItem.name,
@@ -39,14 +44,14 @@ export function transformBackendItem(backendItem: any): Item {
     foundAt: formatDate(backendItem.found_at),
     expiry: backendItem.expires_at ? formatDate(backendItem.expires_at) : 'N/A',
     status: mapItemStatus(backendItem.status),
-    image: '/placeholder.png', // TODO: Get from ItemPhoto
+    image: photos[0] || '/placeholder.png',
     notes: backendItem.description || '',
     finder: {
       name: backendItem.finder_name || backendItem.recorder?.name || 'Unknown',
       contact: backendItem.finder_contact || backendItem.recorder?.personal_email || 'N/A',
       affiliation: backendItem.finder_affiliation || backendItem.recorder?.affiliation || null,
     },
-    photos: backendItem.photos?.map((p: any) => p.storage_url) || [],
+    photos,
   }
 }
 

@@ -21,6 +21,6 @@
     "seed:users": "ts-node prisma/users-seed.ts"
   },
   "prisma": {
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "ts-node --transpile-only prisma/seed.ts"
   }
 }

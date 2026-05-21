@@ -14,7 +14,7 @@ export const createItem = async (data: any, changed_by: string) => {
       color_bucket: colorBucket,
       category_id: data.category_id,
       building_id: data.building_id,
-      room_id: data.room_id,
+      room_id: data.room_id ?? null,
       found_at: new Date(data.found_at),
       found_time_known: data.found_time_known ?? true,
       expires_at: data.expires_at ? new Date(data.expires_at) : null,
@@ -41,7 +41,7 @@ export const updateItem = async (id: string, data: any, changed_by: string) => {
         ? (data.color_hex ? getColorBucket(data.color_hex) : null)
         : undefined,
       category_id: data.category_id,
-      room_id: data.room_id,
+      room_id: data.room_id ?? null,
       found_at: data.found_at !== undefined ? new Date(data.found_at) : undefined,
       found_time_known: data.found_time_known,
       expires_at: data.expires_at !== undefined ? new Date(data.expires_at) : undefined,

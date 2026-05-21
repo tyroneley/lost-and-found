@@ -10,7 +10,7 @@ export const createItemSchema = z.object({
 
   category_id: z.string().uuid('Invalid category_id'),
   building_id: z.string().uuid('Invalid building_id'),
-  room_id: z.string().uuid('Invalid room_id'),
+  room_id: z.string().uuid('Invalid room_id').optional(),
   found_at: z.string().datetime('Invalid date format'),
   found_time_known: z.boolean().optional(),
   expires_at: z.string().datetime().optional(),

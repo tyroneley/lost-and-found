@@ -119,8 +119,8 @@ model Item {
   // Building & Room
   building_id    String
   building       Building   @relation(fields: [building_id], references: [building_id])
-  room_id        String
-  room           Room       @relation(fields: [room_id], references: [room_id])
+  room_id        String?
+  room           Room?      @relation(fields: [room_id], references: [room_id])
 
   // Found info
   found_at       DateTime

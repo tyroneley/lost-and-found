@@ -38,7 +38,7 @@ export interface Claim {
 }
 
 // Config: get the API URL from .env or use localhost for development
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
 
 // Utils for managing auth tokens
@@ -253,6 +253,27 @@ export async function rejectClaim(
     method: 'POST',
     body: JSON.stringify({ reason }),
   })
+}
+
+// Upload a photo file for an item (multipart)
+export async function uploadItemPhoto(itemId: string, file: File): Promise<void> {
+  const token = getAuthToken()
+  const headers: Record<string, string> = {}
+  if (token) headers['Authorization'] = `Bearer ${token}`
+
+  const formData = new FormData()
+  formData.append('file', file)
+
+  const response = await fetch(`${API_URL}/items/${itemId}/photos/upload`, {
+    method: 'POST',
+    headers,
+    body: formData,
+  })
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}))
+    throw new Error(err.error || `Photo upload failed: HTTP ${response.status}`)
+  }
 }
 
 // Category stuff - get available item categories for filtering

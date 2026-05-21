@@ -1,4 +1,6 @@
 import 'dotenv/config'
+import { readFileSync, existsSync } from 'fs'
+import { resolve } from 'path'
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { serve } from '@hono/node-server'
@@ -34,6 +36,23 @@ app.get('/', (c) => c.text('running'))
 
 // Health check endpoint
 app.get('/health', (c) => c.json({ status: 'ok' }))
+
+// Serve uploaded item photos
+app.get('/uploads/:filename', (c) => {
+  const filename = c.req.param('filename')
+  if (filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
+    return c.json({ error: 'Invalid path' }, 400)
+  }
+  const filepath = resolve('./uploads', filename)
+  if (!existsSync(filepath)) return c.json({ error: 'Not found' }, 404)
+  const data = readFileSync(filepath)
+  const ext = filename.split('.').pop()?.toLowerCase() ?? ''
+  const mime: Record<string, string> = {
+    jpg: 'image/jpeg', jpeg: 'image/jpeg',
+    png: 'image/png', gif: 'image/gif', webp: 'image/webp',
+  }
+  return new Response(data, { headers: { 'Content-Type': mime[ext] ?? 'image/octet-stream' } })
+})
 
 // Register endpoint - create new user account
 app.post('/auth/register', async (c) => {

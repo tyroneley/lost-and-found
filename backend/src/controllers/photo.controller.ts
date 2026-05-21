@@ -1,4 +1,4 @@
-import { addPhoto, getPhotos, deletePhoto } from '../services/photo.service'
+import { addPhoto, getPhotos, deletePhoto, savePhotoFile } from '../services/photo.service'
 import { createPhotoSchema } from '../validators/photo.validator'
 import { handleError } from '../utils/errorHandler'
 import { idParamSchema } from '../validators/common.validator'
@@ -20,6 +20,21 @@ export const getPhotosHandler = async (c: any) => {
     const { id: item_id } = idParamSchema.parse({ id: c.req.param('id') })
     const photos = await getPhotos(item_id)
     return c.json(photos)
+  } catch (error) {
+    return handleError(c, error)
+  }
+}
+
+export const uploadPhotoHandler = async (c: any) => {
+  try {
+    const { id: item_id } = idParamSchema.parse({ id: c.req.param('id') })
+    const body = await c.req.parseBody()
+    const file = body['file']
+    if (!file || typeof file === 'string') {
+      return c.json({ error: 'No file provided' }, 400)
+    }
+    const photo = await savePhotoFile(item_id, file as File)
+    return c.json(photo, 201)
   } catch (error) {
     return handleError(c, error)
   }

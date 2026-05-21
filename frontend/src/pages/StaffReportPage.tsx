@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ItemCard } from '../components/ItemCard'
-import { createItem, getCategories, getBuildings } from '../services/api'
+import { createItem, getCategories, getBuildings, uploadItemPhoto } from '../services/api'
 
 interface ReportFormState {
   itemName: string
@@ -181,39 +181,39 @@ export function StaffReportPage() {
 
     setSubmitting(true)
     try {
-      // Look up category UUID
       const category = categories.find(c => c.name === form.category)
-      if (!category) {
-        throw new Error('Category not found')
-      }
+      if (!category) throw new Error('Category not found')
 
-      // Look up building UUID
       const building = buildings.find(b => b.name === form.building)
-      if (!building) {
-        throw new Error('Building not found')
-      }
+      if (!building) throw new Error('Building not found')
 
-      const colorBucket = hexToColorBucket(form.colorHex)
-      const foundAt = form.dateFound + (form.timeFound ? `T${form.timeFound}` : 'T00:00') + 'Z'
-      
+      const time = form.timeFound ? `${form.timeFound}:00.000` : '00:00:00.000'
+      const foundAt = `${form.dateFound}T${time}Z`
+
+      const description = form.notes
+        ? `${form.description}\n\n${form.notes}`
+        : form.description
+
       const itemData = {
         name: form.itemName,
-        description: form.description,
-        category_id: category.category_id, // Use UUID
-        building_id: building.building_id, // Use UUID
+        description,
+        category_id: category.category_id,
+        building_id: building.building_id,
         color_hex: form.colorHex,
-        color_bucket: colorBucket,
-        found_location: form.specificLocation === 'Room' ? `Room ${form.roomNumber}` : form.specificLocation,
-        found_at: foundAt, // ISO datetime
-        // Optional fields
-        ...(form.notes && { description: `${form.description}. ${form.notes}` }),
+        found_at: foundAt,
+        found_time_known: !!form.timeFound,
+        finder_name: form.finderName || undefined,
+        finder_contact: form.finderContact || undefined,
+        finder_affiliation: form.finderAffiliation || undefined,
       }
-      
-      // Call backend API to create item
-      await createItem(itemData)
-      
-      alert('Item submitted for approval!')
-      // Reset form
+
+      const createdItem = await createItem(itemData) as any
+
+      // Upload photos to the created item
+      if (form.photos.length > 0) {
+        await Promise.all(form.photos.map(file => uploadItemPhoto(createdItem.item_id, file)))
+      }
+
       setForm({
         itemName: '',
         category: '',
