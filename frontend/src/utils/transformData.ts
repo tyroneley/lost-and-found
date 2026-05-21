@@ -34,6 +34,7 @@ export function transformBackendItem(backendItem: any): Item {
     category: backendItem.category?.name || 'Other',
     found_location: formatRoomDisplay(backendItem.room),
     found_at: backendItem.found_at || new Date().toISOString(),
+    expires_at: backendItem.expires_at || null,
     building: backendItem.building?.name || 'Unknown',
     foundAt: formatDate(backendItem.found_at),
     expiry: backendItem.expires_at ? formatDate(backendItem.expires_at) : 'N/A',

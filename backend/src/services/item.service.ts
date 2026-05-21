@@ -121,14 +121,11 @@ export const updateItemStatus = async (id: string, data: any, changed_by: string
 
   const item = await prisma.item.update({
     where: { item_id: id },
-    data: {
-      status: data.status,
-      approved_by: data.approved_by || null
-    }
+    data: { status: data.status }
   })
 
-  const action = data.status === 'PENDING' ? 'APPROVE'
-    : data.status === 'RETURNED' ? 'REJECT'
+  const action = data.status === 'CLAIMED' ? 'CLAIM'
+    : data.status === 'COLLECTED' ? 'APPROVE'
     : 'UPDATE'
 
   await logAudit({

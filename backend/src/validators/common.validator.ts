@@ -7,7 +7,7 @@ export const idParamSchema = z.object({
 export const claimQuerySchema = z.object({
   item_id: z.string().uuid().optional(),
   user_id: z.string().uuid().optional(),
-  status: z.enum(['PENDING', 'APPROVED', 'REJECTED']).optional(),
+  status: z.enum(['PENDING', 'APPROVED', 'REJECTED', 'COLLECTED']).optional(),
   limit: z.coerce.number().int().min(1).max(100).default(20),
   offset: z.coerce.number().int().min(0).default(0)
 })
@@ -22,7 +22,7 @@ export const itemQuerySchema = z.object({
     .optional(),
 
   status: z
-    .enum(['ACTIVE','PENDING','RETURNED'])
+    .enum(['ACTIVE', 'CLAIMED', 'COLLECTED', 'RETURNED'])
     .optional(),
 
   category_id: z.string().uuid().optional(),

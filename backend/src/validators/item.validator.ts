@@ -20,7 +20,7 @@ export const createItemSchema = z.object({
 })
 
 export const updateItemStatusSchema = z.object({
-  status: z.enum(['ACTIVE', 'PENDING', 'RETURNED']),
+  status: z.enum(['ACTIVE', 'CLAIMED', 'COLLECTED', 'RETURNED']),
   notes: z.string().optional()
 })
 

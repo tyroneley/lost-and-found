@@ -33,6 +33,7 @@ export interface Item {
   category: string;
   found_location: string;
   found_at: string;
+  expires_at: string | null;
   building: string;
   foundAt: string;
   expiry: string;

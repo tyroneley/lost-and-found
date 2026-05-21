@@ -7,5 +7,5 @@ export const createClaimSchema = z.object({
 
 export const updateClaimSchema = z.object({
   status: z.enum(['PENDING', 'APPROVED', 'REJECTED', 'COLLECTED']),
-  verification_notes: z.string().optional()
+  staff_notes: z.string().optional()
 })

@@ -20,7 +20,7 @@ export function StaffItemsPage({ items }: StaffItemsPageProps) {
   const filteredItems = items.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          item.found_location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.id.toString().includes(searchTerm)
+                         item.item_id.includes(searchTerm)
     const matchesCategory = categoryFilter === 'All' || item.category === categoryFilter
     const matchesStatus = statusFilter === 'All' || item.status === statusFilter
     const matchesBuilding = buildingFilter === 'All' || item.building === buildingFilter
@@ -171,10 +171,10 @@ export function StaffItemsPage({ items }: StaffItemsPageProps) {
           <tbody>
             {paginatedItems.length > 0 ? (
               paginatedItems.map(item => (
-                <tr key={item.id} onClick={() => navigate(`/items/${item.id}`)}>
+                <tr key={item.item_id} onClick={() => navigate(`/items/${item.item_id}`)}>
                   <td>
                     <div className="staff-items-name">{item.name}</div>
-                    <div className="staff-items-id">ITEM-{String(item.id).padStart(5, '0')}</div>
+                    <div className="staff-items-id">ITEM-{item.item_id.slice(0, 8).toUpperCase()}</div>
                   </td>
                   <td className="staff-items-col-hide-sm">{item.category}</td>
                   <td className="staff-items-col-hide-md">{item.found_location}</td>
@@ -198,7 +198,7 @@ export function StaffItemsPage({ items }: StaffItemsPageProps) {
                       className="staff-items-action-btn"
                       onClick={(e) => {
                         e.stopPropagation()
-                        navigate(`/items/${item.id}`)
+                        navigate(`/items/${item.item_id}`)
                       }}
                     >
                       View
