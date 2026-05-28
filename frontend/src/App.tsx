@@ -13,6 +13,7 @@ import { StaffItemsPage } from './pages/StaffItemsPage'
 import { StaffItemDetailsPage } from './pages/StaffItemDetailsPage'
 import { StaffClaimsPage } from './pages/StaffClaimsPage'
 import { StaffClaimReviewPage } from './pages/StaffClaimReviewPage'
+import { StaffManagePage } from './pages/StaffManagePage'
 import { ClaimPage } from './pages/ClaimPage'
 import { MyClaimsPage } from './pages/MyClaimsPage'
 import * as api from './services/api'
@@ -124,6 +125,7 @@ function App() {
         <Route path="/staff/claims" element={<StaffClaimsPage />} />
         <Route path="/staff/claims/:claim_id" element={<StaffClaimReviewPage />} />
         <Route path="/staff/report" element={<StaffReportPage />} />
+        <Route path="/staff/manage" element={<StaffManagePage />} />
       </Routes>
     </>
   )

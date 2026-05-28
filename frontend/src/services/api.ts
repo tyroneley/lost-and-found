@@ -347,14 +347,50 @@ export async function uploadItemPhoto(itemId: string, file: File): Promise<void>
 
 // Category stuff - get available item categories for filtering
 
-// Get list of all available item categories
 export async function getCategories(): Promise<any[]> {
   return apiFetch('/categories')
 }
 
-// Get list of all available buildings
+export async function createCategory(data: { name: string; description?: string }): Promise<any> {
+  return apiFetch('/categories', { method: 'POST', body: JSON.stringify(data) })
+}
+
+export async function updateCategory(id: string, data: { name?: string; description?: string }): Promise<any> {
+  return apiFetch(`/categories/${id}`, { method: 'PUT', body: JSON.stringify(data) })
+}
+
+export async function deleteCategory(id: string): Promise<void> {
+  return apiFetch(`/categories/${id}`, { method: 'DELETE' })
+}
+
+// Building & room management
+
 export async function getBuildings(): Promise<any[]> {
   return apiFetch('/buildings')
+}
+
+export async function createBuilding(data: { name: string; address?: string }): Promise<any> {
+  return apiFetch('/buildings', { method: 'POST', body: JSON.stringify(data) })
+}
+
+export async function updateBuilding(id: string, data: { name?: string; address?: string }): Promise<any> {
+  return apiFetch(`/buildings/${id}`, { method: 'PUT', body: JSON.stringify(data) })
+}
+
+export async function deleteBuilding(id: string): Promise<void> {
+  return apiFetch(`/buildings/${id}`, { method: 'DELETE' })
+}
+
+export async function createRoom(buildingId: string, data: { room_name: string; room_number?: number }): Promise<any> {
+  return apiFetch(`/buildings/${buildingId}/rooms`, { method: 'POST', body: JSON.stringify(data) })
+}
+
+export async function updateRoom(roomId: string, data: { room_name?: string; room_number?: number | null }): Promise<any> {
+  return apiFetch(`/buildings/rooms/${roomId}`, { method: 'PUT', body: JSON.stringify(data) })
+}
+
+export async function deleteRoom(roomId: string): Promise<void> {
+  return apiFetch(`/buildings/rooms/${roomId}`, { method: 'DELETE' })
 }
 
 // Error handling - deal with problems gracefully

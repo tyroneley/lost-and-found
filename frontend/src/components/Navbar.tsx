@@ -113,6 +113,15 @@ export function Navbar({ isSignedIn = false, userName = '', userRole = 'public',
                   Claims
                 </a>
               </li>
+              <li>
+                <a
+                  href="#"
+                  className={isStaffNavActive('/staff/manage') ? 'navbar-link-active' : ''}
+                  onClick={(e) => { e.preventDefault(); handleNavClick('/staff/manage') }}
+                >
+                  Manage
+                </a>
+              </li>
             </>
           )}
           

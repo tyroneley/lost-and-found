@@ -10,8 +10,8 @@ import * as bcrypt from 'bcryptjs'
 import itemRoutes from './routes/item.routes'
 import claimRoutes from './routes/claim.routes'
 import categoryRoutes from './routes/category.routes'
+import buildingRoutes from './routes/building.routes'
 import userRoutes from './routes/user.routes'
-import { getBuildingsHandler } from './controllers/building.controller'
 import { prisma } from './lib/prisma'
 import { issueToken, authMiddleware, requireRole, type AuthPayload } from './middleware/auth'
 import { getAuditLogsByItemId } from './services/audit.service'
@@ -206,7 +206,7 @@ app.get('/audit-log', authMiddleware, requireRole(['STAFF', 'SUPERADMIN']), asyn
 app.route('/items', itemRoutes)
 app.route('/claims', claimRoutes)
 app.route('/categories', categoryRoutes)
-app.get('/buildings', getBuildingsHandler)
+app.route('/buildings', buildingRoutes)
 app.route('/users', userRoutes)
 
 serve({
