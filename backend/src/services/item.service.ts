@@ -9,20 +9,20 @@ export const createItem = async (data: any, changed_by: string) => {
   const item = await prisma.item.create({
     data: {
       name: data.name,
-      description: data.description,
-      color_hex: data.color_hex || null,
+      description: data.description ?? null,
+      color_hex: data.color_hex ?? null,
       color_bucket: colorBucket,
-      category_id: data.category_id,
-      building_id: data.building_id,
-      room_id: data.room_id ?? null,
       found_at: new Date(data.found_at),
       found_time_known: data.found_time_known ?? true,
       expires_at: data.expires_at ? new Date(data.expires_at) : null,
-      finder_name: data.finder_name,
-      finder_contact: data.finder_contact,
-      finder_affiliation: data.finder_affiliation,
-      recorded_by: changed_by
-    }
+      ...(data.finder_name ? { finder_name: data.finder_name } : {}),
+      ...(data.finder_contact ? { finder_contact: data.finder_contact } : {}),
+      ...(data.finder_affiliation ? { finder_affiliation: data.finder_affiliation } : {}),
+      category: { connect: { category_id: data.category_id } },
+      building: { connect: { building_id: data.building_id } },
+      ...(data.room_id ? { room: { connect: { room_id: data.room_id } } } : {}),
+      recorder: { connect: { user_id: changed_by } },
+    },
   })
 
   await logAudit({ item_id: item.item_id, changed_by, action: 'CREATE', new_status: 'ACTIVE' })

@@ -8,6 +8,8 @@ export const claimQuerySchema = z.object({
   item_id: z.string().uuid().optional(),
   user_id: z.string().uuid().optional(),
   status: z.enum(['PENDING', 'APPROVED', 'REJECTED', 'COLLECTED']).optional(),
+  category: z.string().optional(),
+  search: z.string().optional(),
   limit: z.coerce.number().int().min(1).max(100).default(20),
   offset: z.coerce.number().int().min(0).default(0)
 })

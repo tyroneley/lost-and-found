@@ -172,7 +172,7 @@ export function StaffItemsPage() {
           <tbody>
             {paginatedItems.length > 0 ? (
               paginatedItems.map(item => (
-                <tr key={item.item_id} onClick={() => navigate(`/items/${item.item_id}`)}>
+                <tr key={item.item_id} onClick={() => navigate(`/staff/items/${item.item_id}`)}>
                   <td>
                     <div className="staff-items-name">{item.name}</div>
                     <div className="staff-items-id">ITEM-{item.item_id.slice(0, 8).toUpperCase()}</div>
@@ -197,7 +197,7 @@ export function StaffItemsPage() {
                   <td>
                     <button
                       className="staff-items-action-btn"
-                      onClick={(e) => { e.stopPropagation(); navigate(`/items/${item.item_id}`) }}
+                      onClick={(e) => { e.stopPropagation(); navigate(`/staff/items/${item.item_id}`) }}
                     >
                       View
                     </button>

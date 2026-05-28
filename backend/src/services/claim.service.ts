@@ -22,14 +22,43 @@ export const createClaim = async (data: any) => {
   })
 }
 
+const claimInclude = {
+  item: {
+    include: {
+      category: true,
+      building: true,
+      room: { include: { building: true } },
+      photos: true,
+      recorder: { select: { name: true } }
+    }
+  },
+  claimer: true
+} as const
+
 export const getClaims = async (query?: any) => {
   const limit: number = query?.limit ?? 20
   const offset: number = query?.offset ?? 0
 
-  const where = {
-    item_id: query?.item_id,
-    claimer_id: query?.user_id,
-    status: query?.status
+  const where: any = {}
+  if (query?.item_id) where.item_id = query.item_id
+  if (query?.user_id) where.claimer_id = query.user_id
+  if (query?.status) where.status = query.status
+
+  if (query?.category) {
+    where.item = {
+      ...(where.item ?? {}),
+      category: { name: { equals: query.category, mode: 'insensitive' } }
+    }
+  }
+
+  if (query?.search) {
+    const term = String(query.search).trim()
+    if (term) {
+      where.OR = [
+        { claimer: { name: { contains: term, mode: 'insensitive' } } },
+        { item: { name: { contains: term, mode: 'insensitive' } } }
+      ]
+    }
   }
 
   const [total, data] = await prisma.$transaction([
@@ -38,21 +67,21 @@ export const getClaims = async (query?: any) => {
       where,
       take: limit,
       skip: offset,
-      include: { 
-        item: {
-          include: {
-            category: true,
-            building: true,
-            room: { include: { building: true } },
-            photos: true
-          }
-        },
-        claimer: true
-      }
+      orderBy: { requested_at: 'desc' },
+      include: claimInclude
     })
   ])
 
   return { data, total, limit, offset }
+}
+
+export const getClaimById = async (id: string) => {
+  const claim = await prisma.claimRequest.findUnique({
+    where: { claim_id: id },
+    include: claimInclude
+  })
+  if (!claim) throw new AppError(404, 'Claim not found')
+  return claim
 }
 
 export const deleteClaim = async (id: string) => {
@@ -67,13 +96,32 @@ export const updateClaimStatus = async (id: string, data: any, changed_by: strin
     include: { item: { select: { status: true } } }
   })
 
+  if (!existing) throw new AppError(404, 'Claim not found')
+
+  const now = new Date()
+  const updateData: Record<string, unknown> = {
+    status: data.status,
+  }
+
+  if (data.staff_notes !== undefined) {
+    updateData.staff_notes = data.staff_notes
+  }
+
+  if (data.status === 'APPROVED' || data.status === 'REJECTED') {
+    updateData.decision_at = now
+  }
+
+  if (data.status === 'COLLECTED') {
+    updateData.resolved_at = now
+    if (!existing.decision_at) {
+      updateData.decision_at = now
+    }
+  }
+
   const claim = await prisma.claimRequest.update({
     where: { claim_id: id },
-    data: {
-      status: data.status,
-      verification_notes: data.verification_notes || undefined,
-      resolved_at: new Date()
-    }
+    data: updateData,
+    include: claimInclude
   })
 
   if (data.status === 'APPROVED') {
@@ -82,21 +130,34 @@ export const updateClaimStatus = async (id: string, data: any, changed_by: strin
       data: { status: 'CLAIMED', approved_by: changed_by }
     })
 
-    if (existing) {
-      await logAudit({
-        item_id: claim.item_id,
-        changed_by,
-        action: 'APPROVE',
-        old_status: existing.item.status,
-        new_status: 'CLAIMED'
-      })
-    }
-  } else if (data.status === 'REJECTED' && existing) {
+    await logAudit({
+      item_id: claim.item_id,
+      changed_by,
+      action: 'APPROVE',
+      old_status: existing.item.status,
+      new_status: 'CLAIMED',
+      notes: data.staff_notes
+    })
+  } else if (data.status === 'REJECTED') {
     await logAudit({
       item_id: claim.item_id,
       changed_by,
       action: 'REJECT',
-      old_status: existing.item.status
+      old_status: existing.item.status,
+      notes: data.staff_notes
+    })
+  } else if (data.status === 'COLLECTED') {
+    await prisma.item.update({
+      where: { item_id: claim.item_id },
+      data: { status: 'COLLECTED' }
+    })
+
+    await logAudit({
+      item_id: claim.item_id,
+      changed_by,
+      action: 'UPDATE',
+      old_status: existing.item.status,
+      new_status: 'COLLECTED'
     })
   }
 

@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Item } from '../App'
-import { getAllClaims, Claim } from '../services/api'
+import { getAllClaims, getItems } from '../services/api'
+import { transformBackendClaims, transformBackendItems, TransformedClaim } from '../utils/transformData'
 
 interface StaffDashboardPageProps {
-  items: Item[];
   userName: string;
 }
 
@@ -25,7 +25,7 @@ function relativeTime(isoDate: string): string {
   return days === 1 ? 'yesterday' : `${days} days ago`
 }
 
-function claimActionLabel(status: Claim['status']): string {
+function claimActionLabel(status: TransformedClaim['status']): string {
   switch (status) {
     case 'pending': return 'New claim submitted'
     case 'approved': return 'Claim approved'
@@ -34,7 +34,7 @@ function claimActionLabel(status: Claim['status']): string {
   }
 }
 
-function claimDotColor(status: Claim['status']): string {
+function claimDotColor(status: TransformedClaim['status']): string {
   switch (status) {
     case 'pending': return '#ca8a04'
     case 'approved': return '#16a34a'
@@ -43,12 +43,27 @@ function claimDotColor(status: Claim['status']): string {
   }
 }
 
-export function StaffDashboardPage({ items, userName }: StaffDashboardPageProps) {
+export function StaffDashboardPage({ userName }: StaffDashboardPageProps) {
   const navigate = useNavigate()
-  const [claims, setClaims] = useState<Claim[]>([])
+  const [items, setItems] = useState<Item[]>([])
+  const [claims, setClaims] = useState<TransformedClaim[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    getAllClaims().then(setClaims).catch(console.error)
+    setLoading(true)
+    Promise.all([
+      getItems({ limit: 500 }),
+      getAllClaims({ limit: 100 }).catch(() => ({ data: [] as TransformedClaim[] })),
+    ])
+      .then(([itemsResponse, claimsResponse]) => {
+        const rawItems = Array.isArray(itemsResponse) ? itemsResponse : itemsResponse.data ?? []
+        setItems(transformBackendItems(rawItems))
+
+        const rawClaims = Array.isArray(claimsResponse) ? claimsResponse : claimsResponse.data ?? []
+        setClaims(transformBackendClaims(rawClaims))
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false))
   }, [])
 
   const activeItems = items.filter(i => i.status === 'Active').length
@@ -56,12 +71,12 @@ export function StaffDashboardPage({ items, userName }: StaffDashboardPageProps)
   const pendingClaims = claims.filter(c => c.status === 'pending').length
 
   const expiringItemsList = items
-    .filter(i => { const d = daysUntil(i.expires_at); return d !== null && d <= 14 && d > 0 })
-    .slice(0, 3)
+    .filter(i => { const d = daysUntil(i.expires_at); return d !== null && d <= 7 && d > 0 })
+    .slice(0, 5)
 
   const expiringCount = items.filter(i => {
     const d = daysUntil(i.expires_at)
-    return d !== null && d <= 14 && d > 0
+    return d !== null && d <= 7 && d > 0
   }).length
 
   const now = new Date()
@@ -78,10 +93,15 @@ export function StaffDashboardPage({ items, userName }: StaffDashboardPageProps)
   const pendingList = claims
     .filter(c => c.status === 'pending')
     .sort((a, b) => new Date(b.requested_at).getTime() - new Date(a.requested_at).getTime())
-    .slice(0, 4)
+    .slice(0, 5)
 
-  const getItemName = (itemId: string) =>
-    items.find(i => i.item_id === itemId)?.name ?? itemId.slice(0, 8).toUpperCase()
+  if (loading) {
+    return (
+      <main className="staff-dashboard-main" style={{ padding: '3rem', textAlign: 'center', color: '#90a4ae' }}>
+        Loading dashboard…
+      </main>
+    )
+  }
 
   return (
     <main className="staff-dashboard-main">
@@ -107,7 +127,7 @@ export function StaffDashboardPage({ items, userName }: StaffDashboardPageProps)
           <div className="staff-metric staff-metric-alert">
             <div className="staff-metric-label">Expiring soon</div>
             <div className="staff-metric-val">{expiringCount}</div>
-            <div className="staff-metric-sub">within 14 days</div>
+            <div className="staff-metric-sub">within 7 days</div>
           </div>
           <div className="staff-metric">
             <div className="staff-metric-label">Resolved this month</div>
@@ -124,13 +144,13 @@ export function StaffDashboardPage({ items, userName }: StaffDashboardPageProps)
                 <span className="staff-card-link" onClick={() => navigate('/staff/claims')} style={{ cursor: 'pointer' }}>View all →</span>
               </div>
               {pendingList.length === 0 ? (
-                <p style={{ color: '#90a4ae', fontSize: '0.85rem', padding: '0.5rem 0' }}>No pending claims</p>
+                <p style={{ color: '#90a4ae', fontSize: '0.85rem', padding: '1.5rem 1rem' }}>No pending claims</p>
               ) : (
                 pendingList.map(claim => (
                   <div key={claim.claim_id} className="staff-claim-row">
                     <div className="staff-cr-dot staff-dot-pending" />
                     <div className="staff-cr-info">
-                      <div className="staff-cr-name">{getItemName(claim.item_id)}</div>
+                      <div className="staff-cr-name">{claim.item_name}</div>
                       <div className="staff-cr-meta">{relativeTime(claim.requested_at)}</div>
                     </div>
                     <span className="staff-cr-badge staff-badge-pending">Pending</span>
@@ -145,7 +165,7 @@ export function StaffDashboardPage({ items, userName }: StaffDashboardPageProps)
                 <span className="staff-card-link" onClick={() => navigate('/staff/items')} style={{ cursor: 'pointer' }}>View all →</span>
               </div>
               {expiringItemsList.length === 0 ? (
-                <p style={{ color: '#90a4ae', fontSize: '0.85rem', padding: '0.5rem 0' }}>No items expiring soon</p>
+                <p style={{ color: '#90a4ae', fontSize: '0.85rem', padding: '1.5rem 1rem' }}>No items expiring soon</p>
               ) : (
                 expiringItemsList.map(item => {
                   const days = daysUntil(item.expires_at)!
@@ -214,7 +234,7 @@ export function StaffDashboardPage({ items, userName }: StaffDashboardPageProps)
               </div>
               <div className="staff-activity-list">
                 {recentClaims.length === 0 ? (
-                  <p style={{ color: '#90a4ae', fontSize: '0.85rem', padding: '0.5rem 0' }}>No recent activity</p>
+                  <p style={{ color: '#90a4ae', fontSize: '0.85rem', padding: '1.5rem 1rem' }}>No recent activity</p>
                 ) : (
                   recentClaims.map(claim => (
                     <div key={claim.claim_id} className="staff-activity-row">
@@ -224,7 +244,7 @@ export function StaffDashboardPage({ items, userName }: StaffDashboardPageProps)
                       />
                       <div className="staff-cr-info">
                         <div className="staff-cr-name staff-activity-text">
-                          {claimActionLabel(claim.status)}: {getItemName(claim.item_id)}
+                          {claimActionLabel(claim.status)}: {claim.item_name}
                         </div>
                         <div className="staff-cr-meta">{relativeTime(claim.requested_at)}</div>
                       </div>

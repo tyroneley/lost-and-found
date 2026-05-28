@@ -1,7 +1,11 @@
 import { prisma } from '../lib/prisma'
 
 export const getBuildings = async () => {
-  return prisma.building.findMany()
+  return prisma.building.findMany({
+    include: {
+      rooms: true
+    }
+  })
 }
 
 export const getBuildingByName = async (name: string) => {

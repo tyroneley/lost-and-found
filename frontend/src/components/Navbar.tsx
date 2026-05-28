@@ -34,6 +34,11 @@ export function Navbar({ isSignedIn = false, userName = '', userRole = 'public',
     setMenuOpen(false)
   }
 
+  const isStaffNavActive = (path: string) => {
+    if (path === '/staff') return location.pathname === '/staff'
+    return location.pathname === path || location.pathname.startsWith(`${path}/`)
+  }
+
   const getRoleLabel = (role: UserRole) => {
     const roleLabels: Record<UserRole, string> = {
       public: 'User',
@@ -81,9 +86,33 @@ export function Navbar({ isSignedIn = false, userName = '', userRole = 'public',
           
           {isSignedIn && userRole === 'staff' && (
             <>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('/staff') }}>Dashboard</a></li>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('/staff/items') }}>Items</a></li>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('/staff/claims') }}>Claims</a></li>
+              <li>
+                <a
+                  href="#"
+                  className={isStaffNavActive('/staff') ? 'navbar-link-active' : ''}
+                  onClick={(e) => { e.preventDefault(); handleNavClick('/staff') }}
+                >
+                  Dashboard
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  className={isStaffNavActive('/staff/items') ? 'navbar-link-active' : ''}
+                  onClick={(e) => { e.preventDefault(); handleNavClick('/staff/items') }}
+                >
+                  Items
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  className={isStaffNavActive('/staff/claims') ? 'navbar-link-active' : ''}
+                  onClick={(e) => { e.preventDefault(); handleNavClick('/staff/claims') }}
+                >
+                  Claims
+                </a>
+              </li>
             </>
           )}
           
@@ -123,7 +152,9 @@ export function Navbar({ isSignedIn = false, userName = '', userRole = 'public',
                   className="navbar-profile-btn"
                   onClick={() => setProfileOpen(!profileOpen)}
                 >
-                  <img src="/placeholder.png" alt="Profile" className="profile-icon" />
+                  <span className="profile-icon profile-icon-initials" aria-hidden="true">
+                    {(userName || 'U').charAt(0).toUpperCase()}
+                  </span>
                 </button>
               </div>
               

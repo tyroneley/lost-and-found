@@ -3,15 +3,30 @@ import { useNavigate } from 'react-router-dom'
 import { ItemCard } from '../components/ItemCard'
 import { createItem, getCategories, getBuildings, uploadItemPhoto } from '../services/api'
 
+interface Room {
+  room_id: string
+  room_number?: string
+  room_name: string
+}
+
+interface Building {
+  building_id: string
+  name: string
+  rooms?: Room[]
+}
+
+interface Category {
+  category_id: string
+  name: string
+}
+
 interface ReportFormState {
   itemName: string
   category: string
   colorHex: string
   description: string
-  notes: string
   building: string
-  specificLocation: string
-  roomNumber: string
+  roomId: string
   dateFound: string
   timeFound: string
   photos: File[]
@@ -84,10 +99,8 @@ export function StaffReportPage() {
     category: '',
     colorHex: '#2563eb',
     description: '',
-    notes: '',
     building: '',
-    specificLocation: '',
-    roomNumber: '',
+    roomId: '',
     dateFound: '',
     timeFound: '',
     photos: [],
@@ -98,8 +111,8 @@ export function StaffReportPage() {
 
   const [photoPreview, setPhotoPreview] = useState<string[]>([])
   const [submitting, setSubmitting] = useState(false)
-  const [categories, setCategories] = useState<any[]>([])
-  const [buildings, setBuildings] = useState<any[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
+  const [buildings, setBuildings] = useState<Building[]>([])
 
   // Fetch categories and buildings on mount
   useEffect(() => {
@@ -115,17 +128,9 @@ export function StaffReportPage() {
     fetchMetadata()
   }, [])
 
-  // const [showDebug, setShowDebug] = useState(false)
-
-  const handleInputChange = (e: React.ChangeEvent<any>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
-
-    setForm(prev => {
-      if (name === 'specificLocation' && value !== 'Room') {
-        return { ...prev, specificLocation: value, roomNumber: '' }
-      }
-      return { ...prev, [name]: value }
-    })
+    setForm(prev => ({ ...prev, [name]: value }))
   }
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -154,10 +159,7 @@ export function StaffReportPage() {
       { name: 'Description', done: !!form.description },
       {
         name: 'Location',
-        done:
-          !!form.building &&
-          !!form.specificLocation &&
-          (form.specificLocation !== 'Room' || !!form.roomNumber),
+        done: !!form.building && !!form.roomId,
       },
       { name: 'Date found', done: !!form.dateFound },
       { name: 'At least 1 photo', done: form.photos.length > 0 },
@@ -169,9 +171,17 @@ export function StaffReportPage() {
 
   const isFormComplete = getCompletionStatus().every(c => c.done)
 
-  // const handleDebugClick = () => {
-  //   setShowDebug(!showDebug)
-  // }
+  // Derive location display string from buildings state + selected roomId
+  const getLocationDisplay = (): string => {
+    if (!form.building) return 'Location'
+    const selectedBuilding = buildings.find(b => b.name === form.building)
+    const selectedRoom = selectedBuilding?.rooms?.find(r => r.room_id === form.roomId)
+    if (!selectedRoom) return form.building
+    const roomLabel = selectedRoom.room_number
+      ? `${selectedRoom.room_number} — ${selectedRoom.room_name}`
+      : selectedRoom.room_name
+    return `${form.building}, ${roomLabel}`
+  }
 
   const handleSubmit = async () => {
     if (!isFormComplete) {
@@ -190,15 +200,12 @@ export function StaffReportPage() {
       const time = form.timeFound ? `${form.timeFound}:00.000` : '00:00:00.000'
       const foundAt = `${form.dateFound}T${time}Z`
 
-      const description = form.notes
-        ? `${form.description}\n\n${form.notes}`
-        : form.description
-
       const itemData = {
         name: form.itemName,
-        description,
+        description: form.description,
         category_id: category.category_id,
         building_id: building.building_id,
+        room_id: form.roomId || undefined,
         color_hex: form.colorHex,
         found_at: foundAt,
         found_time_known: !!form.timeFound,
@@ -219,10 +226,8 @@ export function StaffReportPage() {
         category: '',
         colorHex: '#2563eb',
         description: '',
-        notes: '',
         building: '',
-        specificLocation: '',
-        roomNumber: '',
+        roomId: '',
         dateFound: '',
         timeFound: '',
         photos: [],
@@ -233,7 +238,10 @@ export function StaffReportPage() {
       setPhotoPreview([])
       navigate('/staff')
     } catch (error) {
-      alert(error instanceof Error ? error.message : 'Failed to submit item')
+      const message = error instanceof Error ? error.message : 'Failed to submit item'
+      alert(message.includes('Internal server error')
+        ? 'Server error while saving the item. Make sure you are logged in as staff and the backend is running.'
+        : message)
     } finally {
       setSubmitting(false)
     }
@@ -323,22 +331,9 @@ export function StaffReportPage() {
             </label>
             <textarea
               name="description"
-              placeholder="Describe the item in detail."
+              placeholder="Describe the item in detail, including condition, brand, model, or any other identifying information."
               value={form.description}
               onChange={handleInputChange}
-            />
-          </div>
-
-          <div className="staff-report-field">
-            <label>
-              Notes <span className="staff-report-optional">optional</span>
-            </label>
-            <textarea
-              name="notes"
-              placeholder="Any other observations."
-              value={form.notes}
-              onChange={handleInputChange}
-              className="staff-report-notes"
             />
           </div>
         </div>
@@ -365,33 +360,20 @@ export function StaffReportPage() {
               <label>
                 Specific location <span className="staff-report-required">*</span>
               </label>
-              <select name="specificLocation" value={form.specificLocation} onChange={handleInputChange}>
-                <option value="" disabled>Select room </option>
-                <option>Auditorium</option>
-                <option>Lobby</option>
-                <option>Student Lounge</option>
-                <option>Sleeping Pods</option>
-                <option>Photography Room</option>
-                <option>Meeting Room</option>
-                <option>Library</option>
-                <option>Room</option>
+              <select name="roomId" value={form.roomId} onChange={handleInputChange}>
+                <option value="" disabled>Select a room</option>
+                {form.building &&
+                  buildings
+                    .find(b => b.name === form.building)
+                    ?.rooms
+                    ?.map((room: Room) => (
+                      <option key={room.room_id} value={room.room_id}>
+                        {room.room_number ? `${room.room_number} — ${room.room_name}` : room.room_name}
+                      </option>
+                    ))
+                }
               </select>
             </div>
-            
-            {form.specificLocation === 'Room' && (
-              <div className="staff-report-field">
-                <label>
-                  Room number <span className="staff-report-required">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="roomNumber"
-                  placeholder="e.g. 602, 627"
-                  value={form.roomNumber}
-                  onChange={handleInputChange}
-                />
-              </div>
-            )}
           </div>
 
           <div className="staff-report-field-row">
@@ -488,7 +470,7 @@ export function StaffReportPage() {
           <ItemCard
             image={photoPreview[0] || ''}
             name={form.itemName || 'Item name'}
-            location={form.building ? `${form.building}${form.specificLocation ? `, ${form.specificLocation === 'Room' ? `Room ${form.roomNumber || ''}` : form.specificLocation}` : ''}` : 'Location'}
+            location={getLocationDisplay()}
             foundAt={form.dateFound || new Date().toISOString()}
             category={form.category || 'Uncategorized'}
             onClick={() => {}}
@@ -513,28 +495,6 @@ export function StaffReportPage() {
         <button className="staff-report-submit-btn" onClick={handleSubmit} disabled={!isFormComplete || submitting}>
           {submitting ? 'Submitting...' : 'Submit →'}
         </button>
-
-        {/* DEBUG START: button and panel for debug */}
-        {/* <button 
-          className="staff-report-debug-btn" 
-          onClick={handleDebugClick}
-        >
-          {showDebug ? '▼ Hide' : '▶ Show'} Debug Info
-        </button>
-
-        {showDebug && (
-          <div className="staff-report-debug-panel">
-            <label className="staff-report-debug-label">
-              JSON Payload:
-            </label>
-            <textarea
-              readOnly
-              value={JSON.stringify(generatePayload(), null, 2)}
-              className="staff-report-debug-textarea"
-            />
-          </div>
-        )} */}
-        {/* DEBUG END */}
       </div>
     </div>
   )

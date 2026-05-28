@@ -1,6 +1,7 @@
 import {
   createClaim,
   getClaims,
+  getClaimById,
   updateClaimStatus,
   deleteClaim
 } from '../services/claim.service'
@@ -30,7 +31,11 @@ export const createClaimHandler = async (c: any) => {
 export const getClaimsHandler = async (c: any) => {
   try {
     const payload = c.get('jwtPayload') as AuthPayload
-    const query = claimQuerySchema.parse(c.req.query())
+    const rawQuery = c.req.query()
+    const query = claimQuerySchema.parse({
+      ...rawQuery,
+      search: rawQuery.search ?? rawQuery.q
+    })
 
     if (payload.role === 'PUBLIC') {
       query.user_id = payload.sub
@@ -39,6 +44,16 @@ export const getClaimsHandler = async (c: any) => {
     const claims = await getClaims(query)
 
     return c.json(claims)
+  } catch (error) {
+    return handleError(c, error)
+  }
+}
+
+export const getClaimByIdHandler = async (c: any) => {
+  try {
+    const params = idParamSchema.parse({ id: c.req.param('id') })
+    const claim = await getClaimById(params.id)
+    return c.json(claim)
   } catch (error) {
     return handleError(c, error)
   }

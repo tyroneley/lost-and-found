@@ -40,7 +40,6 @@ export function MyClaimsPage({ isSignedIn: _isSignedIn }: { items?: Item[]; isSi
         
         // Transform backend claims to frontend format
         const transformedClaims = (claimsData as any[]).map((claim: any) => {
-          // Format room display
           const room = claim.item?.room
           let roomDisplay = 'Unknown'
           if (room) {
@@ -52,7 +51,10 @@ export function MyClaimsPage({ isSignedIn: _isSignedIn }: { items?: Item[]; isSi
               roomDisplay = room.room_name
             }
           }
-          
+          const photos: string[] = claim.item?.photos?.map((p: any) =>
+            p.storage_url.startsWith('http') ? p.storage_url : `${api.API_URL}${p.storage_url}`
+          ) ?? []
+
           return {
             claim_id: claim.claim_id,
             item_id: claim.item_id,
@@ -60,8 +62,8 @@ export function MyClaimsPage({ isSignedIn: _isSignedIn }: { items?: Item[]; isSi
             item_location: roomDisplay,
             item_found_at: claim.item?.found_at || new Date().toISOString(),
             item_category: claim.item?.category?.name || 'Other',
-            item_image: '/placeholder.png', // TODO: Get from item.photos
-            status: claim.status.toLowerCase() as 'pending' | 'approved' | 'rejected' | 'collected',
+            item_image: photos[0] || '',
+            status: claim.status.toLowerCase() as Claim['status'],
             ownership_desc: claim.ownership_desc,
             staff_notes: claim.staff_notes,
             requested_at: claim.requested_at,

@@ -10,6 +10,9 @@ import { SignUpPage } from './pages/SignUpPage'
 import { StaffReportPage } from './pages/StaffReportPage'
 import { StaffDashboardPage } from './pages/StaffDashboardPage'
 import { StaffItemsPage } from './pages/StaffItemsPage'
+import { StaffItemDetailsPage } from './pages/StaffItemDetailsPage'
+import { StaffClaimsPage } from './pages/StaffClaimsPage'
+import { StaffClaimReviewPage } from './pages/StaffClaimReviewPage'
 import { ClaimPage } from './pages/ClaimPage'
 import { MyClaimsPage } from './pages/MyClaimsPage'
 import * as api from './services/api'
@@ -53,6 +56,17 @@ function App() {
   const [, setLoading] = useState(true)
   const [, setError] = useState<string | null>(null)
 
+  // Restore login session from localStorage (token + user)
+  useEffect(() => {
+    const saved = api.loadAuthSession()
+    if (saved && localStorage.getItem('auth_token')) {
+      setUserName(saved.name)
+      setUserEmail(saved.email)
+      setUserRole(saved.role)
+      setIsSignedIn(true)
+    }
+  }, [])
+
   // Fetch items from backend on component mount
   useEffect(() => {
     const fetchItems = async () => {
@@ -79,6 +93,7 @@ function App() {
   }, [])
 
   const handleLogout = () => {
+    api.logout()
     setIsSignedIn(false)
     setUserName('')
     setUserEmail('')
@@ -103,8 +118,11 @@ function App() {
         <Route path="/my-claims" element={<MyClaimsPage items={items} isSignedIn={isSignedIn} />} />
         <Route path="/login" element={<LoginPage onLoginSuccess={handleLoginSuccess} />} />
         <Route path="/signup" element={<SignUpPage onSignUpSuccess={(name) => handleLoginSuccess(name, 'public')} />} />
-        <Route path="/staff" element={<StaffDashboardPage items={items} userName={userName} />} />
+        <Route path="/staff" element={<StaffDashboardPage userName={userName} />} />
         <Route path="/staff/items" element={<StaffItemsPage />} />
+        <Route path="/staff/items/:id" element={<StaffItemDetailsPage />} />
+        <Route path="/staff/claims" element={<StaffClaimsPage />} />
+        <Route path="/staff/claims/:claim_id" element={<StaffClaimReviewPage />} />
         <Route path="/staff/report" element={<StaffReportPage />} />
       </Routes>
     </>

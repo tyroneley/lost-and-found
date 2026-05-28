@@ -23,7 +23,7 @@ itemRoutes.get('/:id', getItemByIdHandler)
 
 // Protected endpoints - require auth
 itemRoutes.use('/*', authMiddleware)
-itemRoutes.post('/', createItemHandler)
+itemRoutes.post('/', requireRole(['STAFF', 'SUPERADMIN']), createItemHandler)
 
 // Photo sub-routes registered before /:id to avoid pattern ambiguity
 itemRoutes.post('/:id/photos/upload', requireRole(['STAFF', 'SUPERADMIN']), uploadPhotoHandler)

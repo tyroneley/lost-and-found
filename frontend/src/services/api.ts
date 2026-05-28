@@ -137,14 +137,38 @@ export async function register(
   })
 }
 
-// Log out - just clear the saved token
-export function logout(): void {
-  clearAuthToken()
+const AUTH_USER_KEY = 'auth_user'
+
+export interface StoredAuthUser {
+  name: string
+  email: string
+  role: 'public' | 'staff' | 'superadmin'
 }
 
-// After login or signup, save the token they gave us
+// Log out - clear token and saved user
+export function logout(): void {
+  clearAuthToken()
+  localStorage.removeItem(AUTH_USER_KEY)
+}
+
+// After login or signup, save the token and user for session restore
 export function storeAuthToken(token: string): void {
   setAuthToken(token)
+}
+
+export function storeAuthSession(token: string, user: StoredAuthUser): void {
+  setAuthToken(token)
+  localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user))
+}
+
+export function loadAuthSession(): StoredAuthUser | null {
+  const raw = localStorage.getItem(AUTH_USER_KEY)
+  if (!raw) return null
+  try {
+    return JSON.parse(raw) as StoredAuthUser
+  } catch {
+    return null
+  }
 }
 
 // Item stuff - browse, view, create, manage lost items
@@ -235,8 +259,51 @@ export async function getUserClaims(): Promise<PaginatedResponse<Claim>> {
 }
 
 // Get all claims in the system (staff/admin only)
-export async function getAllClaims(): Promise<PaginatedResponse<Claim>> {
-  return apiFetch('/claims')
+export async function getAllClaims(filters?: {
+  limit?: number
+  status?: string
+  category?: string
+  search?: string
+  item_id?: string
+}): Promise<PaginatedResponse<Claim>> {
+  const queryParams = new URLSearchParams()
+  if (filters?.limit) queryParams.append('limit', String(filters.limit))
+  if (filters?.status) queryParams.append('status', filters.status.toUpperCase())
+  if (filters?.category) queryParams.append('category', filters.category)
+  if (filters?.search) queryParams.append('search', filters.search)
+  if (filters?.item_id) queryParams.append('item_id', filters.item_id)
+  const qs = queryParams.toString()
+  return apiFetch(`/claims${qs ? `?${qs}` : ''}`)
+}
+
+export async function getClaimById(claimId: string): Promise<unknown> {
+  return apiFetch(`/claims/${claimId}`)
+}
+
+export async function patchClaimStatus(
+  claimId: string,
+  status: 'APPROVED' | 'REJECTED' | 'COLLECTED',
+  staffNotes?: string
+): Promise<unknown> {
+  return apiFetch(`/claims/${claimId}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({
+      status,
+      ...(staffNotes !== undefined ? { staff_notes: staffNotes } : {}),
+    }),
+  })
+}
+
+export interface AuditLogApiEntry {
+  log_id: string
+  action: string
+  created_at: string
+  notes?: string | null
+  user?: { name: string }
+}
+
+export async function getAuditLog(itemId: string): Promise<{ data: AuditLogApiEntry[] }> {
+  return apiFetch(`/audit-log?item_id=${encodeURIComponent(itemId)}`)
 }
 
 // Staff approves a user's claim - they can now collect the item

@@ -118,7 +118,7 @@ const MOCK_ITEMS = [
     finder_name: "John Smith",
     finder_contact: "john@example.com",
     finder_affiliation: "Student",
-    found_at: new Date("2025-05-15T10:30:00"),
+    found_at: new Date("2026-05-15T10:30:00"),
     found_time_known: true,
     status: "CLAIMED" as const, // Has PENDING claim
   },
@@ -133,7 +133,7 @@ const MOCK_ITEMS = [
     finder_name: "Maya Sari",
     finder_contact: "maya@example.com",
     finder_affiliation: "Staff",
-    found_at: new Date("2025-05-16T14:00:00"),
+    found_at: new Date("2026-05-16T14:00:00"),
     found_time_known: true,
     status: "CLAIMED" as const, // Has APPROVED claim
   },
@@ -148,7 +148,7 @@ const MOCK_ITEMS = [
     finder_name: "Ahmad Rahmat",
     finder_contact: "ahmad@example.com",
     finder_affiliation: "Student",
-    found_at: new Date("2025-05-17T11:45:00"),
+    found_at: new Date("2026-05-17T11:45:00"),
     found_time_known: true,
     status: "COLLECTED" as const, // Has COLLECTED claim
   },
@@ -163,7 +163,7 @@ const MOCK_ITEMS = [
     finder_name: "Budi Wijaya",
     finder_contact: "budi@example.com",
     finder_affiliation: "Staff",
-    found_at: new Date("2025-05-18T06:30:00"),
+    found_at: new Date("2026-05-18T06:30:00"),
     found_time_known: true,
     status: "CLAIMED" as const, // Has PENDING claim
   },
@@ -178,7 +178,7 @@ const MOCK_ITEMS = [
     finder_name: "Siti Nurhaliza",
     finder_contact: "siti@example.com",
     finder_affiliation: "Student",
-    found_at: new Date("2025-05-19T16:20:00"),
+    found_at: new Date("2026-05-19T16:20:00"),
     found_time_known: true,
     status: "ACTIVE" as const, // Has REJECTED claim but reverts to ACTIVE
   },
@@ -193,7 +193,7 @@ const MOCK_ITEMS = [
     finder_name: "Rudi Hartono",
     finder_contact: "rudi@example.com",
     finder_affiliation: "Student",
-    found_at: new Date("2025-05-20T15:00:00"),
+    found_at: new Date("2026-05-20T15:00:00"),
     found_time_known: true,
     status: "ACTIVE" as const, // No claims
   },
@@ -208,7 +208,7 @@ const MOCK_ITEMS = [
     finder_name: "Eka Putri",
     finder_contact: "eka@example.com",
     finder_affiliation: "Student",
-    found_at: new Date("2025-05-14T09:00:00"),
+    found_at: new Date("2026-05-14T09:00:00"),
     found_time_known: true,
     status: "COLLECTED" as const, // Has COLLECTED claim
   },
@@ -223,7 +223,7 @@ const MOCK_ITEMS = [
     finder_name: "Dina Kusuma",
     finder_contact: "dina@example.com",
     finder_affiliation: "Student",
-    found_at: new Date("2025-05-13T17:30:00"),
+    found_at: new Date("2026-05-13T17:30:00"),
     found_time_known: true,
     status: "ACTIVE" as const, // No claims
   },
@@ -238,7 +238,7 @@ const MOCK_ITEMS = [
     finder_name: "Pak Jito",
     finder_contact: "jito@example.com",
     finder_affiliation: "Staff",
-    found_at: new Date("2025-03-15T10:00:00"), // Old date - past 30 days
+    found_at: new Date("2026-05-01T10:00:00"), // Old date - approaching 30 days
     found_time_known: true,
     status: "RETURNED" as const, // Past expiry, returned to finder
   },
@@ -253,7 +253,7 @@ const MOCK_ITEMS = [
     finder_name: "Ibu Santi",
     finder_contact: "santi@example.com",
     finder_affiliation: "Staff",
-    found_at: new Date("2025-03-20T14:30:00"), // Old date - past 30 days
+    found_at: new Date("2026-05-02T14:30:00"), // Old date - approaching 30 days
     found_time_known: true,
     status: "RETURNED" as const, // Past expiry, returned to finder
   },
@@ -269,7 +269,7 @@ const MOCK_ITEMS = [
     finder_name: "Rani Setia",
     finder_contact: "rani@example.com",
     finder_affiliation: "Student",
-    found_at: new Date("2025-05-21T12:00:00"),
+    found_at: new Date("2026-05-21T12:00:00"),
     found_time_known: true,
     status: "ACTIVE" as const,
   },
@@ -284,7 +284,7 @@ const MOCK_ITEMS = [
     finder_name: "Bambang Kusuma",
     finder_contact: "bambang@example.com",
     finder_affiliation: "Staff",
-    found_at: new Date("2025-05-20T10:30:00"),
+    found_at: new Date("2026-05-20T10:30:00"),
     found_time_known: true,
     status: "ACTIVE" as const,
   },
@@ -299,7 +299,7 @@ const MOCK_ITEMS = [
     finder_name: "Lina Wijaya",
     finder_contact: "lina@example.com",
     finder_affiliation: "Student",
-    found_at: new Date("2025-05-19T13:15:00"),
+    found_at: new Date("2026-05-19T13:15:00"),
     found_time_known: true,
     status: "ACTIVE" as const,
   },
@@ -314,7 +314,7 @@ const MOCK_ITEMS = [
     finder_name: "Reza Maulana",
     finder_contact: "reza@example.com",
     finder_affiliation: "Student",
-    found_at: new Date("2025-05-21T09:45:00"),
+    found_at: new Date("2026-05-21T09:45:00"),
     found_time_known: true,
     status: "CLAIMED" as const,
   },
@@ -329,7 +329,7 @@ const MOCK_ITEMS = [
     finder_name: "Hendra Prabowo",
     finder_contact: "hendra@example.com",
     finder_affiliation: "Staff",
-    found_at: new Date("2025-05-18T11:20:00"),
+    found_at: new Date("2026-05-18T11:20:00"),
     found_time_known: true,
     status: "ACTIVE" as const,
   },
@@ -344,7 +344,7 @@ const MOCK_ITEMS = [
     finder_name: "Dewi Lestari",
     finder_contact: "dewi@example.com",
     finder_affiliation: "Student",
-    found_at: new Date("2025-05-17T14:00:00"),
+    found_at: new Date("2026-05-17T14:00:00"),
     found_time_known: true,
     status: "CLAIMED" as const,
   },
@@ -359,7 +359,7 @@ const MOCK_ITEMS = [
     finder_name: "Arief Gunawan",
     finder_contact: "arief@example.com",
     finder_affiliation: "Student",
-    found_at: new Date("2025-05-16T08:30:00"),
+    found_at: new Date("2026-05-16T08:30:00"),
     found_time_known: true,
     status: "ACTIVE" as const,
   },
@@ -374,7 +374,7 @@ const MOCK_ITEMS = [
     finder_name: "Nita Suryani",
     finder_contact: "nita@example.com",
     finder_affiliation: "Student",
-    found_at: new Date("2025-05-15T15:45:00"),
+    found_at: new Date("2026-05-15T15:45:00"),
     found_time_known: true,
     status: "CLAIMED" as const,
   },
@@ -389,7 +389,7 @@ const MOCK_ITEMS = [
     finder_name: "Agus Hermawan",
     finder_contact: "agus@example.com",
     finder_affiliation: "Staff",
-    found_at: new Date("2025-05-20T16:00:00"),
+    found_at: new Date("2026-05-20T16:00:00"),
     found_time_known: true,
     status: "ACTIVE" as const,
   },
@@ -404,7 +404,7 @@ const MOCK_ITEMS = [
     finder_name: "Linda Astuti",
     finder_contact: "linda@example.com",
     finder_affiliation: "Student",
-    found_at: new Date("2025-05-19T10:15:00"),
+    found_at: new Date("2026-05-19T10:15:00"),
     found_time_known: true,
     status: "ACTIVE" as const,
   },
@@ -419,7 +419,7 @@ const MOCK_ITEMS = [
     finder_name: "Tono Wijaya",
     finder_contact: "tono@example.com",
     finder_affiliation: "Student",
-    found_at: new Date("2025-05-21T11:30:00"),
+    found_at: new Date("2026-05-21T11:30:00"),
     found_time_known: true,
     status: "ACTIVE" as const,
   },
@@ -432,15 +432,15 @@ const MOCK_CLAIMS = [
     claimerIndex: 0, // Test Claimer 1
     ownership_desc: "I bought these AirPods last month and lost them at the library yesterday",
     status: "PENDING" as const,
-    requested_at: new Date("2025-05-15T11:00:00"),
+    requested_at: new Date("2026-05-15T11:00:00"),
   },
   {
     itemIndex: 1, // Blue Backpack
     claimerIndex: 1, // Test Claimer 2
     ownership_desc: "This is my blue Nike backpack with all my textbooks inside",
     status: "APPROVED" as const,
-    requested_at: new Date("2025-05-16T14:30:00"),
-    decision_at: new Date("2025-05-16T16:00:00"),
+    requested_at: new Date("2026-05-16T14:30:00"),
+    decision_at: new Date("2026-05-16T16:00:00"),
     approved_by: 2, // Staff Approver
     staff_notes: "Verified ownership - ID and receipts provided",
   },
@@ -449,26 +449,26 @@ const MOCK_CLAIMS = [
     claimerIndex: 0, // Test Claimer 1
     ownership_desc: "My black leather wallet with my student ID inside",
     status: "COLLECTED" as const,
-    requested_at: new Date("2025-05-17T12:00:00"),
-    decision_at: new Date("2025-05-17T13:30:00"),
-    resolved_at: new Date("2025-05-17T15:00:00"),
+    requested_at: new Date("2026-05-17T12:00:00"),
+    decision_at: new Date("2026-05-17T13:30:00"),
+    resolved_at: new Date("2026-05-17T15:00:00"),
     approved_by: 2, // Staff Approver
-    staff_notes: "Collected by claimer on 17/05/2025",
+    staff_notes: "Collected by claimer on 17/05/2026",
   },
   {
     itemIndex: 3, // Red Sports Watch
     claimerIndex: 1, // Test Claimer 2
     ownership_desc: "My smartwatch that I wore to the gym, has my fitness data",
     status: "PENDING" as const,
-    requested_at: new Date("2025-05-18T07:00:00"),
+    requested_at: new Date("2026-05-18T07:00:00"),
   },
   {
     itemIndex: 4, // Gray Hoodie
     claimerIndex: 0, // Test Claimer 1
     ownership_desc: "Lost my Adidas hoodie during basketball practice",
     status: "REJECTED" as const,
-    requested_at: new Date("2025-05-19T16:45:00"),
-    decision_at: new Date("2025-05-19T17:30:00"),
+    requested_at: new Date("2026-05-19T16:45:00"),
+    decision_at: new Date("2026-05-19T17:30:00"),
     staff_notes: "Unable to verify ownership - no distinguishing marks or receipts",
     approved_by: 2, // Staff Approver
   },
@@ -477,7 +477,7 @@ const MOCK_CLAIMS = [
     claimerIndex: 0, // Test Claimer 1
     ownership_desc: "My Dell XPS 13 laptop with my work files on it",
     status: "COLLECTED" as const,
-    requested_at: new Date("2025-05-14T10:00:00"),
+    requested_at: new Date("2026-05-14T10:00:00"),
     decision_at: new Date("2025-05-14T11:00:00"),
     resolved_at: new Date("2025-05-14T12:00:00"),
     approved_by: 2, // Staff Approver
@@ -583,7 +583,7 @@ async function seedMockData() {
     }
     console.log(`    ✓ Verified ${roomsCreated} mock rooms`);
 
-    // 4. Create mock items
+    // 4. Create mock items (idempotent - won't duplicate if re-run)
     console.log("  → Creating mock items...");
     const createdItems = [];
     for (const itemData of MOCK_ITEMS) {
@@ -598,92 +598,117 @@ async function seedMockData() {
         continue;
       }
 
-      const item = await prisma.item.create({
-        data: {
+      // Check if item already exists (idempotent)
+      let item = await prisma.item.findFirst({
+        where: {
           name: itemData.name,
-          description: itemData.description,
-          color_hex: itemData.color_hex,
-          color_bucket: itemData.color_bucket,
-          category_id: category.category_id,
           building_id: building.building_id,
           room_id: roomId,
-          finder_name: itemData.finder_name,
-          finder_contact: itemData.finder_contact,
-          finder_affiliation: itemData.finder_affiliation,
-          found_at: itemData.found_at,
-          found_time_known: itemData.found_time_known,
-          expires_at: new Date(itemData.found_at.getTime() + 30 * 24 * 60 * 60 * 1000), // 30 days
-          recorded_by: testUsers[2].user_id, // Test Staff Approver records items
-          status: itemData.status, // Use status from MOCK_ITEMS
         },
       });
+
+      // Only create if doesn't exist
+      if (!item) {
+        item = await prisma.item.create({
+          data: {
+            name: itemData.name,
+            description: itemData.description,
+            color_hex: itemData.color_hex,
+            color_bucket: itemData.color_bucket,
+            category_id: category.category_id,
+            building_id: building.building_id,
+            room_id: roomId,
+            finder_name: itemData.finder_name,
+            finder_contact: itemData.finder_contact,
+            finder_affiliation: itemData.finder_affiliation,
+            found_at: itemData.found_at,
+            found_time_known: itemData.found_time_known,
+            expires_at: new Date(itemData.found_at.getTime() + 30 * 24 * 60 * 60 * 1000), // 30 days
+            recorded_by: testUsers[2].user_id, // Test Staff Approver records items
+            status: itemData.status, // Use status from MOCK_ITEMS
+          },
+        });
+
+        // Add mock photo for new item
+        await prisma.itemPhoto.create({
+          data: {
+            item_id: item.item_id,
+            storage_url: "/placeholder.png", // Using placeholder
+            mime_type: "image/png",
+          },
+        });
+      }
       createdItems.push(item);
-
-      // Add mock photo for each item
-      await prisma.itemPhoto.create({
-        data: {
-          item_id: item.item_id,
-          storage_url: "/placeholder.png", // Using placeholder
-          mime_type: "image/png",
-        },
-      });
     }
-    console.log(`    ✓ Created ${createdItems.length} mock items with photos`);
+    console.log(`    ✓ Verified ${createdItems.length} mock items with photos`);
 
-    // 5. Create mock claims
+    // 5. Create mock claims (idempotent)
     console.log("  → Creating mock claims...");
     let claimsCreated = 0;
     for (const claimData of MOCK_CLAIMS) {
       const item = createdItems[claimData.itemIndex];
       const claimer = testUsers[claimData.claimerIndex];
 
-      const claim = await prisma.claimRequest.create({
-        data: {
+      if (!item) continue;
+
+      // Check if claim already exists
+      const existingClaim = await prisma.claimRequest.findFirst({
+        where: {
           item_id: item.item_id,
           claimer_id: claimer.user_id,
-          status: claimData.status,
-          ownership_desc: claimData.ownership_desc,
-          staff_notes: claimData.staff_notes,
-          requested_at: claimData.requested_at,
-          decision_at: claimData.decision_at || null,
-          resolved_at: claimData.resolved_at || null,
         },
       });
 
-      // Create audit log for claim
-      if (claimData.status !== "PENDING") {
-        const approver = testUsers[claimData.approved_by || 2];
-        
-        // Determine new status based on claim status
-        let auditAction = "APPROVE";
-        let newItemStatus: "ACTIVE" | "CLAIMED" | "COLLECTED" | "RETURNED" = "ACTIVE";
-        
-        if (claimData.status === "REJECTED") {
-          auditAction = "REJECT";
-          newItemStatus = "ACTIVE";
-        } else if (claimData.status === "COLLECTED") {
-          auditAction = "APPROVE";
-          newItemStatus = "COLLECTED";
-        } else if (claimData.status === "APPROVED") {
-          auditAction = "APPROVE";
-          newItemStatus = "CLAIMED";
-        }
-        
-        await prisma.auditLog.create({
+      // Only create if doesn't exist
+      if (!existingClaim) {
+        const claim = await prisma.claimRequest.create({
           data: {
             item_id: item.item_id,
-            changed_by: approver.user_id,
-            action: auditAction as any,
-            old_status: "ACTIVE",
-            new_status: newItemStatus,
-            notes: `Claim ${claimData.status.toLowerCase()}: ${claimData.ownership_desc}`,
+            claimer_id: claimer.user_id,
+            status: claimData.status,
+            ownership_desc: claimData.ownership_desc,
+            staff_notes: claimData.staff_notes,
+            requested_at: claimData.requested_at,
+            decision_at: claimData.decision_at || null,
+            resolved_at: claimData.resolved_at || null,
           },
         });
-      }
 
-      claimsCreated++;
+        // Create audit log for claim
+        if (claimData.status !== "PENDING") {
+          const approver = testUsers[claimData.approved_by || 2];
+          
+          // Determine new status based on claim status
+          let auditAction = "APPROVE";
+          let newItemStatus: "ACTIVE" | "CLAIMED" | "COLLECTED" | "RETURNED" = "ACTIVE";
+          
+          if (claimData.status === "REJECTED") {
+            auditAction = "REJECT";
+            newItemStatus = "ACTIVE";
+          } else if (claimData.status === "COLLECTED") {
+            auditAction = "APPROVE";
+            newItemStatus = "COLLECTED";
+          } else if (claimData.status === "APPROVED") {
+            auditAction = "APPROVE";
+            newItemStatus = "CLAIMED";
+          }
+          
+          await prisma.auditLog.create({
+            data: {
+              item_id: item.item_id,
+              changed_by: approver.user_id,
+              action: auditAction as any,
+              old_status: "ACTIVE",
+              new_status: newItemStatus,
+              notes: `Claim ${claimData.status.toLowerCase()}: ${claimData.ownership_desc}`,
+            },
+          });
+        }
+
+        claimsCreated++;
+      }
     }
-    console.log(`    ✓ Created ${claimsCreated} mock claims`);
+    console.log(`    ✓ Verified ${claimsCreated} mock claims`);
 
     console.log("\n✨ Mock data seeded successfully!\n");
     console.log("📝 Test Users:");

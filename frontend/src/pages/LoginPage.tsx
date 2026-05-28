@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { UserRole } from '../App'
-import { login, storeAuthToken } from '../services/api'
+import { login, storeAuthSession } from '../services/api'
 
 interface LoginPageProps {
   onLoginSuccess: (name: string, email: string, role: UserRole) => void;
@@ -33,7 +33,11 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
     try {
       const response = await login(email, password)
       // Save token for future requests
-      storeAuthToken(response.token)
+      storeAuthSession(response.token, {
+        name: response.user.name,
+        email: response.user.email,
+        role: response.user.role as UserRole,
+      })
       onLoginSuccess(response.user.name, response.user.email, response.user.role as UserRole)
       if (response.user.role === 'staff' || response.user.role === 'superadmin') {
         navigate('/staff')

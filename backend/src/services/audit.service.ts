@@ -10,3 +10,12 @@ export const logAudit = (params: {
   notes?: string
 }) =>
   prisma.auditLog.create({ data: params })
+
+export const getAuditLogsByItemId = async (item_id: string) =>
+  prisma.auditLog.findMany({
+    where: { item_id },
+    orderBy: { created_at: 'desc' },
+    include: {
+      user: { select: { name: true } }
+    }
+  })

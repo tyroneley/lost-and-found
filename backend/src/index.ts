@@ -13,7 +13,8 @@ import categoryRoutes from './routes/category.routes'
 import userRoutes from './routes/user.routes'
 import { getBuildingsHandler } from './controllers/building.controller'
 import { prisma } from './lib/prisma'
-import { issueToken, authMiddleware, type AuthPayload } from './middleware/auth'
+import { issueToken, authMiddleware, requireRole, type AuthPayload } from './middleware/auth'
+import { getAuditLogsByItemId } from './services/audit.service'
 import { handleError } from './utils/errorHandler'
 import { expireItems } from './services/expiration.service'
 import { getClaims } from './services/claim.service'
@@ -184,6 +185,19 @@ app.get('/user/claims', authMiddleware, async (c) => {
 
     const claims = await getClaims({ user_id: jwtPayload.sub })
     return c.json(claims)
+  } catch (error) {
+    return handleError(c, error)
+  }
+})
+
+app.get('/audit-log', authMiddleware, requireRole(['STAFF', 'SUPERADMIN']), async (c) => {
+  try {
+    const item_id = c.req.query('item_id')
+    if (!item_id) {
+      return c.json({ error: 'item_id is required' }, 400)
+    }
+    const logs = await getAuditLogsByItemId(item_id)
+    return c.json({ data: logs })
   } catch (error) {
     return handleError(c, error)
   }
