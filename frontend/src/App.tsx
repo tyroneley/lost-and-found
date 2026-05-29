@@ -114,7 +114,7 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage items={items} />} />
         <Route path="/browse" element={<BrowsePage items={items} />} />
-        <Route path="/items/:id" element={<ItemDetailsPage items={items} isSignedIn={isSignedIn} />} />
+        <Route path="/items/:id" element={<ItemDetailsPage isSignedIn={isSignedIn} />} />
         <Route path="/items/:itemId/claim" element={<ClaimPage items={items} userName={userName} userEmail={userEmail} />} />
         <Route path="/my-claims" element={<MyClaimsPage items={items} isSignedIn={isSignedIn} />} />
         <Route path="/login" element={<LoginPage onLoginSuccess={handleLoginSuccess} />} />

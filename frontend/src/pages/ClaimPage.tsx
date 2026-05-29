@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Item } from '../App'
+import { claimItem } from '../services/api'
 import { Stepper } from '../components/Stepper'
 import { ItemStrip } from '../components/ItemStrip'
 
@@ -86,6 +87,7 @@ function StepReview({
   onSubmit,
   userName,
   userEmail,
+  isSubmitting,
 }: {
   item: Item
   form: ClaimFormState
@@ -93,6 +95,7 @@ function StepReview({
   onSubmit: () => void
   userName?: string
   userEmail?: string
+  isSubmitting?: boolean
 }) {
   const user = { name: userName || 'Guest User', email: userEmail || 'user@example.com' }
 
@@ -117,11 +120,7 @@ function StepReview({
           </div>
           <div className="claim-review-row">
             <span className="claim-review-key">Item ID</span>
-            <span className="claim-review-val claim-mono">ITEM-{String(item.id).padStart(5, '0')}</span>
-          </div>
-          <div className="claim-review-row">
-            <span className="claim-review-key">Collect from</span>
-            <span className="claim-review-val">{item.finder.affiliation}, {item.building}</span>
+            <span className="claim-review-val claim-mono">ITEM-{item.item_id.slice(0, 8).toUpperCase()}</span>
           </div>
         </div>
       </div>
@@ -149,8 +148,8 @@ function StepReview({
         <button className="btn btn-secondary-light" onClick={onBack}>
           ← Back
         </button>
-        <button className="btn btn-primary-dark" onClick={onSubmit}>
-          Submit claim →
+        <button className="btn btn-primary-dark" onClick={onSubmit} disabled={isSubmitting}>
+          {isSubmitting ? 'Submitting...' : 'Submit claim →'}
         </button>
       </div>
     </div>
@@ -158,6 +157,8 @@ function StepReview({
 }
 
 function StepConfirm({ claimRef, onDone }: { claimRef: string; onDone: () => void }) {
+  const navigate = useNavigate()
+
   return (
     <div className="claim-step claim-step-confirm">
       <div className="claim-success-icon">
@@ -211,7 +212,7 @@ function StepConfirm({ claimRef, onDone }: { claimRef: string; onDone: () => voi
         <button
           className="btn btn-secondary-light"
           style={{ width: '100%' }}
-          onClick={onDone}
+          onClick={() => navigate('/my-claims')}
         >
           View my claims
         </button>
@@ -241,16 +242,30 @@ export function ClaimPage({ items, userName, userEmail }: { items: Item[]; userN
     additionalProof: '',
   })
   const [claimRef, setClaimRef] = useState('')
+  const [error, setError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setForm(prev => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = () => {
-    const ref = `CLM-${Date.now().toString().slice(-8)}`
-    setClaimRef(ref)
-    setStep(3)
+  const handleSubmit = async () => {
+    setError('')
+    setIsSubmitting(true)
+    try {
+      if (!itemId) {
+        setError('Item ID not found')
+        return
+      }
+      const response = await claimItem(itemId, form.ownershipDesc)
+      const ref = `CLM-${response.claim_id.slice(0, 8).toUpperCase()}`
+      setClaimRef(ref)
+      setStep(3)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to submit claim')
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -274,6 +289,7 @@ export function ClaimPage({ items, userName, userEmail }: { items: Item[]; userN
           {step < 3 && <Stepper current={step} />}
 
           <div className="claim-content">
+            {error && <div className="auth-error" style={{ marginBottom: '1.5rem' }}>{error}</div>}
             {step === 1 && (
               <StepOwnership
                 item={item}
@@ -291,6 +307,7 @@ export function ClaimPage({ items, userName, userEmail }: { items: Item[]; userN
                 onSubmit={handleSubmit}
                 userName={userName}
                 userEmail={userEmail}
+                isSubmitting={isSubmitting}
               />
             )}
             {step === 3 && (

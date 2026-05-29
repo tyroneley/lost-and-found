@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { ItemCard } from '../components/ItemCard'
 import { Item } from '../App'
 import { getCategories, getItems } from '../services/api'
@@ -7,6 +7,7 @@ import { transformBackendItems } from '../utils/transformData'
 
 export function BrowsePage({ items: propItems }: { items: Item[] }) {
   const navigate = useNavigate()
+  const location = useLocation()
   const [items, setItems] = useState<Item[]>(propItems)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
@@ -41,6 +42,16 @@ export function BrowsePage({ items: propItems }: { items: Item[] }) {
     fetchLatestItems()
   }, [propItems])
 
+  // Initialize searchTerm from URL query `q` so searches from HomePage persist
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    const q = params.get('q') || ''
+    if (q) {
+      setSearchTerm(q)
+      setCurrentPage(1)
+    }
+  }, [location.search])
+
   // Fetch categories on mount
   useEffect(() => {
     const fetchData = async () => {
@@ -71,7 +82,8 @@ export function BrowsePage({ items: propItems }: { items: Item[] }) {
       const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            item.description.toLowerCase().includes(searchTerm.toLowerCase())
       const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(item.category)
-      const matchesColor = selectedColors.length === 0 || selectedColors.includes(item.color)
+      const itemColorLabel = item.color?.toLowerCase() || ''
+      const matchesColor = selectedColors.length === 0 || selectedColors.some(color => color.toLowerCase() === itemColorLabel)
       const matchesLocation = selectedLocations.length === 0 || selectedLocations.includes(item.found_location)
       const matchesRoom = !filterByRoom || (item.found_location.match(/^Room \d+/) && (!roomNumber || item.found_location.includes(`Room ${roomNumber}`)))
       

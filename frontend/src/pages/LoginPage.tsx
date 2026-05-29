@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { UserRole } from '../App'
 import { login, storeAuthSession } from '../services/api'
 
@@ -9,6 +9,7 @@ interface LoginPageProps {
 
 export function LoginPage({ onLoginSuccess }: LoginPageProps) {
   const navigate = useNavigate()
+  const location = useLocation()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -40,7 +41,38 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
         role: response.user.role as UserRole,
       })
       onLoginSuccess(response.user.name, response.user.email, response.user.role as UserRole)
-      if (response.user.role === 'staff' || response.user.role === 'superadmin') {
+      
+      // Check for returnTo in query params or localStorage (hybrid approach)
+      const params = new URLSearchParams(location.search)
+      let returnToRaw = params.get('returnTo') || localStorage.getItem('returnTo')
+
+      if (returnToRaw) {
+        // Clear stored value
+        localStorage.removeItem('returnTo')
+
+        // Try to decode in case it's URL-encoded
+        try {
+          returnToRaw = decodeURIComponent(returnToRaw)
+        } catch (e) {
+          // ignore
+        }
+
+        // If an absolute URL was stored, extract the path+search
+        if (returnToRaw.startsWith('http')) {
+          try {
+            const u = new URL(returnToRaw)
+            returnToRaw = u.pathname + u.search
+          } catch (e) {
+            // ignore and navigate to root as fallback
+            navigate('/')
+          }
+        }
+
+        // Normalize to a leading slash
+        if (!returnToRaw.startsWith('/')) returnToRaw = '/' + returnToRaw
+
+        navigate(returnToRaw)
+      } else if (response.user.role === 'staff' || response.user.role === 'superadmin') {
         navigate('/staff')
       } else {
         navigate('/')

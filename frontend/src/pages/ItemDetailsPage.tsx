@@ -1,21 +1,60 @@
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Item } from '../App'
+import { getItemById } from '../services/api'
+import { transformBackendItem } from '../utils/transformData'
 
-export function ItemDetailsPage({ items, isSignedIn }: { items: Item[]; isSignedIn: boolean }) {
+export function ItemDetailsPage({ isSignedIn }: { isSignedIn: boolean }) {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const [item, setItem] = useState<Item | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [activePhoto, setActivePhoto] = useState(0)
 
-    const handleNavClick = (path: string) => {
-    navigate(path)
+  useEffect(() => {
+    if (!id) return
+    setLoading(true)
+    setError(null)
+    getItemById(id)
+      .then((raw) => {
+        const transformed = transformBackendItem(raw)
+        setItem(transformed)
+        setActivePhoto(0)
+      })
+      .catch(() => setError('Could not load this item. It may have been removed.'))
+      .finally(() => setLoading(false))
+  }, [id])
+
+  const handleClaimClick = () => {
+    if (!item) return
+
+    if (!isSignedIn) {
+      // Set returnTo for both query param and localStorage (hybrid approach)
+      const returnPath = `/items/${item.item_id}/claim`
+      localStorage.setItem('returnTo', returnPath)
+      navigate(`/login?returnTo=${encodeURIComponent(returnPath)}`)
+    } else {
+      navigate(`/items/${item.item_id}/claim`)
+    }
   }
-  
-  const item = items.find(i => i.item_id === id)
 
-  if (!item) {
+  if (loading) {
     return (
-      <main style={{ padding: '3rem 2rem', textAlign: 'center' }}>
+      <main className="item-detail-main" style={{ textAlign: 'center', color: '#90a4ae' }}>
+        Loading item…
+      </main>
+    )
+  }
+
+  if (error || !item) {
+    return (
+      <main className="item-detail-main" style={{ padding: '3rem 2rem', textAlign: 'center' }}>
         <h1>Item not found</h1>
-        <button onClick={() => navigate('/browse')}>Back to browse</button>
+        <p style={{ color: '#90a4ae', marginBottom: '1.5rem' }}>{error}</p>
+        <button className="item-detail-btn-login" onClick={() => navigate('/browse')}>
+          Back to browse
+        </button>
       </main>
     )
   }
@@ -28,12 +67,13 @@ export function ItemDetailsPage({ items, isSignedIn }: { items: Item[]; isSigned
   const calculateExpiry = (foundAt: string) => {
     const found = new Date(foundAt)
     const expiry = new Date(found.getTime() + 90 * 24 * 60 * 60 * 1000)
-    const today = new Date('2026-04-24')
+    const today = new Date()
     const daysElapsed = Math.floor((today.getTime() - found.getTime()) / (24 * 60 * 60 * 1000))
     const percentElapsed = Math.min((daysElapsed / 90) * 100, 100)
     return { expiry: formatDate(expiry.toISOString()), daysElapsed, percentElapsed }
   }
 
+  const photos = item.photos.length > 0 ? item.photos : [item.image]
   const { expiry, daysElapsed, percentElapsed } = calculateExpiry(item.foundAt)
 
   return (
@@ -45,19 +85,23 @@ export function ItemDetailsPage({ items, isSignedIn }: { items: Item[]; isSigned
             {/* Gallery */}
             <div className="item-detail-gallery">
               <div className="item-detail-main-photo">
-                <img src={item.image} alt={item.name} />
+                <img src={photos[activePhoto]} alt={item.name} />
               </div>
-              <div className="item-detail-thumbs">
-                <div className="item-detail-thumb active">
-                  <img src={item.image} alt={item.name} />
+              {photos.length > 1 && (
+                <div className="item-detail-thumbs">
+                  {photos.map((url, i) => (
+                    <button
+                      key={url + i}
+                      type="button"
+                      className={`item-detail-thumb ${i === activePhoto ? 'active' : ''}`}
+                      onClick={() => setActivePhoto(i)}
+                      style={{ border: 'none', padding: 0, cursor: 'pointer' }}
+                    >
+                      <img src={url} alt="" />
+                    </button>
+                  ))}
                 </div>
-                <div className="item-detail-thumb">
-                  <div style={{ width: '24px', height: '24px', background: '#e0e0e0', borderRadius: '4px' }}></div>
-                </div>
-                <div className="item-detail-thumb">
-                  <div style={{ width: '24px', height: '24px', background: '#e0e0e0', borderRadius: '4px' }}></div>
-                </div>
-              </div>
+              )}
             </div>
 
             {/* Info */}
@@ -68,8 +112,8 @@ export function ItemDetailsPage({ items, isSignedIn }: { items: Item[]; isSigned
                 <span className="item-detail-tag item-detail-tag-status">{item.status}</span>
                 <span className="item-detail-tag item-detail-tag-cat">{item.category}</span>
                 <span className="item-detail-tag item-detail-tag-color">
-                  <span className="item-detail-color-dot" style={{ background: item.color_hex }}></span>
-                  {item.color}
+                  <span className="item-detail-color-dot" style={{ background: item.color_hex || item.color }}></span>
+                  {item.color_bucket}
                 </span>
               </div>
 
@@ -79,8 +123,12 @@ export function ItemDetailsPage({ items, isSignedIn }: { items: Item[]; isSigned
                 <tbody>
                   <tr><td>Found at</td><td>{item.found_location}</td></tr>
                   <tr><td>Date found</td><td>{formatDate(item.foundAt)}</td></tr>
-                  <tr><td>Item ID</td><td style={{ fontFamily: 'monospace', fontSize: '12px', color: '#90a4ae' }}>ITEM-{formatDate(item.foundAt).replace(/\s/g, '')}-{String(item.id).padStart(3, '0')}</td></tr>
-                  <tr><td>Notes</td><td>{item.description.substring(0, 50)}...</td></tr>
+                  <tr>
+                    <td>Item ID</td>
+                    <td style={{ fontFamily: 'monospace', fontSize: '12px', color: '#90a4ae' }}>
+                      ITEM-{item.item_id.slice(0, 8).toUpperCase()}
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -91,20 +139,15 @@ export function ItemDetailsPage({ items, isSignedIn }: { items: Item[]; isSigned
             {/* Claim Card */}
             <div className="item-detail-card">
               <div className="item-detail-card-title">Claim this item</div>
-              <p className="item-detail-claim-hint">If this is yours, log in and submit a claim. You'll need to describe the item and schedule an appointment with security to verify ownership.</p>
+              <p className="item-detail-claim-hint">If this is yours, log in and submit a claim. You'll need to describe the item for security to verify ownership.</p>
               <button 
                 className="item-detail-btn-claim"
-                onClick={() => navigate(`/items/${item.id}/claim`)}
-                disabled={!isSignedIn}
-                style={{ opacity: !isSignedIn ? 0.5 : 1, cursor: !isSignedIn ? 'not-allowed' : 'pointer' }}
+                onClick={handleClaimClick}
               >
-                Claim this item
+                {isSignedIn ? 'Claim this item' : 'Log in to claim'}
               </button>
               {!isSignedIn && (
-                <>
-                  <button onClick={() => handleNavClick('/login')} className="item-detail-btn-login">Log in to your account</button>
-                  <p className="item-detail-login-note auth-divider">Don't have an account? <a onClick={() => navigate('/signup')} style={{cursor: 'pointer'}}>Register here</a> </p>
-                </>
+                <p className="item-detail-login-note auth-divider">Don't have an account? <a onClick={() => navigate('/signup')} style={{cursor: 'pointer'}}>Register here</a> </p>
               )}
             </div>
 

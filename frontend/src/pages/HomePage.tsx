@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 import { ItemCard } from '../components/ItemCard'
 import { Item } from '../App'
 
@@ -8,6 +9,7 @@ interface HomePageProps {
 
 export function HomePage({ items }: HomePageProps) {
   const navigate = useNavigate()
+  const [searchInput, setSearchInput] = useState('')
 
   const steps = [
     {
@@ -47,14 +49,20 @@ export function HomePage({ items }: HomePageProps) {
             <input 
               type="text" 
               placeholder="Search by item name, color, location…" 
-              className="search-input" 
+              className="search-input"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               onKeyPress={(e) => {
                 if (e.key === 'Enter') {
-                  navigate('/browse')
+                  const path = searchInput.trim() ? `/browse?q=${encodeURIComponent(searchInput.trim())}` : '/browse'
+                  navigate(path)
                 }
               }}
             />
-            <button className="search-btn" onClick={() => navigate('/browse')}>Search items</button>
+            <button className="search-btn" onClick={() => {
+              const path = searchInput.trim() ? `/browse?q=${encodeURIComponent(searchInput.trim())}` : '/browse'
+              navigate(path)
+            }}>Search items</button>
           </div>
         </div>
       </section>
@@ -90,7 +98,7 @@ export function HomePage({ items }: HomePageProps) {
           </div>
           
           <div className="items-grid">
-            {items.slice(0, 4).map((item) => (
+            {items.sort((a, b) => new Date(b.foundAt).getTime() - new Date(a.foundAt).getTime()).slice(0, 4).map((item) => (
               <ItemCard
                 key={item.item_id}
                 image={item.image}

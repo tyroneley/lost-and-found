@@ -5,6 +5,12 @@ import { logAudit } from './audit.service'
 
 export const createItem = async (data: any, changed_by: string) => {
   const colorBucket = data.color_hex ? getColorBucket(data.color_hex) : null
+  
+  // Calculate expiry: found_at + 90 days if not provided
+  const foundAt = new Date(data.found_at)
+  const expiresAt = data.expires_at 
+    ? new Date(data.expires_at)
+    : new Date(foundAt.getTime() + 90 * 24 * 60 * 60 * 1000)
 
   const item = await prisma.item.create({
     data: {
@@ -12,9 +18,9 @@ export const createItem = async (data: any, changed_by: string) => {
       description: data.description ?? null,
       color_hex: data.color_hex ?? null,
       color_bucket: colorBucket,
-      found_at: new Date(data.found_at),
+      found_at: foundAt,
       found_time_known: data.found_time_known ?? true,
-      expires_at: data.expires_at ? new Date(data.expires_at) : null,
+      expires_at: expiresAt,
       ...(data.finder_name ? { finder_name: data.finder_name } : {}),
       ...(data.finder_contact ? { finder_contact: data.finder_contact } : {}),
       ...(data.finder_affiliation ? { finder_affiliation: data.finder_affiliation } : {}),

@@ -73,14 +73,38 @@ export function Navbar({ isSignedIn = false, userName = '', userRole = 'public',
         <ul className={`navbar-menu ${menuOpen ? 'active' : ''}`}>
           {!isSignedIn && (
             <>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('/browse') }}>Browse Items</a></li>
+              <li>
+                <a
+                  href="#"
+                  className={isStaffNavActive('/browse') ? 'navbar-link-active' : ''}
+                  onClick={(e) => { e.preventDefault(); handleNavClick('/browse') }}
+                >
+                  Browse Items
+                </a>
+              </li>
             </>
           )}
           
           {isSignedIn && userRole === 'public' && (
             <>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('/browse') }}>Browse Items</a></li>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('/my-claims') }}>My Claims</a></li>
+              <li>
+                <a
+                  href="#"
+                  className={isStaffNavActive('/browse') ? 'navbar-link-active' : ''}
+                  onClick={(e) => { e.preventDefault(); handleNavClick('/browse') }}
+                >
+                  Browse Items
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  className={isStaffNavActive('/my-claims') ? 'navbar-link-active' : ''}
+                  onClick={(e) => { e.preventDefault(); handleNavClick('/my-claims') }}
+                >
+                  My Claims
+                </a>
+              </li>
             </>
           )}
           
