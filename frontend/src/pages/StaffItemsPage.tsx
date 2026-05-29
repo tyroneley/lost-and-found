@@ -50,16 +50,6 @@ export function StaffItemsPage() {
   const totalPages = Math.ceil(sortedItems.length / itemsPerPage)
   const paginatedItems = sortedItems.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
 
-  const getColorHex = (colorName: string): string => {
-    const colorMap: Record<string, string> = {
-      'BLACK': '#1a1a1a', 'WHITE': '#f5f5f5', 'RED': '#ef4444',
-      'BLUE': '#2563eb', 'GREEN': '#22c55e', 'YELLOW': '#eab308',
-      'ORANGE': '#f97316', 'PURPLE': '#a855f7', 'GRAY': '#94a3b8',
-      'PINK': '#ec4899', 'CYAN': '#06b6d4', 'BROWN': '#92400e',
-    }
-    return colorMap[colorName?.toUpperCase()] || '#d0d8e0'
-  }
-
   const statusBadgeClass = (status: string) =>
     `staff-items-status-badge staff-items-status-${status.toLowerCase().replace(/\s+/g, '-')}`
 
@@ -183,7 +173,7 @@ export function StaffItemsPage() {
                     <div className="staff-items-color-chip">
                       <div
                         className="staff-items-color-dot"
-                        style={{ backgroundColor: getColorHex(item.color_bucket) }}
+                        style={{ backgroundColor: item.color_hex }}
                       />
                       <span className="staff-items-col-label">{item.color_bucket}</span>
                     </div>

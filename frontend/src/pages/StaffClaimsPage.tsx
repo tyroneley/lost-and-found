@@ -7,6 +7,7 @@ import { StaffClaimRow } from '../components/StaffClaimRow'
 
 type StatusTab = 'All' | 'Pending' | 'Approved' | 'Rejected' | 'Collected'
 
+const CLAIMS_PER_PAGE = 6
 const STATUS_TABS: StatusTab[] = ['All', 'Pending', 'Approved', 'Rejected', 'Collected']
 
 const TAB_TO_API: Record<Exclude<StatusTab, 'All'>, string> = {
@@ -30,6 +31,7 @@ export function StaffClaimsPage() {
   const [categoryFilter, setCategoryFilter] = useState('All')
   const [statusTab, setStatusTab] = useState<StatusTab>('All')
   const [categories, setCategories] = useState<string[]>(['All'])
+  const [currentPage, setCurrentPage] = useState(1)
 
   useEffect(() => {
     getAllClaims({ limit: 100 })
@@ -61,6 +63,7 @@ export function StaffClaimsPage() {
 
   useEffect(() => {
     fetchListClaims()
+    setCurrentPage(1)
   }, [fetchListClaims])
 
   useEffect(() => {
@@ -82,6 +85,12 @@ export function StaffClaimsPage() {
         c.item_name.toLowerCase().includes(term)
     )
   }, [listClaims, searchTerm])
+
+  const totalPages = Math.ceil(filteredClaims.length / CLAIMS_PER_PAGE)
+  const paginatedClaims = useMemo(() => {
+    const start = (currentPage - 1) * CLAIMS_PER_PAGE
+    return filteredClaims.slice(start, start + CLAIMS_PER_PAGE)
+  }, [filteredClaims, currentPage])
 
   const summarySource = summaryClaims
 
@@ -186,7 +195,7 @@ export function StaffClaimsPage() {
             <span>Try adjusting your filters or search term.</span>
           </div>
         ) : (
-          filteredClaims.map((claim) => (
+          paginatedClaims.map((claim) => (
             <StaffClaimRow
               key={claim.claim_id}
               claim={claim}
@@ -195,6 +204,41 @@ export function StaffClaimsPage() {
           ))
         )}
       </div>
+
+      {filteredClaims.length > 0 && (
+        <div className="staff-items-pagination">
+          <span className="staff-items-pg-info">
+            Showing {paginatedClaims.length > 0 ? (currentPage - 1) * CLAIMS_PER_PAGE + 1 : 0}–{Math.min(currentPage * CLAIMS_PER_PAGE, filteredClaims.length)} of {filteredClaims.length} claims
+          </span>
+          <div className="staff-items-pg-btns">
+            <button
+              className="staff-items-pg-btn"
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              style={{ opacity: currentPage === 1 ? 0.35 : 1 }}
+            >
+              ‹
+            </button>
+            {Array.from({ length: totalPages }, (_, i) => (
+              <button
+                key={i + 1}
+                className={`staff-items-pg-btn ${currentPage === i + 1 ? 'staff-items-pg-btn-active' : ''}`}
+                onClick={() => setCurrentPage(i + 1)}
+              >
+                {i + 1}
+              </button>
+            ))}
+            <button
+              className="staff-items-pg-btn"
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages || totalPages === 0}
+              style={{ opacity: currentPage === totalPages || totalPages === 0 ? 0.35 : 1 }}
+            >
+              ›
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

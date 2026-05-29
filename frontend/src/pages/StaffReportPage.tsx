@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ItemCard } from '../components/ItemCard'
+import { ConfirmationDialog, ConfirmRow, ConfirmColorRow } from '../components/ConfirmationDialog'
+import { useStaffToast } from '../components/StaffToast'
 import { createItem, getCategories, getBuildings, uploadItemPhoto } from '../services/api'
 
 interface Room {
@@ -113,6 +115,8 @@ export function StaffReportPage() {
   const [submitting, setSubmitting] = useState(false)
   const [categories, setCategories] = useState<Category[]>([])
   const [buildings, setBuildings] = useState<Building[]>([])
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const { showSuccess, showError, Toast } = useStaffToast()
 
   // Fetch categories and buildings on mount
   useEffect(() => {
@@ -122,7 +126,8 @@ export function StaffReportPage() {
         setCategories(cats)
         setBuildings(bldgs)
       } catch (error) {
-        console.error('Failed to load categories/buildings:', error)
+        const message = error instanceof Error ? error.message : 'Failed to load form data'
+        showError(`Failed to load categories and buildings: ${message}`)
       }
     }
     fetchMetadata()
@@ -165,6 +170,7 @@ export function StaffReportPage() {
       { name: 'At least 1 photo', done: form.photos.length > 0 },
       { name: 'Finder name', done: !!form.finderName },
       { name: 'Finder contact', done: !!form.finderContact },
+      { name: 'Finder affiliation', done: !!form.finderAffiliation },
     ]
     return checks
   }
@@ -183,12 +189,34 @@ export function StaffReportPage() {
     return `${form.building}, ${roomLabel}`
   }
 
-  const handleSubmit = async () => {
+  // Get date constraints for "date found" field
+  const getDateConstraints = () => {
+    const today = new Date()
+    today.setUTCHours(0, 0, 0, 0)
+    const maxDate = today.toISOString().split('T')[0] // Today
+
+    const minDate = new Date(today)
+    minDate.setDate(minDate.getDate() - 90) // 90 days ago
+    const minDateStr = minDate.toISOString().split('T')[0]
+
+    return { min: minDateStr, max: maxDate }
+  }
+
+  const handleOpenConfirmDialog = () => {
     if (!isFormComplete) {
-      alert('Please complete all required fields')
+      showError('Please complete all required fields')
+      return
+    }
+    setShowConfirmDialog(true)
+  }
+
+  const handleConfirmSubmit = async () => {
+    if (!isFormComplete) {
+      showError('Please complete all required fields')
       return
     }
 
+    setShowConfirmDialog(false)
     setSubmitting(true)
     try {
       const category = categories.find(c => c.name === form.category)
@@ -217,46 +245,35 @@ export function StaffReportPage() {
       const createdItem = await createItem(itemData) as any
 
       // Upload photos to the created item
+      let photoErrors = 0
       if (form.photos.length > 0) {
-        await Promise.all(form.photos.map(file => uploadItemPhoto(createdItem.item_id, file)))
+        const photoUploadResults = await Promise.allSettled(
+          form.photos.map(file => uploadItemPhoto(createdItem.item_id, file))
+        )
+        photoErrors = photoUploadResults.filter(r => r.status === 'rejected').length
       }
 
-      setForm({
-        itemName: '',
-        category: '',
-        colorHex: '#2563eb',
-        description: '',
-        building: '',
-        roomId: '',
-        dateFound: '',
-        timeFound: '',
-        photos: [],
-        finderName: '',
-        finderContact: '',
-        finderAffiliation: '',
-      })
-      setPhotoPreview([])
-      navigate('/staff')
+      if (photoErrors > 0) {
+        showError(`Item created, but ${photoErrors} photo(s) failed to upload. You can add photos later.`)
+      } else {
+        showSuccess('Item recorded successfully!')
+      }
+      // Delay redirect to allow toast to display (form stays visible for better UX)
+      setTimeout(() => navigate('/staff'), 1500)
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to submit item'
-      alert(message.includes('Internal server error')
-        ? 'Server error while saving the item. Make sure you are logged in as staff and the backend is running.'
-        : message)
+      showError(
+        message.includes('Internal server error')
+          ? 'Server error while saving the item. Make sure you are logged in as staff and the backend is running.'
+          : message
+      )
     } finally {
       setSubmitting(false)
     }
   }
 
-  const handleSaveDraft = async () => {
-    try {
-      setSubmitting(true)
-      // TODO: Implement draft saving in backend
-      alert('Item saved as draft!')
-    } catch (error) {
-      alert(error instanceof Error ? error.message : 'Failed to save draft')
-    } finally {
-      setSubmitting(false)
-    }
+  const handleCancelConfirmDialog = () => {
+    setShowConfirmDialog(false)
   }
 
   return (
@@ -381,7 +398,14 @@ export function StaffReportPage() {
               <label>
                 Date found <span className="staff-report-required">*</span>
               </label>
-              <input type="date" name="dateFound" value={form.dateFound} onChange={handleInputChange} />
+              <input
+                type="date"
+                name="dateFound"
+                value={form.dateFound}
+                onChange={handleInputChange}
+                min={getDateConstraints().min}
+                max={getDateConstraints().max}
+              />
             </div>
             <div className="staff-report-field">
               <label>
@@ -451,7 +475,7 @@ export function StaffReportPage() {
           </div>
           <div className="staff-report-field">
             <label>
-              Finder affiliation <span className="staff-report-optional">optional</span>
+              Finder affiliation <span className="staff-report-required">*</span>
             </label>
             <select name="finderAffiliation" value={form.finderAffiliation} onChange={handleInputChange}>
               <option value="">Select</option>
@@ -489,12 +513,68 @@ export function StaffReportPage() {
           ))}
         </div>
 
-        <button className="staff-report-save-draft" onClick={handleSaveDraft} disabled={submitting}>
-          Save as draft
-        </button>
-        <button className="staff-report-submit-btn" onClick={handleSubmit} disabled={!isFormComplete || submitting}>
+        <button className="staff-report-submit-btn" onClick={handleOpenConfirmDialog} disabled={!isFormComplete || submitting}>
           {submitting ? 'Submitting...' : 'Submit →'}
         </button>
+
+        {/* Confirmation Dialog */}
+        <ConfirmationDialog
+          isOpen={showConfirmDialog}
+          title="Confirm item details"
+          sections={[
+            {
+              title: 'Item Details',
+              content: (
+                <>
+                  <ConfirmRow label="Item name:" value={form.itemName} />
+                  <ConfirmRow label="Category:" value={form.category} />
+                  <ConfirmColorRow
+                    label="Color:"
+                    color={form.colorHex}
+                    colorName={`${hexToColorBucket(form.colorHex)} (${form.colorHex.toUpperCase()})`}
+                  />
+                  <ConfirmRow label="Description:" value={form.description} />
+                </>
+              ),
+            },
+            {
+              title: 'Location & Time',
+              content: (
+                <>
+                  <ConfirmRow label="Location:" value={getLocationDisplay()} />
+                  <ConfirmRow label="Date found:" value={new Date(form.dateFound).toLocaleDateString()} />
+                  {form.timeFound && (
+                    <ConfirmRow label="Time found:" value={form.timeFound} />
+                  )}
+                </>
+              ),
+            },
+            {
+              title: 'Photos',
+              content: (
+                <ConfirmRow label="Photos:" value={`${form.photos.length} photo(s) selected`} />
+              ),
+            },
+            {
+              title: 'Finder Information',
+              content: (
+                <>
+                  <ConfirmRow label="Finder name:" value={form.finderName} />
+                  <ConfirmRow label="Finder contact:" value={form.finderContact} />
+                  <ConfirmRow label="Affiliation:" value={form.finderAffiliation} />
+                </>
+              ),
+            },
+          ]}
+          onCancel={handleCancelConfirmDialog}
+          onConfirm={handleConfirmSubmit}
+          cancelText="Cancel"
+          confirmText={submitting ? 'Submitting...' : 'Confirm & Submit'}
+          confirmVariant="primary"
+          isConfirmDisabled={submitting}
+        />
+
+      <Toast />
       </div>
     </div>
   )

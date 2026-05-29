@@ -2,10 +2,12 @@ import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ItemCard } from '../components/ItemCard'
 import { Item } from '../App'
-import { getCategories } from '../services/api'
+import { getCategories, getItems } from '../services/api'
+import { transformBackendItems } from '../utils/transformData'
 
-export function BrowsePage({ items }: { items: Item[] }) {
+export function BrowsePage({ items: propItems }: { items: Item[] }) {
   const navigate = useNavigate()
+  const [items, setItems] = useState<Item[]>(propItems)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
   const [selectedColors, setSelectedColors] = useState<string[]>([])
@@ -20,6 +22,24 @@ export function BrowsePage({ items }: { items: Item[] }) {
   const [showSortMenu, setShowSortMenu] = useState(false)
   const [fetchedCategories, setFetchedCategories] = useState<any[]>([])
   const itemsPerPage = 20
+
+  // Refetch items when page loads to get the latest items
+  useEffect(() => {
+    const fetchLatestItems = async () => {
+      try {
+        const response = await getItems({ status: 'ACTIVE' })
+        const itemList = Array.isArray(response) ? response : response.data || []
+        const transformedItems = transformBackendItems(itemList)
+        setItems(transformedItems)
+      } catch (error) {
+        console.error('Failed to fetch items:', error)
+        // Fallback to prop items if fetch fails
+        setItems(propItems)
+      }
+    }
+
+    fetchLatestItems()
+  }, [propItems])
 
   // Fetch categories on mount
   useEffect(() => {

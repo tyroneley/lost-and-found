@@ -68,7 +68,7 @@ export function ItemDetailsPage({ items, isSignedIn }: { items: Item[]; isSigned
                 <span className="item-detail-tag item-detail-tag-status">{item.status}</span>
                 <span className="item-detail-tag item-detail-tag-cat">{item.category}</span>
                 <span className="item-detail-tag item-detail-tag-color">
-                  <span className="item-detail-color-dot" style={{ background: item.color }}></span>
+                  <span className="item-detail-color-dot" style={{ background: item.color_hex }}></span>
                   {item.color}
                 </span>
               </div>

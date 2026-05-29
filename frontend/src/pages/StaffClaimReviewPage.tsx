@@ -16,6 +16,7 @@ import type { StaffClaimObject, StaffClaimsNavState, AuditLogEntry } from '../ty
 import { Item } from '../App'
 import { StatusBadge } from '../components/StatusBadge'
 import { useStaffToast } from '../components/StaffToast'
+import { ConfirmationDialog, ConfirmRow, ConfirmActionBox, ConfirmNotesBox } from '../components/ConfirmationDialog'
 
 function formatClaimRef(claimId: string): string {
   return `CLM-${claimId.slice(0, 8).toUpperCase()}`
@@ -84,6 +85,8 @@ export function StaffClaimReviewPage() {
   const [staffNotes, setStaffNotes] = useState('')
   const [rejectError, setRejectError] = useState('')
   const [actionLoading, setActionLoading] = useState<'approve' | 'collect' | 'reject' | null>(null)
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const [pendingAction, setPendingAction] = useState<{ status: 'APPROVED' | 'REJECTED' | 'COLLECTED'; actionKey: 'approve' | 'collect' | 'reject' } | null>(null)
 
   useEffect(() => {
     if (!claim_id) return
@@ -154,6 +157,19 @@ export function StaffClaimReviewPage() {
       return
     }
     setRejectError('')
+
+    // Open confirmation dialog
+    setPendingAction({ status, actionKey })
+    setShowConfirmDialog(true)
+  }
+
+  const executeAction = async (
+    status: 'APPROVED' | 'REJECTED' | 'COLLECTED',
+    actionKey: 'approve' | 'collect' | 'reject'
+  ) => {
+    if (!claim_id || !claim) return
+
+    setShowConfirmDialog(false)
     setActionLoading(actionKey)
 
     try {
@@ -401,6 +417,55 @@ export function StaffClaimReviewPage() {
           </div>
         </div>
       </div>
+
+      {/* Confirmation Dialog */}
+      {pendingAction && claim && (
+        <ConfirmationDialog
+          isOpen={showConfirmDialog}
+          title="Confirm action"
+          sections={[
+            {
+              title: 'Claim Details',
+              content: (
+                <>
+                  <ConfirmRow label="Claim ID:" value={formatClaimRef(claim.claim_id)} />
+                  <ConfirmRow label="Item:" value={claim.item_name} />
+                  <ConfirmRow label="Claimant:" value={claim.claimer_name} />
+                  <ConfirmRow label="Claimant email:" value={claim.claimer_email} />
+                  <ConfirmRow label="Ownership description:" value={claim.ownership_desc} />
+                </>
+              ),
+            },
+            {
+              title: 'Action to take',
+              content: (
+                <>
+                  <ConfirmActionBox>
+                    {pendingAction.actionKey === 'approve' && '✓ Approve this claim'}
+                    {pendingAction.actionKey === 'collect' && '📦 Mark as collected'}
+                    {pendingAction.actionKey === 'reject' && '✕ Reject this claim'}
+                  </ConfirmActionBox>
+                  {pendingAction.actionKey === 'reject' && staffNotes && (
+                    <ConfirmNotesBox label="Rejection reason:" value={staffNotes} />
+                  )}
+                </>
+              ),
+            },
+          ]}
+          onCancel={() => setShowConfirmDialog(false)}
+          onConfirm={() => executeAction(pendingAction.status, pendingAction.actionKey)}
+          cancelText="Cancel"
+          confirmText={actionLoading ? 'Updating…' : 'Confirm'}
+          confirmVariant={
+            pendingAction.actionKey === 'approve'
+              ? 'approve'
+              : pendingAction.actionKey === 'collect'
+                ? 'collect'
+                : 'reject'
+          }
+          isConfirmDisabled={actionLoading !== null}
+        />
+      )}
     </main>
   )
 }
