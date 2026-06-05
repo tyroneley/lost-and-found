@@ -1,23 +1,10 @@
 import './App.css'
 import { useState, useEffect } from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { Routes } from 'react-router-dom'
 import { Navbar } from './components/Navbar'
-import { HomePage } from './pages/HomePage'
-import { BrowsePage } from './pages/BrowsePage'
-import { ItemDetailsPage } from './pages/ItemDetailsPage'
-import { LoginPage } from './pages/LoginPage'
-import { SignUpPage } from './pages/SignUpPage'
-import { StaffReportPage } from './pages/StaffReportPage'
-import { StaffDashboardPage } from './pages/StaffDashboardPage'
-import { StaffItemsPage } from './pages/StaffItemsPage'
-import { StaffItemDetailsPage } from './pages/StaffItemDetailsPage'
-import { StaffClaimsPage } from './pages/StaffClaimsPage'
-import { StaffClaimReviewPage } from './pages/StaffClaimReviewPage'
-import { StaffManagePage } from './pages/StaffManagePage'
-import { ClaimPage } from './pages/ClaimPage'
-import { MyClaimsPage } from './pages/MyClaimsPage'
 import * as api from './services/api'
 import { transformBackendItems } from './utils/transformData'
+import { getProtectedRoutes } from './routes/ProtectedRoutes'
 
 export type UserRole = 'public' | 'staff' | 'superadmin';
 
@@ -112,20 +99,16 @@ function App() {
     <>
       <Navbar isSignedIn={isSignedIn} userName={userName} userRole={userRole} onLogout={handleLogout} />
       <Routes>
-        <Route path="/" element={<HomePage items={items} />} />
-        <Route path="/browse" element={<BrowsePage items={items} />} />
-        <Route path="/items/:id" element={<ItemDetailsPage isSignedIn={isSignedIn} />} />
-        <Route path="/items/:itemId/claim" element={<ClaimPage items={items} userName={userName} userEmail={userEmail} />} />
-        <Route path="/my-claims" element={<MyClaimsPage items={items} isSignedIn={isSignedIn} />} />
-        <Route path="/login" element={<LoginPage onLoginSuccess={handleLoginSuccess} />} />
-        <Route path="/signup" element={<SignUpPage onSignUpSuccess={(name) => handleLoginSuccess(name, 'public')} />} />
-        <Route path="/staff" element={<StaffDashboardPage userName={userName} />} />
-        <Route path="/staff/items" element={<StaffItemsPage />} />
-        <Route path="/staff/items/:id" element={<StaffItemDetailsPage />} />
-        <Route path="/staff/claims" element={<StaffClaimsPage />} />
-        <Route path="/staff/claims/:claim_id" element={<StaffClaimReviewPage />} />
-        <Route path="/staff/report" element={<StaffReportPage />} />
-        <Route path="/staff/manage" element={<StaffManagePage />} />
+        {getProtectedRoutes({
+          isSignedIn,
+          userRole,
+          items,
+          userName,
+          userEmail,
+          isSignedInProp: isSignedIn,
+          onLoginSuccess: handleLoginSuccess,
+          onSignUpSuccess: (name) => handleLoginSuccess(name, 'public'),
+        })}
       </Routes>
     </>
   )

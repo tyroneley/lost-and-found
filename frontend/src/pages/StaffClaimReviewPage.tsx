@@ -101,7 +101,7 @@ export function StaffClaimReviewPage() {
 
         const [itemRaw, auditRes, otherRes] = await Promise.all([
           getItemById(transformed.item_id),
-          getAuditLog(transformed.item_id).catch(() => ({ data: [] })),
+          getAuditLog({ item_id: transformed.item_id }).catch(() => ({ data: [] })),
           getAllClaims({ item_id: transformed.item_id, limit: 100 }).catch(() => ({ data: [] })),
         ])
 

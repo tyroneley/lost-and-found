@@ -90,8 +90,15 @@ async function apiFetch<T>(
     
     // If something went wrong, throw an error
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}))
-      throw new Error(errorData.error || `HTTP ${response.status}`)
+      const errorData = await response.json().catch(() => ({})) as { error?: string; message?: string }
+      const msg =
+        errorData.error ||
+        errorData.message ||
+        (typeof errorData === 'object' && errorData !== null && 'issues' in errorData
+          ? 'Validation failed — check your input'
+          : null) ||
+        `HTTP ${response.status}`
+      throw new Error(msg)
     }
     
     // All good, return the data
@@ -299,11 +306,23 @@ export interface AuditLogApiEntry {
   action: string
   created_at: string
   notes?: string | null
+  old_status?: string | null
+  new_status?: string | null
   user?: { name: string }
+  item?: { name: string }
 }
 
-export async function getAuditLog(itemId: string): Promise<{ data: AuditLogApiEntry[] }> {
-  return apiFetch(`/audit-log?item_id=${encodeURIComponent(itemId)}`)
+export async function getAuditLog(filters?: {
+  item_id?: string
+  limit?: number
+  offset?: number
+}): Promise<{ data: AuditLogApiEntry[]; total?: number }> {
+  const queryParams = new URLSearchParams()
+  if (filters?.item_id) queryParams.append('item_id', filters.item_id)
+  if (filters?.limit) queryParams.append('limit', String(filters.limit))
+  if (filters?.offset) queryParams.append('offset', String(filters.offset))
+  const qs = queryParams.toString()
+  return apiFetch(`/audit-log${qs ? `?${qs}` : ''}`)
 }
 
 // Staff approves a user's claim - they can now collect the item
@@ -391,6 +410,33 @@ export async function updateRoom(roomId: string, data: { room_name?: string; roo
 
 export async function deleteRoom(roomId: string): Promise<void> {
   return apiFetch(`/buildings/rooms/${roomId}`, { method: 'DELETE' })
+}
+
+// User management (staff / superadmin)
+
+export interface ApiUser {
+  user_id: string
+  name: string
+  personal_email: string
+  uni_email?: string | null
+  role: 'PUBLIC' | 'STAFF' | 'SUPERADMIN'
+  affiliation?: string | null
+  created_at: string
+}
+
+export async function getUsers(filters?: {
+  limit?: number
+  offset?: number
+  role?: string
+  q?: string
+}): Promise<PaginatedResponse<ApiUser>> {
+  const queryParams = new URLSearchParams()
+  if (filters?.limit) queryParams.append('limit', String(filters.limit))
+  if (filters?.offset) queryParams.append('offset', String(filters.offset))
+  if (filters?.role) queryParams.append('role', filters.role.toUpperCase())
+  if (filters?.q) queryParams.append('q', filters.q)
+  const qs = queryParams.toString()
+  return apiFetch(`/users${qs ? `?${qs}` : ''}`)
 }
 
 // Error handling - deal with problems gracefully
