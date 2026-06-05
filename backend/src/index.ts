@@ -14,7 +14,7 @@ import buildingRoutes from './routes/building.routes'
 import userRoutes from './routes/user.routes'
 import { prisma } from './lib/prisma'
 import { issueToken, authMiddleware, requireRole, type AuthPayload } from './middleware/auth'
-import { getAuditLogsByItemId } from './services/audit.service'
+import { getAuditLogs, getAuditLogsByItemId } from './services/audit.service'
 import { handleError } from './utils/errorHandler'
 import { expireItems } from './services/expiration.service'
 import { getClaims } from './services/claim.service'
@@ -29,7 +29,7 @@ app.use('/*', cors({
     }
     return process.env.CORS_ORIGIN ?? 'http://localhost:5173'
   },
-  allowMethods: ['GET', 'POST', 'PATCH', 'DELETE'],
+  allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization'],
 }))
 
@@ -193,11 +193,14 @@ app.get('/user/claims', authMiddleware, async (c) => {
 app.get('/audit-log', authMiddleware, requireRole(['STAFF', 'SUPERADMIN']), async (c) => {
   try {
     const item_id = c.req.query('item_id')
-    if (!item_id) {
-      return c.json({ error: 'item_id is required' }, 400)
+    if (item_id) {
+      const logs = await getAuditLogsByItemId(item_id)
+      return c.json({ data: logs })
     }
-    const logs = await getAuditLogsByItemId(item_id)
-    return c.json({ data: logs })
+    const limit = Math.min(parseInt(c.req.query('limit') || '100', 10) || 100, 500)
+    const offset = parseInt(c.req.query('offset') || '0', 10) || 0
+    const logs = await getAuditLogs({ limit, offset })
+    return c.json(logs)
   } catch (error) {
     return handleError(c, error)
   }

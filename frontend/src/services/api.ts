@@ -382,6 +382,18 @@ export async function deleteCategory(id: string): Promise<void> {
   return apiFetch(`/categories/${id}`, { method: 'DELETE' })
 }
 
+export interface ReferenceUsage {
+  totalItems: number
+  activeItems: number
+  roomCount?: number
+  canDelete: boolean
+  blockReason?: string
+}
+
+export async function getCategoryUsage(id: string): Promise<ReferenceUsage> {
+  return apiFetch(`/categories/${id}/usage`)
+}
+
 // Building & room management
 
 export async function getBuildings(): Promise<any[]> {
@@ -400,6 +412,10 @@ export async function deleteBuilding(id: string): Promise<void> {
   return apiFetch(`/buildings/${id}`, { method: 'DELETE' })
 }
 
+export async function getBuildingUsage(id: string): Promise<ReferenceUsage> {
+  return apiFetch(`/buildings/${id}/usage`)
+}
+
 export async function createRoom(buildingId: string, data: { room_name: string; room_number?: number }): Promise<any> {
   return apiFetch(`/buildings/${buildingId}/rooms`, { method: 'POST', body: JSON.stringify(data) })
 }
@@ -410,6 +426,10 @@ export async function updateRoom(roomId: string, data: { room_name?: string; roo
 
 export async function deleteRoom(roomId: string): Promise<void> {
   return apiFetch(`/buildings/rooms/${roomId}`, { method: 'DELETE' })
+}
+
+export async function getRoomUsage(roomId: string): Promise<ReferenceUsage> {
+  return apiFetch(`/buildings/rooms/${roomId}/usage`)
 }
 
 // User management (staff / superadmin)

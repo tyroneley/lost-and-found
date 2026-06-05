@@ -33,6 +33,10 @@ export const handleError = (c: any, error: any) => {
     return c.json({ error: 'Record not found' }, 404)
   }
 
+  if (error.code === 'P2003') {
+    return c.json({ error: 'Cannot delete: still referenced by other records' }, 400)
+  }
+
   console.error(error)
 
   return c.json(

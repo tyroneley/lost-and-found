@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Item } from '../App'
 import { claimItem } from '../services/api'
 import { Stepper } from '../components/Stepper'
 import { ItemStrip } from '../components/ItemStrip'
+import { ErrorPage } from './ErrorPage'
 
 interface ClaimFormState {
   ownershipDesc: string
@@ -221,21 +222,11 @@ function StepConfirm({ claimRef, onDone }: { claimRef: string; onDone: () => voi
   )
 }
 
-export function ClaimPage({ items, userName, userEmail }: { items: Item[]; userName?: string; userEmail?: string }) {
+export function ClaimPage({ items, userName, userEmail, isSignedIn }: { items: Item[]; userName?: string; userEmail?: string; isSignedIn?: boolean }) {
   const { itemId } = useParams()
   const navigate = useNavigate()
 
-  const item = items.find(i => i.item_id === itemId)
-
-  if (!item) {
-    return (
-      <div style={{ padding: '3rem 2rem', textAlign: 'center' }}>
-        <h1>Item not found</h1>
-        <button onClick={() => navigate('/browse')}>Back to browse</button>
-      </div>
-    )
-  }
-
+  // Hooks must always be called at the top, before any conditional logic
   const [step, setStep] = useState(1)
   const [form, setForm] = useState<ClaimFormState>({
     ownershipDesc: '',
@@ -244,6 +235,42 @@ export function ClaimPage({ items, userName, userEmail }: { items: Item[]; userN
   const [claimRef, setClaimRef] = useState('')
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Check auth status and item on mount
+  useEffect(() => {
+    if (isSignedIn === false) {
+      setError('AUTH_REQUIRED')
+    }
+  }, [])
+
+  const item = items.find(i => i.item_id === itemId)
+
+  // Check for auth error
+  if (error === 'AUTH_REQUIRED') {
+    return (
+      <ErrorPage
+        code={401}
+        title="Authentication Required"
+        message="You must be logged in to submit a claim. Please log in and try again."
+        showBackButton={true}
+        showHomeButton={true}
+        onBack={() => navigate(`/items/${itemId}`)}
+      />
+    )
+  }
+
+  // Check for item not found
+  if (!item) {
+    return (
+      <ErrorPage
+        code={404}
+        title="Item Not Found"
+        message="The item you're trying to claim doesn't exist or has been removed."
+        showBackButton={false}
+        showHomeButton={true}
+      />
+    )
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target

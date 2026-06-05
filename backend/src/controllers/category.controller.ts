@@ -1,4 +1,5 @@
 import { createCategory, getCategories, updateCategory, deleteCategory } from '../services/category.service'
+import { getCategoryUsage } from '../services/reference-usage.service'
 import { createCategorySchema } from '../validators/category.validator'
 import { handleError } from '../utils/errorHandler'
 
@@ -28,6 +29,16 @@ export const updateCategoryHandler = async (c: any) => {
     const body = await c.req.json()
     const category = await updateCategory(id, body)
     return c.json(category)
+  } catch (error) {
+    return handleError(c, error)
+  }
+}
+
+export const getCategoryUsageHandler = async (c: any) => {
+  try {
+    const id = c.req.param('id')
+    const usage = await getCategoryUsage(id)
+    return c.json(usage)
   } catch (error) {
     return handleError(c, error)
   }

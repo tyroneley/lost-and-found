@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { Item } from '../App'
 import { getItemById } from '../services/api'
 import { transformBackendItem } from '../utils/transformData'
+import { ErrorPage } from './ErrorPage'
 
 export function ItemDetailsPage({ isSignedIn }: { isSignedIn: boolean }) {
   const { id } = useParams<{ id: string }>()
@@ -22,7 +23,7 @@ export function ItemDetailsPage({ isSignedIn }: { isSignedIn: boolean }) {
         setItem(transformed)
         setActivePhoto(0)
       })
-      .catch(() => setError('Could not load this item. It may have been removed.'))
+      .catch(() => setError("The item you're looking for doesn't exist or has been removed."))
       .finally(() => setLoading(false))
   }, [id])
 
@@ -49,13 +50,14 @@ export function ItemDetailsPage({ isSignedIn }: { isSignedIn: boolean }) {
 
   if (error || !item) {
     return (
-      <main className="item-detail-main" style={{ padding: '3rem 2rem', textAlign: 'center' }}>
-        <h1>Item not found</h1>
-        <p style={{ color: '#90a4ae', marginBottom: '1.5rem' }}>{error}</p>
-        <button className="item-detail-btn-login" onClick={() => navigate('/browse')}>
-          Back to browse
-        </button>
-      </main>
+      <ErrorPage
+        code={404}
+        title="Item Not Found"
+        message={error || "The item you're looking for doesn't exist or has been removed."}
+        showBackButton={true}
+        showHomeButton={true}
+        onBack={() => navigate('/browse')}
+      />
     )
   }
 

@@ -72,7 +72,9 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
         if (!returnToRaw.startsWith('/')) returnToRaw = '/' + returnToRaw
 
         navigate(returnToRaw)
-      } else if (response.user.role === 'staff' || response.user.role === 'superadmin') {
+      } else if (response.user.role === 'superadmin') {
+        navigate('/admin/overview')
+      } else if (response.user.role === 'staff') {
         navigate('/staff')
       } else {
         navigate('/')

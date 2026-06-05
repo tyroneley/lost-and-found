@@ -7,6 +7,7 @@ import {
   updateRoom,
   deleteRoom,
 } from '../services/building.service'
+import { getBuildingUsage, getRoomUsage } from '../services/reference-usage.service'
 import { handleError } from '../utils/errorHandler'
 
 export const getBuildingsHandler = async (c: any) => {
@@ -66,6 +67,26 @@ export const updateRoomHandler = async (c: any) => {
     const body = await c.req.json()
     const room = await updateRoom(roomId, body)
     return c.json(room)
+  } catch (error) {
+    return handleError(c, error)
+  }
+}
+
+export const getBuildingUsageHandler = async (c: any) => {
+  try {
+    const id = c.req.param('id')
+    const usage = await getBuildingUsage(id)
+    return c.json(usage)
+  } catch (error) {
+    return handleError(c, error)
+  }
+}
+
+export const getRoomUsageHandler = async (c: any) => {
+  try {
+    const roomId = c.req.param('roomId')
+    const usage = await getRoomUsage(roomId)
+    return c.json(usage)
   } catch (error) {
     return handleError(c, error)
   }

@@ -1,5 +1,32 @@
 import { prisma } from '../lib/prisma'
 import { AppError } from '../utils/errorHandler'
+import { getBuildingUsage, getRoomUsage } from './reference-usage.service'
+
+const normalizeRoomName = (name: string) => name.trim().toLowerCase()
+
+const assertUniqueRoomNameInBuilding = async (
+  building_id: string,
+  room_name: string,
+  excludeRoomId?: string
+) => {
+  const normalized = normalizeRoomName(room_name)
+  if (!normalized) throw new AppError(400, 'Room name is required')
+
+  const rooms = await prisma.room.findMany({
+    where: { building_id },
+    select: { room_id: true, room_name: true },
+  })
+
+  const duplicate = rooms.find(
+    (r) => r.room_id !== excludeRoomId && normalizeRoomName(r.room_name) === normalized
+  )
+  if (duplicate) {
+    throw new AppError(
+      400,
+      `A room named "${room_name.trim()}" already exists in this building. Use a different name.`
+    )
+  }
+}
 
 export const getBuildings = async () => {
   return prisma.building.findMany({
@@ -29,27 +56,47 @@ export const updateBuilding = async (id: string, data: { name?: string; address?
 export const deleteBuilding = async (id: string) => {
   const existing = await prisma.building.findUnique({ where: { building_id: id } })
   if (!existing) throw new AppError(404, 'Building not found')
-  const itemCount = await prisma.item.count({ where: { building_id: id, deleted_at: null } })
-  if (itemCount > 0) throw new AppError(400, `Cannot delete: ${itemCount} active item(s) are in this building`)
-  return prisma.building.delete({ where: { building_id: id } })
+
+  const { canDelete, blockReason } = await getBuildingUsage(id)
+  if (!canDelete) throw new AppError(400, blockReason ?? 'Cannot delete: building is still in use')
+
+  return prisma.$transaction(async (tx) => {
+    await tx.room.deleteMany({ where: { building_id: id } })
+    return tx.building.delete({ where: { building_id: id } })
+  })
 }
 
 export const createRoom = async (building_id: string, data: { room_number?: number; room_name: string }) => {
   const building = await prisma.building.findUnique({ where: { building_id } })
   if (!building) throw new AppError(404, 'Building not found')
-  return prisma.room.create({ data: { ...data, building_id } })
+  await assertUniqueRoomNameInBuilding(building_id, data.room_name)
+  return prisma.room.create({ data: { ...data, room_name: data.room_name.trim(), building_id } })
 }
 
 export const updateRoom = async (id: string, data: { room_number?: number | null; room_name?: string }) => {
   const existing = await prisma.room.findUnique({ where: { room_id: id } })
   if (!existing) throw new AppError(404, 'Room not found')
-  return prisma.room.update({ where: { room_id: id }, data })
+
+  const nextName = data.room_name !== undefined ? data.room_name.trim() : existing.room_name
+  if (!nextName) throw new AppError(400, 'Room name is required')
+
+  await assertUniqueRoomNameInBuilding(existing.building_id, nextName, id)
+
+  return prisma.room.update({
+    where: { room_id: id },
+    data: {
+      ...data,
+      ...(data.room_name !== undefined ? { room_name: nextName } : {}),
+    },
+  })
 }
 
 export const deleteRoom = async (id: string) => {
   const existing = await prisma.room.findUnique({ where: { room_id: id } })
   if (!existing) throw new AppError(404, 'Room not found')
-  const itemCount = await prisma.item.count({ where: { room_id: id, deleted_at: null } })
-  if (itemCount > 0) throw new AppError(400, `Cannot delete: ${itemCount} active item(s) are in this room`)
+
+  const { canDelete, blockReason } = await getRoomUsage(id)
+  if (!canDelete) throw new AppError(400, blockReason ?? 'Cannot delete: room is still in use')
+
   return prisma.room.delete({ where: { room_id: id } })
 }

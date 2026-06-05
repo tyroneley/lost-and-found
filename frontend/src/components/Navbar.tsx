@@ -25,8 +25,8 @@ export function Navbar({ isSignedIn = false, userName = '', userRole = 'public',
 
   const handleLogout = () => {
     setProfileOpen(false)
+    navigate('/', { replace: true })
     onLogout?.()
-    navigate('/')
   }
 
   const handleNavClick = (path: string) => {
@@ -43,7 +43,7 @@ export function Navbar({ isSignedIn = false, userName = '', userRole = 'public',
     const roleLabels: Record<UserRole, string> = {
       public: 'User',
       staff: 'Security Staff',
-      superadmin: 'Admin'
+      superadmin: 'Superadmin'
     }
     return roleLabels[role]
   }
@@ -137,25 +137,56 @@ export function Navbar({ isSignedIn = false, userName = '', userRole = 'public',
                   Claims
                 </a>
               </li>
-              <li>
-                <a
-                  href="#"
-                  className={isStaffNavActive('/staff/manage') ? 'navbar-link-active' : ''}
-                  onClick={(e) => { e.preventDefault(); handleNavClick('/staff/manage') }}
-                >
-                  Manage
-                </a>
-              </li>
             </>
           )}
           
           {isSignedIn && userRole === 'superadmin' && (
             <>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('/admin/overview') }}>Overview</a></li>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('/admin/users') }}>Users</a></li>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('/admin/items') }}>All Items</a></li>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('/admin/audit') }}>Audit Log</a></li>
-              <li><a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('/admin/settings') }}>Settings</a></li>
+              <li>
+                <a
+                  href="#"
+                  className={isStaffNavActive('/admin/overview') ? 'navbar-link-active' : ''}
+                  onClick={(e) => { e.preventDefault(); handleNavClick('/admin/overview') }}
+                >
+                  Overview
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  className={isStaffNavActive('/admin/users') ? 'navbar-link-active' : ''}
+                  onClick={(e) => { e.preventDefault(); handleNavClick('/admin/users') }}
+                >
+                  Users
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  className={isStaffNavActive('/admin/items') ? 'navbar-link-active' : ''}
+                  onClick={(e) => { e.preventDefault(); handleNavClick('/admin/items') }}
+                >
+                  All Items
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  className={isStaffNavActive('/admin/audit') ? 'navbar-link-active' : ''}
+                  onClick={(e) => { e.preventDefault(); handleNavClick('/admin/audit') }}
+                >
+                  Audit Log
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#"
+                  className={isStaffNavActive('/admin/settings') ? 'navbar-link-active' : ''}
+                  onClick={(e) => { e.preventDefault(); handleNavClick('/admin/settings') }}
+                >
+                  Settings
+                </a>
+              </li>
             </>
           )}
         </ul>
