@@ -284,7 +284,7 @@ export function StaffReportPage() {
         </div>
         <div className="staff-report-header">
           <h1 className="staff-report-title">Record a found item</h1>
-          <p className="staff-report-subtitle">Fill in the details as accurately as possible. The record will be submitted to ISS admin for approval before going live.</p>
+          <p className="staff-report-subtitle">Fill in the details as accurately as possible. The item will be posted in the browse page once saved.</p>
         </div>
 
         {/* Item Details */}

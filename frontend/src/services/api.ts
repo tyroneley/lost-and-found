@@ -180,24 +180,44 @@ export function loadAuthSession(): StoredAuthUser | null {
 
 // Item stuff - browse, view, create, manage lost items
 
-// Get all items, with optional filters (search, category, color, location, status)
+const COLOR_API_VALUES: Record<string, string> = {
+  Gray: 'GRAY',
+  Grey: 'GRAY',
+  Black: 'BLACK',
+  White: 'WHITE',
+  Red: 'RED',
+  Orange: 'ORANGE',
+  Yellow: 'YELLOW',
+  Green: 'GREEN',
+  Cyan: 'CYAN',
+  Blue: 'BLUE',
+  Purple: 'PURPLE',
+  Pink: 'PINK',
+  Brown: 'BROWN',
+}
+
+function normalizeColorFilter(color: string): string {
+  return COLOR_API_VALUES[color] ?? color.toUpperCase()
+}
+
+// Get all items, with optional filters (q, category, color, status)
 export async function getItems(filters?: {
-  search?: string
+  q?: string
   category?: string
   color?: string
-  location?: string
   status?: string
   limit?: number
+  offset?: number
 }): Promise<PaginatedResponse<Item>> {
   const queryParams = new URLSearchParams()
 
   if (filters) {
-    if (filters.search) queryParams.append('search', filters.search)
+    if (filters.q) queryParams.append('q', filters.q)
     if (filters.category) queryParams.append('category', filters.category)
-    if (filters.color) queryParams.append('color', filters.color)
-    if (filters.location) queryParams.append('location', filters.location)
+    if (filters.color) queryParams.append('color', normalizeColorFilter(filters.color))
     if (filters.status) queryParams.append('status', filters.status)
     if (filters.limit) queryParams.append('limit', String(filters.limit))
+    if (filters.offset) queryParams.append('offset', String(filters.offset))
   }
   
   const endpoint = `/items${queryParams.toString() ? '?' + queryParams.toString() : ''}`

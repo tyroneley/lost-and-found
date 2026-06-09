@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { ItemCard } from '../components/ItemCard'
 import { Item } from '../App'
-import { getCategories, getItems } from '../services/api'
+import { getBuildings, getCategories, getItems } from '../services/api'
 import { transformBackendItems } from '../utils/transformData'
 
 export function BrowsePage({ items: propItems }: { items: Item[] }) {
@@ -22,6 +22,7 @@ export function BrowsePage({ items: propItems }: { items: Item[] }) {
   const [showFilters, setShowFilters] = useState(false)
   const [showSortMenu, setShowSortMenu] = useState(false)
   const [fetchedCategories, setFetchedCategories] = useState<any[]>([])
+  const [locations, setLocations] = useState<string[]>([])
   const itemsPerPage = 20
 
   // Refetch items when page loads to get the latest items
@@ -52,21 +53,28 @@ export function BrowsePage({ items: propItems }: { items: Item[] }) {
     }
   }, [location.search])
 
-  // Fetch categories on mount
+  // Fetch categories and building/room locations on mount
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const cats = await getCategories()
+        const [cats, buildings] = await Promise.all([getCategories(), getBuildings()])
         setFetchedCategories(cats)
+
+        const roomNames = new Set<string>()
+        for (const building of buildings) {
+          for (const room of building.rooms ?? []) {
+            if (room.room_name) roomNames.add(room.room_name)
+          }
+        }
+        setLocations([...roomNames].sort((a, b) => a.localeCompare(b)))
       } catch (error) {
-        console.error('Failed to load categories:', error)
+        console.error('Failed to load filter data:', error)
       }
     }
     fetchData()
   }, [])
 
   const categories = fetchedCategories.map(c => c.name)
-  const locations = ['Auditorium', 'Lobby', 'Student Lounge', 'Sleeping Pods', 'Photography Room', 'Meeting Room', 'Library']
   const colors = [
     { name: 'Black', hex: '#222222' },
     { name: 'White', hex: '#ffffff' },
@@ -84,7 +92,9 @@ export function BrowsePage({ items: propItems }: { items: Item[] }) {
       const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(item.category)
       const itemColorLabel = item.color?.toLowerCase() || ''
       const matchesColor = selectedColors.length === 0 || selectedColors.some(color => color.toLowerCase() === itemColorLabel)
-      const matchesLocation = selectedLocations.length === 0 || selectedLocations.includes(item.found_location)
+      const matchesLocation =
+        selectedLocations.length === 0 ||
+        selectedLocations.some((loc) => item.found_location.includes(loc))
       const matchesRoom = !filterByRoom || (item.found_location.match(/^Room \d+/) && (!roomNumber || item.found_location.includes(`Room ${roomNumber}`)))
       
       // Date filtering
@@ -145,7 +155,7 @@ export function BrowsePage({ items: propItems }: { items: Item[] }) {
   }
 
   const getCategoryCount = (cat: string) => items.filter(i => i.category === cat).length
-  const getLocationCount = (loc: string) => items.filter(i => i.found_location === loc).length
+  const getLocationCount = (loc: string) => items.filter((i) => i.found_location.includes(loc)).length
 
   return (
     <main>

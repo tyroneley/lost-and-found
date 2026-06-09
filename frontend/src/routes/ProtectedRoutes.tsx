@@ -29,7 +29,7 @@ interface ProtectedRoutesProps {
   userEmail: string
   isSignedInProp: boolean
   onLoginSuccess: (name: string, email: string, role: UserRole) => void
-  onSignUpSuccess: (name: string) => void
+  onSignUpSuccess: (name: string, email: string, role: UserRole) => void
 }
 
 export function getProtectedRoutes({
@@ -105,7 +105,7 @@ export function getProtectedRoutes({
     <Route
       key="claim"
       path="/items/:itemId/claim"
-      element={<ClaimPage items={items} userName={userName} userEmail={userEmail} isSignedIn={isSignedIn} />}
+      element={<ClaimPage userName={userName} userEmail={userEmail} isSignedIn={isSignedIn} />}
     />,
 
     // STAFF ROUTE

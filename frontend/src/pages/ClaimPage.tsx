@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Item } from '../App'
-import { claimItem } from '../services/api'
+import { claimItem, getItemById } from '../services/api'
+import { transformBackendItem } from '../utils/transformData'
 import { Stepper } from '../components/Stepper'
 import { ItemStrip } from '../components/ItemStrip'
 import { ErrorPage } from './ErrorPage'
 
 interface ClaimFormState {
   ownershipDesc: string
-  additionalProof: string
 }
 
 function StepOwnership({
@@ -194,7 +194,7 @@ function StepConfirm({ claimRef, onDone }: { claimRef: string; onDone: () => voi
           <div className="claim-next-row">
             <div className="claim-next-dot" />
             <p className="claim-next-text">
-              <strong>If you're away from campus:</strong> Your claim will be reviewed. You'll receive an email when approved. Come back to campus whenever convenient and complete the verification process.
+              <strong>If you're away from campus:</strong> Your claim will be reviewed by security staff. Check your claim status in My Claims, then visit campus when convenient to complete verification and collect your item.
             </p>
           </div>
           <div className="claim-next-row">
@@ -222,30 +222,45 @@ function StepConfirm({ claimRef, onDone }: { claimRef: string; onDone: () => voi
   )
 }
 
-export function ClaimPage({ items, userName, userEmail, isSignedIn }: { items: Item[]; userName?: string; userEmail?: string; isSignedIn?: boolean }) {
+export function ClaimPage({
+  userName,
+  userEmail,
+  isSignedIn,
+}: {
+  userName?: string
+  userEmail?: string
+  isSignedIn?: boolean
+}) {
   const { itemId } = useParams()
   const navigate = useNavigate()
 
-  // Hooks must always be called at the top, before any conditional logic
   const [step, setStep] = useState(1)
-  const [form, setForm] = useState<ClaimFormState>({
-    ownershipDesc: '',
-    additionalProof: '',
-  })
+  const [form, setForm] = useState<ClaimFormState>({ ownershipDesc: '' })
+  const [item, setItem] = useState<Item | null>(null)
+  const [loading, setLoading] = useState(true)
   const [claimRef, setClaimRef] = useState('')
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Check auth status and item on mount
   useEffect(() => {
     if (isSignedIn === false) {
       setError('AUTH_REQUIRED')
     }
-  }, [])
+  }, [isSignedIn])
 
-  const item = items.find(i => i.item_id === itemId)
+  useEffect(() => {
+    if (!itemId) {
+      setLoading(false)
+      return
+    }
 
-  // Check for auth error
+    setLoading(true)
+    getItemById(itemId)
+      .then((raw) => setItem(transformBackendItem(raw)))
+      .catch(() => setItem(null))
+      .finally(() => setLoading(false))
+  }, [itemId])
+
   if (error === 'AUTH_REQUIRED') {
     return (
       <ErrorPage
@@ -259,7 +274,14 @@ export function ClaimPage({ items, userName, userEmail, isSignedIn }: { items: I
     )
   }
 
-  // Check for item not found
+  if (loading) {
+    return (
+      <main className="item-detail-main" style={{ textAlign: 'center', color: '#90a4ae', padding: '3rem' }}>
+        Loading item…
+      </main>
+    )
+  }
+
   if (!item) {
     return (
       <ErrorPage
@@ -274,7 +296,7 @@ export function ClaimPage({ items, userName, userEmail, isSignedIn }: { items: I
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
-    setForm(prev => ({ ...prev, [name]: value }))
+    setForm((prev) => ({ ...prev, [name]: value }))
   }
 
   const handleSubmit = async () => {
@@ -316,7 +338,9 @@ export function ClaimPage({ items, userName, userEmail, isSignedIn }: { items: I
           {step < 3 && <Stepper current={step} />}
 
           <div className="claim-content">
-            {error && <div className="auth-error" style={{ marginBottom: '1.5rem' }}>{error}</div>}
+            {error && error !== 'AUTH_REQUIRED' && (
+              <div className="auth-error" style={{ marginBottom: '1.5rem' }}>{error}</div>
+            )}
             {step === 1 && (
               <StepOwnership
                 item={item}

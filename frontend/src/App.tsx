@@ -107,7 +107,7 @@ function App() {
           userEmail,
           isSignedInProp: isSignedIn,
           onLoginSuccess: handleLoginSuccess,
-          onSignUpSuccess: (name) => handleLoginSuccess(name, 'public'),
+          onSignUpSuccess: handleLoginSuccess,
         })}
       </Routes>
     </>

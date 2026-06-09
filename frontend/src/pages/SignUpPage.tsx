@@ -1,8 +1,13 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { register, storeAuthToken } from '../services/api'
+import { UserRole } from '../App'
+import { register, storeAuthSession } from '../services/api'
 
-export function SignUpPage({ onSignUpSuccess }: { onSignUpSuccess: (name: string) => void }) {
+export function SignUpPage({
+  onSignUpSuccess,
+}: {
+  onSignUpSuccess: (name: string, email: string, role: UserRole) => void
+}) {
   const navigate = useNavigate()
   const [formData, setFormData] = useState({
     firstName: '',
@@ -74,11 +79,14 @@ export function SignUpPage({ onSignUpSuccess }: { onSignUpSuccess: (name: string
         formData.affiliation
       )
 
-      // Store the auth token
-      storeAuthToken(response.token)
+      const role = response.user.role as UserRole
+      storeAuthSession(response.token, {
+        name: response.user.name,
+        email: response.user.email,
+        role,
+      })
 
-      // Update app state
-      onSignUpSuccess(fullName)
+      onSignUpSuccess(response.user.name, response.user.email, role)
 
       // Redirect to home
       navigate('/')
