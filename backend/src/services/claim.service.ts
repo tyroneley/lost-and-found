@@ -1,6 +1,7 @@
 import { prisma } from '../lib/prisma'
 import { logAudit } from './audit.service'
 import { AppError } from '../utils/errorHandler'
+import { sendClaimInvoiceEmail, sendClaimStatusEmail } from './email.service'
 
 export const createClaim = async (data: any) => {
   const item = await prisma.item.findUnique({ where: { item_id: data.item_id } })
@@ -13,13 +14,17 @@ export const createClaim = async (data: any) => {
   })
   if (duplicate) throw new AppError(409, 'You already have a pending claim for this item')
 
-  return prisma.claimRequest.create({
+  const claim = await prisma.claimRequest.create({
     data: {
       item_id: data.item_id,
       claimer_id: data.claimer_id,
       ownership_desc: data.ownership_desc
-    }
+    },
+    include: claimInclude
   })
+
+  sendClaimInvoiceEmail(claim)
+  return claim
 }
 
 const claimInclude = {
@@ -138,6 +143,8 @@ export const updateClaimStatus = async (id: string, data: any, changed_by: strin
       new_status: 'CLAIMED',
       notes: data.staff_notes
     })
+
+    sendClaimStatusEmail(claim)
   } else if (data.status === 'REJECTED') {
     await logAudit({
       item_id: claim.item_id,
@@ -146,6 +153,8 @@ export const updateClaimStatus = async (id: string, data: any, changed_by: strin
       old_status: existing.item.status,
       notes: data.staff_notes
     })
+
+    sendClaimStatusEmail(claim)
   } else if (data.status === 'COLLECTED') {
     await prisma.item.update({
       where: { item_id: claim.item_id },

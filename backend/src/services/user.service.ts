@@ -1,6 +1,7 @@
 import { prisma } from '../lib/prisma'
 import * as bcrypt from 'bcryptjs'
 import type { Prisma } from '../../generated/prisma'
+import { sendWelcomeEmail } from './email.service'
 
 export const createUser = async (data: any) => {
   const salt = await bcrypt.genSalt(10)
@@ -12,6 +13,7 @@ export const createUser = async (data: any) => {
   })
 
   const { password: _, ...safeUser } = user
+  sendWelcomeEmail(safeUser)
   return safeUser
 }
 
