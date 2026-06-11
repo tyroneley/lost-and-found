@@ -35,13 +35,32 @@ export function StaffItemDetailsPage() {
   }
 
   const calculateExpiry = (foundAt: string) => {
-    const found = new Date(foundAt)
-    const expiry = new Date(found.getTime() + 90 * 24 * 60 * 60 * 1000)
-    const today = new Date()
-    const daysElapsed = Math.floor((today.getTime() - found.getTime()) / (24 * 60 * 60 * 1000))
-    const percentElapsed = Math.min((daysElapsed / 90) * 100, 100)
-    return { expiry: formatDate(expiry.toISOString()), daysElapsed, percentElapsed }
-  }
+      const found = new Date(foundAt)
+      const expiry = new Date(found.getTime() + 90 * 24 * 60 * 60 * 1000)
+
+      // Compare calendar dates only
+      const foundDate = new Date(found)
+      foundDate.setHours(0, 0, 0, 0)
+
+      const todayDate = new Date()
+      todayDate.setHours(0, 0, 0, 0)
+
+      const daysElapsed = Math.max(
+        0,
+        Math.floor(
+          (todayDate.getTime() - foundDate.getTime()) /
+          (24 * 60 * 60 * 1000)
+        )
+      )
+
+      const percentElapsed = Math.min((daysElapsed / 90) * 100, 100)
+
+      return {
+        expiry: formatDate(expiry.toISOString()),
+        daysElapsed,
+        percentElapsed
+      }
+    }
 
   if (loading) {
     return (
