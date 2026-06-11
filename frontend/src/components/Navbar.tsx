@@ -228,19 +228,6 @@ export function Navbar({ isSignedIn = false, userName = '', userRole = 'public',
                     Welcome, <strong>{titleCase(userName)}</strong>
                   </div>
                   <button 
-                    className="profile-menu-btn"
-                    onClick={() => setProfileOpen(false)}
-                  >
-                    Settings
-                  </button>
-                  <button 
-                    className="profile-menu-btn"
-                    onClick={() => setProfileOpen(false)}
-                  >
-                    My Account
-                  </button>
-                  <hr className="profile-dropdown-divider" />
-                  <button 
                     className="profile-logout-btn"
                     onClick={handleLogout}
                   >
