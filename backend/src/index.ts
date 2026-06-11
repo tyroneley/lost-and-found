@@ -16,6 +16,7 @@ import { prisma } from './lib/prisma'
 import { issueToken, authMiddleware, requireRole, type AuthPayload } from './middleware/auth'
 import { getAuditLogs, getAuditLogsByItemId } from './services/audit.service'
 import { handleError } from './utils/errorHandler'
+import { FIELD_LIMITS } from './validators/fieldLimits'
 import { expireItems } from './services/expiration.service'
 import { getClaims } from './services/claim.service'
 
@@ -62,12 +63,12 @@ app.post('/auth/register', async (c) => {
     
     // Validate input
     const schema = z.object({
-      name: z.string().min(1, 'Name is required'),
-      email: z.string().email('Invalid email'),
-      password: z.string().min(8, 'Password must be at least 8 characters'),
-      phone: z.string().optional(),
-      uni_email: z.string().optional(),
-      affiliation: z.string().optional(),
+      name: z.string().min(1, 'Name is required').max(FIELD_LIMITS.USER_NAME),
+      email: z.string().email('Invalid email').max(FIELD_LIMITS.EMAIL),
+      password: z.string().min(8, 'Password must be at least 8 characters').max(FIELD_LIMITS.PASSWORD_MAX),
+      phone: z.string().max(FIELD_LIMITS.PHONE).optional(),
+      uni_email: z.string().email('Invalid university email').max(FIELD_LIMITS.EMAIL).optional(),
+      affiliation: z.string().max(FIELD_LIMITS.AFFILIATION).optional(),
     })
     
     const { name, email, password, phone, uni_email, affiliation } = schema.parse(body)
@@ -122,8 +123,8 @@ app.post('/auth/login', async (c) => {
     
     // Validate input
     const schema = z.object({
-      email: z.string().email('Invalid email'),
-      password: z.string().min(1, 'Password is required'),
+      email: z.string().email('Invalid email').max(FIELD_LIMITS.EMAIL),
+      password: z.string().min(1, 'Password is required').max(FIELD_LIMITS.PASSWORD_MAX),
     })
     
     const { email, password } = schema.parse(body)

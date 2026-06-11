@@ -886,6 +886,62 @@ main {
   color: #2c3e50;
   background: white;
   transition: all 0.3s ease;
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+.form-input,
+.staff-report-field input,
+.staff-report-field textarea,
+.staff-manage-input,
+.staff-items-search input,
+.browse-search-bar .search-input,
+.search-container .search-input {
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+.staff-report-field,
+.staff-report-field-row,
+.form-group {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.staff-report-field input:not([type="color"]):not([type="file"]):not([type="date"]):not([type="time"]),
+.staff-report-field textarea,
+.form-input,
+textarea.staff-claims-notes {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.staff-report-field input[type="text"],
+.staff-report-field input[type="tel"],
+input.form-input {
+  overflow: hidden;
+}
+
+.staff-report-field textarea,
+.form-input.claim-textarea,
+.staff-claims-notes {
+  overflow-x: hidden;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+.field-char-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.35rem;
+}
+
+.field-char-count {
+  font-size: 0.8rem;
+  color: #90a4ae;
 }
 
 .form-input::placeholder {
@@ -2671,6 +2727,9 @@ main {
 .staff-report-field select,
 .staff-report-field textarea {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   font-size: 1rem;
   padding: 0.85rem 1rem;
   border: 1px solid #d0d8e0;
@@ -2755,7 +2814,7 @@ main {
 
 .staff-report-field-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 1.25rem;
 }
 
@@ -5215,6 +5274,13 @@ main {
   min-height: 72px;
   resize: vertical;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: pre-wrap;
 }
 
 .staff-claims-reject-error {

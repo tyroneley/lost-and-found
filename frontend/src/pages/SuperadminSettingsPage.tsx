@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import * as api from '../services/api'
 import type { ReferenceUsage } from '../services/api'
+import { FIELD_LIMITS } from '../utils/fieldLimits'
 import { ConfirmationDialog, ConfirmRow } from '../components/ConfirmationDialog'
 
 interface Category {
@@ -448,12 +449,14 @@ export function SuperadminSettingsPage() {
                             value={editingCatName}
                             onChange={(e) => setEditingCatName(e.target.value)}
                             placeholder="Name"
+                            maxLength={FIELD_LIMITS.CATEGORY_NAME}
                           />
                           <input
                             className="staff-manage-input"
                             value={editingCatDesc}
                             onChange={(e) => setEditingCatDesc(e.target.value)}
                             placeholder="Description"
+                            maxLength={FIELD_LIMITS.CATEGORY_DESCRIPTION}
                           />
                           <div className="admin-category-card-edit-actions">
                             <button type="button" className="staff-manage-save-btn" onClick={requestSaveCat} disabled={saving}>
@@ -497,12 +500,14 @@ export function SuperadminSettingsPage() {
                       placeholder="Category name *"
                       value={newCatName}
                       onChange={(e) => setNewCatName(e.target.value)}
+                      maxLength={FIELD_LIMITS.CATEGORY_NAME}
                     />
                     <input
                       className="staff-manage-input"
                       placeholder="Description (optional)"
                       value={newCatDesc}
                       onChange={(e) => setNewCatDesc(e.target.value)}
+                      maxLength={FIELD_LIMITS.CATEGORY_DESCRIPTION}
                     />
                     <button type="button" className="staff-manage-add-btn" onClick={handleAddCategory} disabled={saving || !newCatName.trim()}>
                       Add
@@ -543,12 +548,14 @@ export function SuperadminSettingsPage() {
                     placeholder="Building name *"
                     value={newBldName}
                     onChange={(e) => setNewBldName(e.target.value)}
+                    maxLength={FIELD_LIMITS.BUILDING_NAME}
                   />
                   <input
                     className="staff-manage-input"
                     placeholder="Address (optional)"
                     value={newBldAddr}
                     onChange={(e) => setNewBldAddr(e.target.value)}
+                    maxLength={FIELD_LIMITS.BUILDING_ADDRESS}
                   />
                   <button type="button" className="staff-manage-add-btn" onClick={handleAddBuilding} disabled={saving || !newBldName.trim()}>
                     Add
@@ -582,6 +589,7 @@ export function SuperadminSettingsPage() {
                             className="staff-manage-input"
                             value={editingBldName}
                             onChange={(e) => setEditingBldName(e.target.value)}
+                            maxLength={FIELD_LIMITS.BUILDING_NAME}
                           />
                           <button type="button" className="staff-manage-save-btn" onClick={requestSaveBld} disabled={saving}>
                             Save
@@ -643,11 +651,14 @@ export function SuperadminSettingsPage() {
                               value={editingRoomNum}
                               onChange={(e) => setEditingRoomNum(e.target.value)}
                               type="number"
+                              min={0}
+                              max={FIELD_LIMITS.ROOM_NUMBER_MAX}
                             />
                             <input
                               className="staff-manage-input"
                               value={editingRoomName}
                               onChange={(e) => setEditingRoomName(e.target.value)}
+                              maxLength={FIELD_LIMITS.ROOM_NAME}
                             />
                             <button type="button" className="staff-manage-save-btn" onClick={requestSaveRoom} disabled={saving}>
                               Save
@@ -680,12 +691,15 @@ export function SuperadminSettingsPage() {
                           value={newRoomNum}
                           onChange={(e) => setNewRoomNum(e.target.value)}
                           type="number"
+                          min={0}
+                          max={FIELD_LIMITS.ROOM_NUMBER_MAX}
                         />
                         <input
                           className="staff-manage-input"
                           placeholder="Room name *"
                           value={newRoomName}
                           onChange={(e) => setNewRoomName(e.target.value)}
+                          maxLength={FIELD_LIMITS.ROOM_NAME}
                         />
                         <button
                           type="button"

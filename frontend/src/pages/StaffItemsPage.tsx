@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Item } from '../App'
 import { getItems } from '../services/api'
+import { FIELD_LIMITS } from '../utils/fieldLimits'
 import { transformBackendItems } from '../utils/transformData'
 
 export function StaffItemsPage() {
@@ -89,6 +90,7 @@ export function StaffItemsPage() {
               placeholder="Name, location, or ID"
               value={searchTerm}
               onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1) }}
+              maxLength={FIELD_LIMITS.SEARCH}
             />
           </div>
         </div>

@@ -4,6 +4,7 @@ import { getAllClaims, getCategories } from '../services/api'
 import { transformBackendStaffClaims } from '../utils/transformData'
 import type { StaffClaimObject, StaffClaimsNavState } from '../types/claims'
 import { StaffClaimRow } from '../components/StaffClaimRow'
+import { FIELD_LIMITS } from '../utils/fieldLimits'
 
 type StatusTab = 'All' | 'Pending' | 'Approved' | 'Rejected' | 'Collected'
 
@@ -152,6 +153,7 @@ export function StaffClaimsPage() {
               placeholder="Search by item name or claimant name…"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              maxLength={FIELD_LIMITS.SEARCH}
             />
           </div>
         </div>
