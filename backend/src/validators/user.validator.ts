@@ -2,13 +2,13 @@ import { z } from 'zod'
 
 export const createUserSchema = z.object({
   name: z.string().min(1, 'Name is required'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
 
   phone: z.string().optional(),
 
   personal_email: z
     .string()
-    .email('Invalid personal email')
-    .optional(),
+    .email('Invalid personal email'),
 
   uni_email: z
     .string()

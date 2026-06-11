@@ -1,8 +1,18 @@
 import { prisma } from '../lib/prisma'
+import * as bcrypt from 'bcryptjs'
 import type { Prisma } from '../../generated/prisma'
 
 export const createUser = async (data: any) => {
-  return prisma.user.create({ data })
+  const salt = await bcrypt.genSalt(10)
+  const hashedPassword = await bcrypt.hash(data.password, salt)
+
+  const { password, ...rest } = data
+  const user = await prisma.user.create({
+    data: { ...rest, password: hashedPassword, role: data.role ?? 'PUBLIC' },
+  })
+
+  const { password: _, ...safeUser } = user
+  return safeUser
 }
 
 export const getUserById = async (id: string) => {
