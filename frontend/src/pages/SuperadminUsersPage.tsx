@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createUser, getUsers } from '../services/api'
 import type { ApiUser } from '../services/api'
+import { StaffBannerActionBtn, StaffPageBanner } from '../components/StaffPageBanner'
 import { AFFILIATION_OPTIONS, allowedRolesForAffiliation, roleForUserAffiliation } from '../utils/affiliation'
 import { clampField, FIELD_LIMITS } from '../utils/fieldLimits'
 
@@ -142,20 +143,18 @@ export function SuperadminUsersPage() {
   return (
     <main className="staff-dashboard-main">
       <div className="staff-dashboard-page admin-users-page">
-        <div className="staff-items-header">
-          <div>
-            <h1 className="staff-items-title">Users</h1>
-            <p className="staff-items-subtitle">
-              {total} account{total === 1 ? '' : 's'} in the system
-            </p>
-          </div>
-          <button type="button" className="staff-items-record-btn" onClick={() => setShowAddUser(true)}>
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path d="M6 1v10M1 6h10" />
-            </svg>
-            <span>Add user</span>
-          </button>
-        </div>
+        <StaffPageBanner
+          title="Users"
+          subtitle={`${total} account${total === 1 ? '' : 's'} in the system`}
+          action={
+            <StaffBannerActionBtn onClick={() => setShowAddUser(true)}>
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M6 1v10M1 6h10" />
+              </svg>
+              <span>Add user</span>
+            </StaffBannerActionBtn>
+          }
+        />
 
         <div className="staff-dashboard-section">
           <div className="staff-items-toolbar" style={{ marginBottom: '1.25rem' }}>

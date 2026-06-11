@@ -4,6 +4,7 @@ import { getAllClaims, getCategories } from '../services/api'
 import { transformBackendStaffClaims } from '../utils/transformData'
 import type { StaffClaimObject, StaffClaimsNavState } from '../types/claims'
 import { StaffClaimRow } from '../components/StaffClaimRow'
+import { StaffPageBanner } from '../components/StaffPageBanner'
 import { FIELD_LIMITS } from '../utils/fieldLimits'
 
 type StatusTab = 'All' | 'Pending' | 'Approved' | 'Rejected' | 'Collected'
@@ -110,14 +111,14 @@ export function StaffClaimsPage() {
   }
 
   return (
-    <div className="staff-items-page staff-claims-page">
-      <div className="staff-items-header">
-        <div>
-          <h1 className="staff-items-title">Claims</h1>
-          <p className="staff-items-subtitle">Review and action incoming claim requests</p>
-        </div>
-      </div>
+    <main className="staff-dashboard-main">
+      <div className="staff-dashboard-page">
+        <StaffPageBanner
+          title="Claims"
+          subtitle="Review and action incoming claim requests"
+        />
 
+        <div className="staff-list-page-content staff-claims-page">
       <div className="staff-metrics staff-claims-metrics">
         <div className="staff-metric">
           <div className="staff-metric-label">Total</div>
@@ -241,6 +242,8 @@ export function StaffClaimsPage() {
           </div>
         </div>
       )}
-    </div>
+        </div>
+      </div>
+    </main>
   )
 }

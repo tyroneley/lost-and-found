@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Item } from '../App'
 import { getItems } from '../services/api'
 import { FIELD_LIMITS } from '../utils/fieldLimits'
+import { StaffBannerActionBtn, StaffPageBanner } from '../components/StaffPageBanner'
 import { transformBackendItems } from '../utils/transformData'
 
 interface StaffItemsPageProps {
@@ -66,31 +67,29 @@ export function StaffItemsPage({
   const statusBadgeClass = (status: string) =>
     `staff-items-status-badge staff-items-status-${status.toLowerCase().replace(/\s+/g, '-')}`
 
+  const recordAction = showRecordButton ? (
+    <StaffBannerActionBtn onClick={() => navigate('/staff/report')}>
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <path d="M6 1v10M1 6h10" />
+      </svg>
+      <span>Record found item</span>
+    </StaffBannerActionBtn>
+  ) : undefined
+
   if (loading) {
     return (
-      <div className="staff-items-page" style={{ padding: '3rem', textAlign: 'center', color: '#90a4ae' }}>
+      <main className="staff-dashboard-main" style={{ padding: '3rem', textAlign: 'center', color: '#90a4ae' }}>
         Loading items…
-      </div>
+      </main>
     )
   }
 
   return (
-    <div className="staff-items-page">
-      <div className="staff-items-header">
-        <div>
-          <h1 className="staff-items-title">{title}</h1>
-          <p className="staff-items-subtitle">{subtitle}</p>
-        </div>
-        {showRecordButton && (
-          <button className="staff-items-record-btn" onClick={() => navigate('/staff/report')}>
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path d="M6 1v10M1 6h10" />
-            </svg>
-            <span>Record found item</span>
-          </button>
-        )}
-      </div>
+    <main className="staff-dashboard-main">
+      <div className="staff-dashboard-page">
+        <StaffPageBanner title={title} subtitle={subtitle} action={recordAction} />
 
+        <div className="staff-list-page-content">
       <div className="staff-items-toolbar">
         <div className="staff-items-search-group">
           <label className="staff-items-filter-label">Search</label>
@@ -253,6 +252,8 @@ export function StaffItemsPage({
           </div>
         </div>
       </div>
-    </div>
+        </div>
+      </div>
+    </main>
   )
 }
