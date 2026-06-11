@@ -197,7 +197,11 @@ export function getProtectedRoutes({
       path="/admin/items"
       element={
         <SuperadminRoute isSignedIn={isSignedIn} userRole={userRole}>
-          <StaffItemsPage />
+          <StaffItemsPage
+            showRecordButton={false}
+            title="All items"
+            subtitle="View every item recorded in the system"
+          />
         </SuperadminRoute>
       }
     />,

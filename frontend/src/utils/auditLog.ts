@@ -1,4 +1,14 @@
-import type { AuditLogApiEntry } from '../services/api'
+import type { AuditLogAction, AuditLogApiEntry } from '../services/api'
+
+export const AUDIT_ACTION_FILTER_OPTIONS: { value: '' | AuditLogAction; label: string }[] = [
+  { value: '', label: 'All actions' },
+  { value: 'CREATE', label: 'Item recorded' },
+  { value: 'UPDATE', label: 'Item updated' },
+  { value: 'DELETE', label: 'Item removed' },
+  { value: 'CLAIM', label: 'Claim submitted' },
+  { value: 'APPROVE', label: 'Claim approved' },
+  { value: 'REJECT', label: 'Claim rejected' },
+]
 
 export function auditActionLabel(entry: AuditLogApiEntry): string {
   const itemName = entry.item?.name ?? 'Item'

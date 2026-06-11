@@ -5,7 +5,19 @@ import { getItems } from '../services/api'
 import { FIELD_LIMITS } from '../utils/fieldLimits'
 import { transformBackendItems } from '../utils/transformData'
 
-export function StaffItemsPage() {
+interface StaffItemsPageProps {
+  showRecordButton?: boolean
+  title?: string
+  subtitle?: string
+  itemDetailBasePath?: string
+}
+
+export function StaffItemsPage({
+  showRecordButton = true,
+  title = 'Items',
+  subtitle = 'All found items recorded at this security desk',
+  itemDetailBasePath = '/staff/items',
+}: StaffItemsPageProps = {}) {
   const navigate = useNavigate()
   const [allItems, setAllItems] = useState<Item[]>([])
   const [loading, setLoading] = useState(true)
@@ -66,15 +78,17 @@ export function StaffItemsPage() {
     <div className="staff-items-page">
       <div className="staff-items-header">
         <div>
-          <h1 className="staff-items-title">Items</h1>
-          <p className="staff-items-subtitle">All found items recorded at this security desk</p>
+          <h1 className="staff-items-title">{title}</h1>
+          <p className="staff-items-subtitle">{subtitle}</p>
         </div>
-        <button className="staff-items-record-btn" onClick={() => navigate('/staff/report')}>
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <path d="M6 1v10M1 6h10" />
-          </svg>
-          <span>Record found item</span>
-        </button>
+        {showRecordButton && (
+          <button className="staff-items-record-btn" onClick={() => navigate('/staff/report')}>
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path d="M6 1v10M1 6h10" />
+            </svg>
+            <span>Record found item</span>
+          </button>
+        )}
       </div>
 
       <div className="staff-items-toolbar">
@@ -164,7 +178,7 @@ export function StaffItemsPage() {
           <tbody>
             {paginatedItems.length > 0 ? (
               paginatedItems.map(item => (
-                <tr key={item.item_id} onClick={() => navigate(`/staff/items/${item.item_id}`)}>
+                <tr key={item.item_id} onClick={() => navigate(`${itemDetailBasePath}/${item.item_id}`)}>
                   <td>
                     <div className="staff-items-name">{item.name}</div>
                     <div className="staff-items-id">ITEM-{item.item_id.slice(0, 8).toUpperCase()}</div>
@@ -189,7 +203,7 @@ export function StaffItemsPage() {
                   <td>
                     <button
                       className="staff-items-action-btn"
-                      onClick={(e) => { e.stopPropagation(); navigate(`/staff/items/${item.item_id}`) }}
+                      onClick={(e) => { e.stopPropagation(); navigate(`${itemDetailBasePath}/${item.item_id}`) }}
                     >
                       View
                     </button>

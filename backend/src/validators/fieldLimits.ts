@@ -20,4 +20,6 @@ export const FIELD_LIMITS = {
   BUILDING_NAME: 100,
   BUILDING_ADDRESS: 300,
   ROOM_NAME: 80,
+
+  SEARCH: 100,
 } as const

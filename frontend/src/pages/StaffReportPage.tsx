@@ -5,6 +5,7 @@ import { ConfirmationDialog, ConfirmRow, ConfirmColorRow } from '../components/C
 import { useStaffToast } from '../components/StaffToast'
 import { createItem, getCategories, getBuildings, getUsers, uploadItemPhoto } from '../services/api'
 import type { ApiUser } from '../services/api'
+import { AFFILIATION_OPTIONS } from '../utils/affiliation'
 import { FIELD_LIMITS, clampField } from '../utils/fieldLimits'
 
 const REPORT_FIELD_LIMITS: Record<string, number> = {
@@ -103,15 +104,13 @@ const hexToColorBucket = (hex: string): string => {
   return 'Red' // Default for remaining hues
 }
 
-const FINDER_AFFILIATIONS = ['Student', 'Staff', 'Visitor'] as const
-
 function finderContactFor(user: ApiUser): string {
   return user.phone?.trim() || user.personal_email
 }
 
 function finderAffiliationFor(user: ApiUser): string {
   const aff = user.affiliation?.trim() ?? ''
-  if (FINDER_AFFILIATIONS.includes(aff as (typeof FINDER_AFFILIATIONS)[number])) {
+  if (AFFILIATION_OPTIONS.includes(aff as (typeof AFFILIATION_OPTIONS)[number])) {
     return aff
   }
   return 'Visitor'
@@ -139,7 +138,7 @@ export function StaffReportPage() {
     photos: [],
     finderName: '',
     finderContact: '',
-    finderAffiliation: '',
+    finderAffiliation: 'Student',
   })
 
   const [photoPreview, setPhotoPreview] = useState<string[]>([])
@@ -613,10 +612,11 @@ export function StaffReportPage() {
               Finder affiliation <span className="staff-report-required">*</span>
             </label>
             <select name="finderAffiliation" value={form.finderAffiliation} onChange={handleInputChange}>
-              <option value="">Select</option>
-              <option>Student</option>
-              <option>Staff</option>
-              <option>Visitor</option>
+              {AFFILIATION_OPTIONS.map((opt) => (
+                <option key={opt} value={opt}>
+                  {opt}
+                </option>
+              ))}
             </select>
           </div>
         </div>

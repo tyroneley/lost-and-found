@@ -200,7 +200,17 @@ app.get('/audit-log', authMiddleware, requireRole(['STAFF', 'SUPERADMIN']), asyn
     }
     const limit = Math.min(parseInt(c.req.query('limit') || '100', 10) || 100, 500)
     const offset = parseInt(c.req.query('offset') || '0', 10) || 0
-    const logs = await getAuditLogs({ limit, offset })
+    const actionRaw = c.req.query('action')
+    const action =
+      actionRaw && ['CREATE', 'UPDATE', 'DELETE', 'APPROVE', 'REJECT', 'CLAIM'].includes(actionRaw)
+        ? (actionRaw as 'CREATE' | 'UPDATE' | 'DELETE' | 'APPROVE' | 'REJECT' | 'CLAIM')
+        : undefined
+    const sortRaw = c.req.query('sort')
+    const sort = sortRaw === 'oldest' ? 'oldest' : 'newest'
+    const q = c.req.query('q')?.trim().slice(0, FIELD_LIMITS.SEARCH) || undefined
+    const from = c.req.query('from') || undefined
+    const to = c.req.query('to') || undefined
+    const logs = await getAuditLogs({ limit, offset, action, sort, q, from, to })
     return c.json(logs)
   } catch (error) {
     return handleError(c, error)

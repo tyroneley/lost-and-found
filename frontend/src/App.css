@@ -6576,6 +6576,183 @@ input.form-input {
   min-width: 200px;
 }
 
+.admin-users-page .staff-items-header {
+  margin-bottom: 1.25rem;
+}
+
+/* Admin form modal — dashboard banner + staff-report fields */
+.admin-form-modal {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: 580px;
+  width: 100%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.admin-form-modal-banner {
+  background: var(--banner-gradient);
+  color: #ffffff;
+  padding: 1.5rem 1.5rem 1.35rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-shrink: 0;
+  box-shadow: 0 4px 16px rgba(0, 74, 135, 0.2);
+}
+
+.admin-form-modal-banner h2 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 0.35rem;
+  letter-spacing: -0.3px;
+}
+
+.admin-form-modal-banner p {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0;
+  line-height: 1.45;
+  max-width: 28rem;
+}
+
+.admin-form-modal-close {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #ffffff;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.admin-form-modal-close:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.admin-form-modal-close:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.admin-form-modal-body {
+  overflow-y: auto;
+  flex: 1;
+  padding: 1.25rem 1.5rem 0.5rem;
+  background: linear-gradient(135deg, #f0f6fc 0%, #f8fafb 50%, #ffffff 100%);
+}
+
+.admin-form-modal-body .staff-report-section {
+  margin-bottom: 1.5rem;
+}
+
+.admin-form-modal-body .staff-report-section:last-child {
+  margin-bottom: 0.5rem;
+}
+
+.admin-form-modal-body .staff-report-section:first-of-type {
+  margin-top: 0;
+}
+
+.admin-form-modal-error {
+  margin-bottom: 1rem;
+}
+
+.admin-form-modal-footer {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1.15rem 1.5rem;
+  border-top: 1px solid #e8ecf0;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  background: #ffffff;
+}
+
+.admin-form-modal-submit {
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  padding: 0.6rem 1.25rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.2s ease;
+  white-space: nowrap;
+}
+
+.admin-form-modal-submit:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.admin-form-modal-submit:disabled {
+  background: #cbd5e1;
+  cursor: not-allowed;
+}
+
+.staff-items-clear-btn {
+  font-size: 0.9rem;
+  padding: 0.6rem 0.85rem;
+  border: 1px solid #d0d8e0;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #546e7a;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  height: fit-content;
+}
+
+.staff-items-clear-btn:hover {
+  background: #f8fafb;
+  border-color: #b0bec5;
+  color: #2c3e50;
+}
+
+.staff-items-pg-ellipsis {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 0.25rem;
+  color: #90a4ae;
+  font-size: 0.85rem;
+  user-select: none;
+}
+
+.admin-audit-pagination {
+  border-top: 1px solid #e8ecf0;
+}
+
+.admin-audit-toolbar {
+  align-items: flex-end;
+}
+
+.admin-audit-date-input {
+  min-width: 9.5rem;
+  cursor: pointer;
+}
+
+.admin-audit-clear-wrap {
+  align-self: flex-end;
+  flex: 0 0 auto;
+}
+
 /* Settings layout */
 .admin-settings-page-wrap .staff-dashboard-header {
   margin-bottom: 0;

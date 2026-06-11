@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
-import { getUsers } from '../services/api'
+import { useState, useEffect, useCallback } from 'react'
+import { createUser, getUsers } from '../services/api'
 import type { ApiUser } from '../services/api'
-import { FIELD_LIMITS } from '../utils/fieldLimits'
+import { AFFILIATION_OPTIONS, allowedRolesForAffiliation, roleForUserAffiliation } from '../utils/affiliation'
+import { clampField, FIELD_LIMITS } from '../utils/fieldLimits'
 
 function initials(name: string): string {
   return name
@@ -36,14 +37,34 @@ function roleBadgeClass(role: ApiUser['role']): string {
   return 'staff-badge-pending'
 }
 
+const EMPTY_ADD_FORM = {
+  name: '',
+  personal_email: '',
+  password: '',
+  phone: '',
+  uni_email: '',
+  role: 'PUBLIC' as ApiUser['role'],
+  affiliation: 'Student',
+}
+
+const ROLE_LABELS: Record<ApiUser['role'], string> = {
+  PUBLIC: 'Public',
+  STAFF: 'Staff',
+  SUPERADMIN: 'Superadmin',
+}
+
 export function SuperadminUsersPage() {
   const [users, setUsers] = useState<ApiUser[]>([])
   const [total, setTotal] = useState(0)
   const [search, setSearch] = useState('')
   const [roleFilter, setRoleFilter] = useState('')
   const [loading, setLoading] = useState(true)
+  const [showAddUser, setShowAddUser] = useState(false)
+  const [addForm, setAddForm] = useState(EMPTY_ADD_FORM)
+  const [addError, setAddError] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
 
-  useEffect(() => {
+  const loadUsers = useCallback(() => {
     setLoading(true)
     getUsers({
       limit: 100,
@@ -58,14 +79,82 @@ export function SuperadminUsersPage() {
       .finally(() => setLoading(false))
   }, [search, roleFilter])
 
+  useEffect(() => {
+    loadUsers()
+  }, [loadUsers])
+
+  const resetAddModal = () => {
+    setAddForm(EMPTY_ADD_FORM)
+    setAddError(null)
+    setShowAddUser(false)
+  }
+
+  const closeAddModal = () => {
+    if (saving) return
+    resetAddModal()
+  }
+
+  const handleAffiliationChange = (affiliation: string) => {
+    setAddForm((f) => ({
+      ...f,
+      affiliation,
+      role: roleForUserAffiliation(affiliation, f.role),
+    }))
+  }
+
+  const roleOptions = allowedRolesForAffiliation(addForm.affiliation)
+
+  const handleAddUser = async () => {
+    const name = addForm.name.trim()
+    const personal_email = addForm.personal_email.trim()
+    const password = addForm.password
+
+    if (!name || !personal_email || !password) {
+      setAddError('Name, personal email, and password are required')
+      return
+    }
+    if (password.length < FIELD_LIMITS.PASSWORD_MIN) {
+      setAddError(`Password must be at least ${FIELD_LIMITS.PASSWORD_MIN} characters`)
+      return
+    }
+
+    setSaving(true)
+    setAddError(null)
+    try {
+      await createUser({
+        name,
+        personal_email,
+        password,
+        role: addForm.role,
+        phone: addForm.phone.trim() || undefined,
+        uni_email: addForm.uni_email.trim() || undefined,
+        affiliation: addForm.affiliation.trim() || undefined,
+      })
+      resetAddModal()
+      loadUsers()
+    } catch (err) {
+      setAddError(err instanceof Error ? err.message : 'Failed to create user')
+    } finally {
+      setSaving(false)
+    }
+  }
+
   return (
     <main className="staff-dashboard-main">
-      <div className="staff-dashboard-page">
-        <div className="staff-dashboard-header">
-          <h1 className="staff-dashboard-title">Users</h1>
-          <p className="staff-dashboard-subtitle">
-            {total} account{total === 1 ? '' : 's'} in the system
-          </p>
+      <div className="staff-dashboard-page admin-users-page">
+        <div className="staff-items-header">
+          <div>
+            <h1 className="staff-items-title">Users</h1>
+            <p className="staff-items-subtitle">
+              {total} account{total === 1 ? '' : 's'} in the system
+            </p>
+          </div>
+          <button type="button" className="staff-items-record-btn" onClick={() => setShowAddUser(true)}>
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path d="M6 1v10M1 6h10" />
+            </svg>
+            <span>Add user</span>
+          </button>
         </div>
 
         <div className="staff-dashboard-section">
@@ -77,7 +166,7 @@ export function SuperadminUsersPage() {
                   type="text"
                   placeholder="Name or email"
                   value={search}
-                  onChange={(e) => setSearch(e.target.value)}
+                  onChange={(e) => setSearch(clampField(e.target.value, FIELD_LIMITS.SEARCH))}
                   maxLength={FIELD_LIMITS.SEARCH}
                 />
               </div>
@@ -117,6 +206,179 @@ export function SuperadminUsersPage() {
           </div>
         </div>
       </div>
+
+      {showAddUser && (
+        <div
+          className="staff-report-modal-overlay"
+          onClick={closeAddModal}
+          role="presentation"
+        >
+          <div
+            className="admin-form-modal"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="add-user-modal-title"
+          >
+            <div className="admin-form-modal-banner">
+              <div>
+                <h2 id="add-user-modal-title">Add user</h2>
+                <p>Create a new staff or public account for the lost &amp; found system.</p>
+              </div>
+              <button
+                type="button"
+                className="admin-form-modal-close"
+                onClick={closeAddModal}
+                aria-label="Close"
+                disabled={saving}
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="admin-form-modal-body">
+              {addError && <div className="staff-manage-error admin-form-modal-error">{addError}</div>}
+
+              <div className="staff-report-section">
+                <h3 className="staff-report-section-title">Account details</h3>
+
+                <div className="staff-report-field">
+                  <label htmlFor="add-user-name">
+                    Full name <span className="staff-report-required">*</span>
+                  </label>
+                  <input
+                    id="add-user-name"
+                    type="text"
+                    placeholder="e.g. John Doe"
+                    value={addForm.name}
+                    onChange={(e) => setAddForm((f) => ({ ...f, name: clampField(e.target.value, FIELD_LIMITS.USER_NAME) }))}
+                    maxLength={FIELD_LIMITS.USER_NAME}
+                  />
+                </div>
+
+                <div className="staff-report-field-row">
+                  <div className="staff-report-field">
+                    <label htmlFor="add-user-affiliation">
+                      Affiliation <span className="staff-report-required">*</span>
+                    </label>
+                    <select
+                      id="add-user-affiliation"
+                      value={addForm.affiliation}
+                      onChange={(e) => handleAffiliationChange(e.target.value)}
+                    >
+                      {AFFILIATION_OPTIONS.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="staff-report-field">
+                    <label htmlFor="add-user-role">
+                      Role <span className="staff-report-required">*</span>
+                    </label>
+                    <select
+                      id="add-user-role"
+                      value={addForm.role}
+                      onChange={(e) => setAddForm((f) => ({ ...f, role: e.target.value as ApiUser['role'] }))}
+                      disabled={roleOptions.length === 1}
+                    >
+                      {roleOptions.map((role) => (
+                        <option key={role} value={role}>
+                          {ROLE_LABELS[role]}
+                        </option>
+                      ))}
+                    </select>
+                    {addForm.affiliation === 'Staff' && (
+                      <p className="staff-report-hint">Staff affiliation: Staff or Superadmin.</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="staff-report-section">
+                <h3 className="staff-report-section-title">Contact</h3>
+
+                <div className="staff-report-field-row">
+                  <div className="staff-report-field">
+                    <label htmlFor="add-user-personal-email">
+                      Personal email <span className="staff-report-required">*</span>
+                    </label>
+                    <input
+                      id="add-user-personal-email"
+                      type="email"
+                      placeholder="name@email.com"
+                      value={addForm.personal_email}
+                      onChange={(e) => setAddForm((f) => ({ ...f, personal_email: clampField(e.target.value, FIELD_LIMITS.EMAIL) }))}
+                      maxLength={FIELD_LIMITS.EMAIL}
+                    />
+                  </div>
+                  <div className="staff-report-field">
+                    <label htmlFor="add-user-uni-email">
+                      University email <span className="staff-report-optional">(optional)</span>
+                    </label>
+                    <input
+                      id="add-user-uni-email"
+                      type="email"
+                      placeholder="name@binus.ac.id"
+                      value={addForm.uni_email}
+                      onChange={(e) => setAddForm((f) => ({ ...f, uni_email: clampField(e.target.value, FIELD_LIMITS.EMAIL) }))}
+                      maxLength={FIELD_LIMITS.EMAIL}
+                    />
+                  </div>
+                </div>
+
+                <div className="staff-report-field">
+                  <label htmlFor="add-user-phone">
+                    Phone <span className="staff-report-optional">(optional)</span>
+                  </label>
+                  <input
+                    id="add-user-phone"
+                    type="tel"
+                    placeholder="Phone number"
+                    value={addForm.phone}
+                    onChange={(e) => setAddForm((f) => ({ ...f, phone: clampField(e.target.value, FIELD_LIMITS.PHONE) }))}
+                    maxLength={FIELD_LIMITS.PHONE}
+                  />
+                </div>
+              </div>
+
+              <div className="staff-report-section">
+                <h3 className="staff-report-section-title">Security</h3>
+
+                <div className="staff-report-field">
+                  <label htmlFor="add-user-password">
+                    Password <span className="staff-report-required">*</span>
+                  </label>
+                  <input
+                    id="add-user-password"
+                    type="password"
+                    placeholder={`At least ${FIELD_LIMITS.PASSWORD_MIN} characters`}
+                    value={addForm.password}
+                    onChange={(e) => setAddForm((f) => ({ ...f, password: clampField(e.target.value, FIELD_LIMITS.PASSWORD_MAX) }))}
+                    maxLength={FIELD_LIMITS.PASSWORD_MAX}
+                  />
+                  <p className="staff-report-hint">The user can sign in with their personal email and this password.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="admin-form-modal-footer">
+              <button type="button" className="staff-report-modal-cancel" onClick={closeAddModal} disabled={saving}>
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="admin-form-modal-submit"
+                onClick={handleAddUser}
+                disabled={saving || !addForm.name.trim() || !addForm.personal_email.trim() || !addForm.password}
+              >
+                {saving ? 'Creating…' : 'Create account →'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   )
 }

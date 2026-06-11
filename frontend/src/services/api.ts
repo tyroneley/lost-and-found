@@ -332,15 +332,35 @@ export interface AuditLogApiEntry {
   item?: { name: string }
 }
 
+export type AuditLogAction =
+  | 'CREATE'
+  | 'UPDATE'
+  | 'DELETE'
+  | 'APPROVE'
+  | 'REJECT'
+  | 'CLAIM'
+
+export type AuditLogSort = 'newest' | 'oldest'
+
 export async function getAuditLog(filters?: {
   item_id?: string
   limit?: number
   offset?: number
+  action?: AuditLogAction
+  q?: string
+  sort?: AuditLogSort
+  from?: string
+  to?: string
 }): Promise<{ data: AuditLogApiEntry[]; total?: number }> {
   const queryParams = new URLSearchParams()
   if (filters?.item_id) queryParams.append('item_id', filters.item_id)
   if (filters?.limit) queryParams.append('limit', String(filters.limit))
   if (filters?.offset) queryParams.append('offset', String(filters.offset))
+  if (filters?.action) queryParams.append('action', filters.action)
+  if (filters?.q) queryParams.append('q', filters.q)
+  if (filters?.sort) queryParams.append('sort', filters.sort)
+  if (filters?.from) queryParams.append('from', filters.from)
+  if (filters?.to) queryParams.append('to', filters.to)
   const qs = queryParams.toString()
   return apiFetch(`/audit-log${qs ? `?${qs}` : ''}`)
 }
@@ -478,6 +498,24 @@ export async function getUsers(filters?: {
   if (filters?.q) queryParams.append('q', filters.q)
   const qs = queryParams.toString()
   return apiFetch(`/users${qs ? `?${qs}` : ''}`)
+}
+
+export async function createUser(data: {
+  name: string
+  personal_email: string
+  password: string
+  phone?: string
+  uni_email?: string
+  role?: ApiUser['role']
+  affiliation?: string
+}): Promise<ApiUser> {
+  return apiFetch('/users', {
+    method: 'POST',
+    body: JSON.stringify({
+      ...data,
+      role: data.role ?? 'PUBLIC',
+    }),
+  })
 }
 
 // Error handling - deal with problems gracefully
