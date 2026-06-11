@@ -105,7 +105,7 @@ const hexToColorBucket = (hex: string): string => {
 }
 
 function finderContactFor(user: ApiUser): string {
-  return user.phone?.trim() || user.personal_email
+  return user.personal_email || user.uni_email?.trim() || ''
 }
 
 function finderAffiliationFor(user: ApiUser): string {
