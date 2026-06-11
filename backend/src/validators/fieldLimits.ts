@@ -1,0 +1,23 @@
+/** Max lengths for validated fields — keep in sync with frontend/src/utils/fieldLimits.ts */
+export const FIELD_LIMITS = {
+  USER_NAME: 100,
+  EMAIL: 254,
+  PASSWORD_MAX: 128,
+  PHONE: 20,
+  AFFILIATION: 50,
+
+  ITEM_NAME: 80,
+  ITEM_DESCRIPTION: 300,
+  FINDER_NAME: 60,
+  FINDER_CONTACT: 80,
+  FINDER_AFFILIATION: 50,
+
+  OWNERSHIP_DESC: 300,
+  STAFF_NOTES: 300,
+
+  CATEGORY_NAME: 60,
+  CATEGORY_DESCRIPTION: 300,
+  BUILDING_NAME: 100,
+  BUILDING_ADDRESS: 300,
+  ROOM_NAME: 80,
+} as const
