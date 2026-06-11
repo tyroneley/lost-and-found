@@ -5289,6 +5289,27 @@ input.form-input {
   margin: 0;
 }
 
+.staff-claims-resolved-msg {
+  font-size: 0.9rem;
+  color: #546e7a;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.staff-claims-notes-readonly {
+  margin-top: 0.5rem;
+}
+
+.staff-claims-notes-readonly-text {
+  font-size: 0.85rem;
+  color: #37474f;
+  line-height: 1.5;
+  margin: 0.35rem 0 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
 .staff-claims-other-body {
   padding-top: 0.25rem;
 }

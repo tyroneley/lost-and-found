@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, type ReactNode } from 'react'
+import { useState, useEffect, type ReactNode } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import {
   getClaimById,
@@ -196,20 +196,12 @@ export function StaffClaimReviewPage() {
     }
   }
 
-  const approveDisabled = useMemo(() => {
-    if (!claim) return true
-    return claim.status !== 'pending' || actionLoading !== null
-  }, [claim, actionLoading])
+  const showApprove = claim?.status === 'pending'
+  const showReject = claim?.status === 'pending'
+  const showCollect = claim?.status === 'approved'
+  const isResolved = claim?.status === 'rejected' || claim?.status === 'collected'
 
-  const collectDisabled = useMemo(() => {
-    if (!claim) return true
-    return claim.status !== 'approved' || actionLoading !== null
-  }, [claim, actionLoading])
-
-  const rejectDisabled = useMemo(() => {
-    if (!claim) return true
-    return claim.status !== 'pending' || actionLoading !== null
-  }, [claim, actionLoading])
+  const actionBusy = actionLoading !== null
 
   if (loading) {
     return (
@@ -325,53 +317,78 @@ export function StaffClaimReviewPage() {
             <div className="item-detail-card staff-claims-action-card">
               <div className="item-detail-card-title">Take action</div>
               <div className="staff-claims-action-body">
-                <button
-                  type="button"
-                  className="btn btn-primary-dark staff-claims-action-btn"
-                  disabled={approveDisabled}
-                  onClick={() => runAction('APPROVED', 'approve')}
-                >
-                  {actionLoading === 'approve' ? 'Updating…' : 'Approve claim'}
-                </button>
+                {isResolved ? (
+                  <p className="staff-claims-resolved-msg">
+                    This claim has been{' '}
+                    <strong>{claim.status === 'collected' ? 'collected' : 'rejected'}</strong>.
+                    No further action is required.
+                  </p>
+                ) : (
+                  <>
+                    {showApprove && (
+                      <button
+                        type="button"
+                        className="btn btn-primary-dark staff-claims-action-btn"
+                        disabled={actionBusy}
+                        onClick={() => runAction('APPROVED', 'approve')}
+                      >
+                        {actionLoading === 'approve' ? 'Updating…' : 'Approve claim'}
+                      </button>
+                    )}
 
-                <button
-                  type="button"
-                  className="btn staff-claims-action-btn staff-claims-btn-collect"
-                  disabled={collectDisabled}
-                  onClick={() => runAction('COLLECTED', 'collect')}
-                >
-                  {actionLoading === 'collect' ? 'Updating…' : 'Mark as collected'}
-                </button>
+                    {showCollect && (
+                      <button
+                        type="button"
+                        className="btn staff-claims-action-btn staff-claims-btn-collect"
+                        disabled={actionBusy}
+                        onClick={() => runAction('COLLECTED', 'collect')}
+                      >
+                        {actionLoading === 'collect' ? 'Updating…' : 'Mark as collected'}
+                      </button>
+                    )}
 
-                <label className="staff-claims-notes-label" htmlFor="staff-notes">
-                  Staff notes
-                </label>
-                <textarea
-                  id="staff-notes"
-                  className="form-input staff-claims-notes"
-                  placeholder="Notes are sent to the claimant when rejecting."
-                  value={staffNotes}
-                  onChange={(e) => {
-                    setStaffNotes(clampField(e.target.value, FIELD_LIMITS.STAFF_NOTES))
-                    if (rejectError) setRejectError('')
-                  }}
-                  maxLength={FIELD_LIMITS.STAFF_NOTES}
-                />
-                <div className="field-char-row">
-                  <span className="field-char-count">
-                    {staffNotes.length} / {FIELD_LIMITS.STAFF_NOTES}
-                  </span>
-                </div>
-                {rejectError && <p className="staff-claims-reject-error">{rejectError}</p>}
+                    {showReject && (
+                      <>
+                        <label className="staff-claims-notes-label" htmlFor="staff-notes">
+                          Staff notes
+                        </label>
+                        <textarea
+                          id="staff-notes"
+                          className="form-input staff-claims-notes"
+                          placeholder="Notes are sent to the claimant when rejecting."
+                          value={staffNotes}
+                          onChange={(e) => {
+                            setStaffNotes(clampField(e.target.value, FIELD_LIMITS.STAFF_NOTES))
+                            if (rejectError) setRejectError('')
+                          }}
+                          maxLength={FIELD_LIMITS.STAFF_NOTES}
+                        />
+                        <div className="field-char-row">
+                          <span className="field-char-count">
+                            {staffNotes.length} / {FIELD_LIMITS.STAFF_NOTES}
+                          </span>
+                        </div>
+                        {rejectError && <p className="staff-claims-reject-error">{rejectError}</p>}
 
-                <button
-                  type="button"
-                  className="btn staff-claims-action-btn staff-claims-btn-reject"
-                  disabled={rejectDisabled}
-                  onClick={() => runAction('REJECTED', 'reject')}
-                >
-                  {actionLoading === 'reject' ? 'Updating…' : 'Reject claim'}
-                </button>
+                        <button
+                          type="button"
+                          className="btn staff-claims-action-btn staff-claims-btn-reject"
+                          disabled={actionBusy}
+                          onClick={() => runAction('REJECTED', 'reject')}
+                        >
+                          {actionLoading === 'reject' ? 'Updating…' : 'Reject claim'}
+                        </button>
+                      </>
+                    )}
+                  </>
+                )}
+
+                {(isResolved || claim.status === 'approved') && staffNotes.trim() && (
+                  <div className="staff-claims-notes-readonly">
+                    <span className="staff-claims-notes-label">Staff notes</span>
+                    <p className="staff-claims-notes-readonly-text">{staffNotes}</p>
+                  </div>
+                )}
               </div>
             </div>
 
