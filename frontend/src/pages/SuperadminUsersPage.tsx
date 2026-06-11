@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { getUsers } from '../services/api'
 import type { ApiUser } from '../services/api'
+import { FIELD_LIMITS } from '../utils/fieldLimits'
 
 function initials(name: string): string {
   return name
@@ -77,6 +78,7 @@ export function SuperadminUsersPage() {
                   placeholder="Name or email"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
+                  maxLength={FIELD_LIMITS.SEARCH}
                 />
               </div>
             </div>

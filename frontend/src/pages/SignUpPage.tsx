@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { UserRole } from '../App'
 import { register, storeAuthSession } from '../services/api'
+import { FIELD_LIMITS } from '../utils/fieldLimits'
 
 export function SignUpPage({
   onSignUpSuccess,
@@ -124,6 +125,7 @@ export function SignUpPage({
                       value={formData.firstName}
                       onChange={handleChange}
                       className="form-input"
+                      maxLength={FIELD_LIMITS.USER_FIRST_NAME}
                     />
                   </div>
                   <div className="form-group">
@@ -136,6 +138,7 @@ export function SignUpPage({
                       value={formData.lastName}
                       onChange={handleChange}
                       className="form-input"
+                      maxLength={FIELD_LIMITS.USER_LAST_NAME}
                     />
                   </div>
                 </div>
@@ -150,6 +153,7 @@ export function SignUpPage({
                     value={formData.phoneNumber}
                     onChange={handleChange}
                     className="form-input"
+                    maxLength={FIELD_LIMITS.PHONE}
                   />
                   <p className="form-hint">Used by staff to contact you about your claim appointment.</p>
                 </div>
@@ -200,6 +204,7 @@ export function SignUpPage({
                         value={formData.uniEmail}
                         onChange={handleChange}
                         className="form-input"
+                        maxLength={FIELD_LIMITS.EMAIL}
                       />
                       <p className="form-hint">Your institutional email ending in @binus.ac.id or @binus.edu</p>
                     </div>
@@ -216,6 +221,7 @@ export function SignUpPage({
                         value={formData.binusId}
                         onChange={handleChange}
                         className="form-input"
+                        maxLength={FIELD_LIMITS.BINUS_ID}
                       />
                       <p className="form-hint">Providing this helps staff verify your identity faster at the appointment.</p>
                     </div>
@@ -235,6 +241,7 @@ export function SignUpPage({
                     value={formData.personalEmail}
                     onChange={handleChange}
                     className="form-input"
+                    maxLength={FIELD_LIMITS.EMAIL}
                   />
                   <p className="form-hint">Used to log in. Can be the same as your BINUS email.</p>
                 </div>
@@ -250,6 +257,7 @@ export function SignUpPage({
                       value={formData.password}
                       onChange={handleChange}
                       className="form-input"
+                      maxLength={FIELD_LIMITS.PASSWORD_MAX}
                     />
                     <button
                       type="button"

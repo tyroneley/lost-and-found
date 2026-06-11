@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { FIELD_LIMITS } from './fieldLimits'
 
 export const createUserSchema = z.object({
-  name: z.string().min(1, 'Name is required').max(FIELD_LIMITS.USER_NAME),
+  name: z.string().min(1, 'Name is required').max(FIELD_LIMITS.USER_NAME).max(FIELD_LIMITS.USER_NAME),
   password: z.string().min(8, 'Password must be at least 8 characters').max(FIELD_LIMITS.PASSWORD_MAX),
 
   phone: z.string().max(FIELD_LIMITS.PHONE).optional(),
@@ -10,6 +10,7 @@ export const createUserSchema = z.object({
   personal_email: z
     .string()
     .email('Invalid personal email')
+    .max(FIELD_LIMITS.EMAIL)
     .max(FIELD_LIMITS.EMAIL),
 
   uni_email: z

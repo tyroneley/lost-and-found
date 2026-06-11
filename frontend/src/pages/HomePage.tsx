@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
+import { FIELD_LIMITS } from '../utils/fieldLimits'
 import { ItemCard } from '../components/ItemCard'
 import { Item } from '../App'
 
@@ -52,6 +53,7 @@ export function HomePage({ items }: HomePageProps) {
               className="search-input"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
+              maxLength={FIELD_LIMITS.SEARCH}
               onKeyPress={(e) => {
                 if (e.key === 'Enter') {
                   const path = searchInput.trim() ? `/browse?q=${encodeURIComponent(searchInput.trim())}` : '/browse'

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { UserRole } from '../App'
 import { login, storeAuthSession } from '../services/api'
+import { FIELD_LIMITS } from '../utils/fieldLimits'
 
 interface LoginPageProps {
   onLoginSuccess: (name: string, email: string, role: UserRole) => void;
@@ -111,6 +112,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
                       setError('')
                     }}
                     className="form-input"
+                    maxLength={FIELD_LIMITS.EMAIL}
                   />
                 </div>
 
@@ -127,6 +129,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
                         setError('')
                       }}
                       className="form-input"
+                      maxLength={FIELD_LIMITS.PASSWORD_MAX}
                     />
                     <button
                       type="button"

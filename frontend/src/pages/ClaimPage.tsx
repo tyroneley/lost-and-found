@@ -6,6 +6,7 @@ import { transformBackendItem } from '../utils/transformData'
 import { Stepper } from '../components/Stepper'
 import { ItemStrip } from '../components/ItemStrip'
 import { ErrorPage } from './ErrorPage'
+import { FIELD_LIMITS, clampField } from '../utils/fieldLimits'
 
 interface ClaimFormState {
   ownershipDesc: string
@@ -24,7 +25,7 @@ function StepOwnership({
   onNext: () => void
   onCancel: () => void
 }) {
-  const charLimit = 500
+  const charLimit = FIELD_LIMITS.OWNERSHIP_DESC
   const remaining = charLimit - form.ownershipDesc.length
   const canProceed = form.ownershipDesc.trim().length >= 10
 
@@ -296,7 +297,9 @@ export function ClaimPage({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
-    setForm((prev) => ({ ...prev, [name]: value }))
+    const next =
+      name === 'ownershipDesc' ? clampField(value, FIELD_LIMITS.OWNERSHIP_DESC) : value
+    setForm((prev) => ({ ...prev, [name]: next }))
   }
 
   const handleSubmit = async () => {

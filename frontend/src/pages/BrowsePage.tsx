@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { ItemCard } from '../components/ItemCard'
 import { Item } from '../App'
 import { getBuildings, getCategories, getItems } from '../services/api'
+import { FIELD_LIMITS } from '../utils/fieldLimits'
 import { transformBackendItems } from '../utils/transformData'
 
 export function BrowsePage({ items: propItems }: { items: Item[] }) {
@@ -177,6 +178,7 @@ export function BrowsePage({ items: propItems }: { items: Item[] }) {
                   setCurrentPage(1)
                 }}
                 className="search-input"
+                maxLength={FIELD_LIMITS.SEARCH}
               />
             </div>
           </div>
@@ -312,6 +314,7 @@ export function BrowsePage({ items: propItems }: { items: Item[] }) {
                     setCurrentPage(1)
                   }}
                   className="room-input"
+                  maxLength={FIELD_LIMITS.ROOM_FILTER}
                 />
               )}
             </div>

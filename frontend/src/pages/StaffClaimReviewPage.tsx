@@ -17,6 +17,7 @@ import { Item } from '../App'
 import { StatusBadge } from '../components/StatusBadge'
 import { useStaffToast } from '../components/StaffToast'
 import { ConfirmationDialog, ConfirmRow, ConfirmActionBox, ConfirmNotesBox } from '../components/ConfirmationDialog'
+import { FIELD_LIMITS, clampField } from '../utils/fieldLimits'
 
 function formatClaimRef(claimId: string): string {
   return `CLM-${claimId.slice(0, 8).toUpperCase()}`
@@ -351,10 +352,16 @@ export function StaffClaimReviewPage() {
                   placeholder="Notes are sent to the claimant when rejecting."
                   value={staffNotes}
                   onChange={(e) => {
-                    setStaffNotes(e.target.value)
+                    setStaffNotes(clampField(e.target.value, FIELD_LIMITS.STAFF_NOTES))
                     if (rejectError) setRejectError('')
                   }}
+                  maxLength={FIELD_LIMITS.STAFF_NOTES}
                 />
+                <div className="field-char-row">
+                  <span className="field-char-count">
+                    {staffNotes.length} / {FIELD_LIMITS.STAFF_NOTES}
+                  </span>
+                </div>
                 {rejectError && <p className="staff-claims-reject-error">{rejectError}</p>}
 
                 <button

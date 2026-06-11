@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+const SEARCH_MAX = 100
+
 export const idParamSchema = z.object({
   id: z.string().uuid('Invalid ID format')
 })
@@ -9,7 +11,7 @@ export const claimQuerySchema = z.object({
   user_id: z.string().uuid().optional(),
   status: z.enum(['PENDING', 'APPROVED', 'REJECTED', 'COLLECTED']).optional(),
   category: z.string().optional(),
-  search: z.string().optional(),
+  search: z.string().max(SEARCH_MAX).optional(),
   limit: z.coerce.number().int().min(1).max(100).default(20),
   offset: z.coerce.number().int().min(0).default(0)
 })
@@ -29,14 +31,14 @@ export const itemQuerySchema = z.object({
 
   category_id: z.string().uuid().optional(),
 
-  q: z.string().optional(), // search
+  q: z.string().max(SEARCH_MAX).optional(),
   limit: z.coerce.number().int().min(1).max(500).default(20),
   offset: z.coerce.number().int().min(0).default(0)
 })
 
 export const userQuerySchema = z.object({
   role: z.enum(['PUBLIC','STAFF','SUPERADMIN']).optional(),
-  q: z.string().optional(),
+  q: z.string().max(SEARCH_MAX).optional(),
   limit: z.coerce.number().int().min(1).max(100).default(20),
   offset: z.coerce.number().int().min(0).default(0)
 })

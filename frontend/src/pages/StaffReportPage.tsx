@@ -4,6 +4,14 @@ import { ItemCard } from '../components/ItemCard'
 import { ConfirmationDialog, ConfirmRow, ConfirmColorRow } from '../components/ConfirmationDialog'
 import { useStaffToast } from '../components/StaffToast'
 import { createItem, getCategories, getBuildings, uploadItemPhoto } from '../services/api'
+import { FIELD_LIMITS, clampField } from '../utils/fieldLimits'
+
+const REPORT_FIELD_LIMITS: Record<string, number> = {
+  itemName: FIELD_LIMITS.ITEM_NAME,
+  description: FIELD_LIMITS.ITEM_DESCRIPTION,
+  finderName: FIELD_LIMITS.FINDER_NAME,
+  finderContact: FIELD_LIMITS.FINDER_CONTACT,
+}
 
 interface Room {
   room_id: string
@@ -135,7 +143,9 @@ export function StaffReportPage() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
-    setForm(prev => ({ ...prev, [name]: value }))
+    const max = REPORT_FIELD_LIMITS[name]
+    const next = max !== undefined ? clampField(value, max) : value
+    setForm(prev => ({ ...prev, [name]: next }))
   }
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -301,6 +311,7 @@ export function StaffReportPage() {
               placeholder="Item name"
               value={form.itemName}
               onChange={handleInputChange}
+              maxLength={FIELD_LIMITS.ITEM_NAME}
             />
           </div>
 
@@ -351,7 +362,13 @@ export function StaffReportPage() {
               placeholder="Describe the item in detail, including condition, brand, model, or any other identifying information."
               value={form.description}
               onChange={handleInputChange}
+              maxLength={FIELD_LIMITS.ITEM_DESCRIPTION}
             />
+            <div className="field-char-row">
+              <span className="field-char-count">
+                {form.description.length} / {FIELD_LIMITS.ITEM_DESCRIPTION}
+              </span>
+            </div>
           </div>
         </div>
 
@@ -458,6 +475,7 @@ export function StaffReportPage() {
                 placeholder="Full name"
                 value={form.finderName}
                 onChange={handleInputChange}
+                maxLength={FIELD_LIMITS.FINDER_NAME}
               />
             </div>
             <div className="staff-report-field">
@@ -470,6 +488,7 @@ export function StaffReportPage() {
                 placeholder="Phone or email"
                 value={form.finderContact}
                 onChange={handleInputChange}
+                maxLength={FIELD_LIMITS.FINDER_CONTACT}
               />
             </div>
           </div>
