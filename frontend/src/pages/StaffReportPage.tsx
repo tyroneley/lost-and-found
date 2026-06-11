@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { ItemCard } from '../components/ItemCard'
 import { ConfirmationDialog, ConfirmRow, ConfirmColorRow } from '../components/ConfirmationDialog'
 import { useStaffToast } from '../components/StaffToast'
-import { createItem, getCategories, getBuildings, uploadItemPhoto } from '../services/api'
+import { createItem, getCategories, getBuildings, getUsers, uploadItemPhoto } from '../services/api'
+import type { ApiUser } from '../services/api'
 import { FIELD_LIMITS, clampField } from '../utils/fieldLimits'
 
 const REPORT_FIELD_LIMITS: Record<string, number> = {
@@ -102,6 +103,28 @@ const hexToColorBucket = (hex: string): string => {
   return 'Red' // Default for remaining hues
 }
 
+const FINDER_AFFILIATIONS = ['Student', 'Staff', 'Visitor'] as const
+
+function finderContactFor(user: ApiUser): string {
+  return user.phone?.trim() || user.personal_email
+}
+
+function finderAffiliationFor(user: ApiUser): string {
+  const aff = user.affiliation?.trim() ?? ''
+  if (FINDER_AFFILIATIONS.includes(aff as (typeof FINDER_AFFILIATIONS)[number])) {
+    return aff
+  }
+  return 'Visitor'
+}
+
+function finderSearchMeta(user: ApiUser): string {
+  const parts = [user.personal_email]
+  if (user.uni_email) parts.push(user.uni_email)
+  if (user.phone) parts.push(user.phone)
+  if (user.affiliation) parts.push(user.affiliation)
+  return parts.join(' · ')
+}
+
 export function StaffReportPage() {
   const navigate = useNavigate()
   const [form, setForm] = useState<ReportFormState>({
@@ -124,6 +147,10 @@ export function StaffReportPage() {
   const [categories, setCategories] = useState<Category[]>([])
   const [buildings, setBuildings] = useState<Building[]>([])
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const [finderSearch, setFinderSearch] = useState('')
+  const [finderResults, setFinderResults] = useState<ApiUser[]>([])
+  const [finderSearchLoading, setFinderSearchLoading] = useState(false)
+  const [selectedFinder, setSelectedFinder] = useState<ApiUser | null>(null)
   const { showSuccess, showError, Toast } = useStaffToast()
 
   // Fetch categories and buildings on mount
@@ -141,10 +168,50 @@ export function StaffReportPage() {
     fetchMetadata()
   }, [])
 
+  useEffect(() => {
+    const q = finderSearch.trim()
+    if (q.length < 2) {
+      setFinderResults([])
+      setFinderSearchLoading(false)
+      return
+    }
+
+    setFinderSearchLoading(true)
+    const timer = window.setTimeout(() => {
+      getUsers({ q, limit: 8 })
+        .then((res) => setFinderResults(res.data ?? []))
+        .catch(() => setFinderResults([]))
+        .finally(() => setFinderSearchLoading(false))
+    }, 300)
+
+    return () => window.clearTimeout(timer)
+  }, [finderSearch])
+
+  const applyFinder = (user: ApiUser) => {
+    setSelectedFinder(user)
+    setForm((prev) => ({
+      ...prev,
+      finderName: clampField(user.name, FIELD_LIMITS.FINDER_NAME),
+      finderContact: clampField(finderContactFor(user), FIELD_LIMITS.FINDER_CONTACT),
+      finderAffiliation: finderAffiliationFor(user),
+    }))
+    setFinderSearch('')
+    setFinderResults([])
+  }
+
+  const clearSelectedFinder = () => {
+    setSelectedFinder(null)
+    setFinderSearch('')
+    setFinderResults([])
+  }
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
     const max = REPORT_FIELD_LIMITS[name]
     const next = max !== undefined ? clampField(value, max) : value
+    if (name === 'finderName' || name === 'finderContact' || name === 'finderAffiliation') {
+      setSelectedFinder(null)
+    }
     setForm(prev => ({ ...prev, [name]: next }))
   }
 
@@ -463,6 +530,55 @@ export function StaffReportPage() {
         {/* Finder Info */}
         <div className="staff-report-section">
           <h2 className="staff-report-section-title">Finder information</h2>
+
+          <div className="staff-report-field staff-report-finder-search">
+            <label htmlFor="finder-search">Search registered user</label>
+            <p className="staff-report-hint">
+              Look up someone in the system by name, email, or phone. You can still edit the fields below manually.
+            </p>
+            <input
+              id="finder-search"
+              type="text"
+              placeholder="Name, email, or phone number"
+              value={finderSearch}
+              onChange={(e) => setFinderSearch(clampField(e.target.value, FIELD_LIMITS.SEARCH))}
+              maxLength={FIELD_LIMITS.SEARCH}
+              autoComplete="off"
+            />
+            {finderSearchLoading && (
+              <p className="staff-report-finder-status">Searching…</p>
+            )}
+            {!finderSearchLoading && finderSearch.trim().length >= 2 && finderResults.length === 0 && (
+              <p className="staff-report-finder-status">No matching users — enter finder details manually below.</p>
+            )}
+            {finderResults.length > 0 && (
+              <ul className="staff-report-finder-results" role="listbox" aria-label="Finder search results">
+                {finderResults.map((user) => (
+                  <li key={user.user_id}>
+                    <button
+                      type="button"
+                      className="staff-report-finder-result"
+                      onClick={() => applyFinder(user)}
+                    >
+                      <span className="staff-report-finder-result-name">{user.name}</span>
+                      <span className="staff-report-finder-result-meta">{finderSearchMeta(user)}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          {selectedFinder && (
+            <div className="staff-report-finder-selected">
+              <span>
+                Selected: <strong>{selectedFinder.name}</strong>
+              </span>
+              <button type="button" className="staff-report-finder-clear" onClick={clearSelectedFinder}>
+                Clear
+              </button>
+            </div>
+          )}
 
           <div className="staff-report-field-row">
             <div className="staff-report-field">

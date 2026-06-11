@@ -457,6 +457,7 @@ export async function getRoomUsage(roomId: string): Promise<ReferenceUsage> {
 export interface ApiUser {
   user_id: string
   name: string
+  phone?: string | null
   personal_email: string
   uni_email?: string | null
   role: 'PUBLIC' | 'STAFF' | 'SUPERADMIN'

@@ -40,19 +40,34 @@ export const getUsers = async (query?: any) => {
   const offset: number = query?.offset ?? 0
 
   const where: Prisma.UserWhereInput = {
-    role: query?.role,
-    OR: query?.q
-      ? [
-          { name: { contains: query.q, mode: 'insensitive' } },
-          { personal_email: { contains: query.q, mode: 'insensitive' } },
-          { uni_email: { contains: query.q, mode: 'insensitive' } }
-        ]
-      : undefined
+    deleted_at: null,
+    ...(query?.role ? { role: query.role } : {}),
+    ...(query?.q
+      ? {
+          OR: [
+            { name: { contains: query.q, mode: 'insensitive' } },
+            { personal_email: { contains: query.q, mode: 'insensitive' } },
+            { uni_email: { contains: query.q, mode: 'insensitive' } },
+            { phone: { contains: query.q, mode: 'insensitive' } },
+          ],
+        }
+      : {}),
   }
+
+  const userSelect = {
+    user_id: true,
+    name: true,
+    phone: true,
+    personal_email: true,
+    uni_email: true,
+    role: true,
+    affiliation: true,
+    created_at: true,
+  } as const
 
   const [total, data] = await prisma.$transaction([
     prisma.user.count({ where }),
-    prisma.user.findMany({ where, take: limit, skip: offset })
+    prisma.user.findMany({ where, take: limit, skip: offset, select: userSelect }),
   ])
 
   return { data, total, limit, offset }
