@@ -18,7 +18,6 @@ export function SignUpPage({
     password: '',
     uniEmail: '',
     affiliation: '',
-    binusId: '',
   })
   const [error, setError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -31,7 +30,11 @@ export function SignUpPage({
   }
 
   const setAffiliation = (aff: string) => {
-    setFormData(prev => ({ ...prev, affiliation: aff, binusId: '', uniEmail: '' }))
+    setFormData((prev) => ({
+      ...prev,
+      affiliation: aff,
+      uniEmail: aff === 'Student' ? prev.uniEmail : '',
+    }))
     setError('')
   }
 
@@ -59,12 +62,6 @@ export function SignUpPage({
     // Validate password length
     if (formData.password.length < 8) {
       setError('Password must be at least 8 characters')
-      return
-    }
-
-    // Conditional validation for Student/Staff
-    if ((formData.affiliation === 'Student' || formData.affiliation === 'Staff') && !formData.binusId) {
-      setError('Student/Staff ID is required for your affiliation')
       return
     }
 
@@ -173,13 +170,6 @@ export function SignUpPage({
                     </button>
                     <button
                       type="button"
-                      className={`affiliation-tab ${formData.affiliation === 'Staff' ? 'active' : ''}`}
-                      onClick={() => setAffiliation('Staff')}
-                    >
-                      Staff
-                    </button>
-                    <button
-                      type="button"
                       className={`affiliation-tab ${formData.affiliation === 'Visitor' ? 'active' : ''}`}
                       onClick={() => setAffiliation('Visitor')}
                     >
@@ -188,42 +178,25 @@ export function SignUpPage({
                   </div>
                 </div>
 
-                {(formData.affiliation === 'Student' || formData.affiliation === 'Staff') && (
+                {formData.affiliation === 'Student' && (
                   <>
                     <div className="info-box">
-                      Use your BINUS {formData.affiliation === 'Student' ? 'email and student number' : 'staff email and employee ID'} below. These help staff verify your affiliation when processing claims.
+                      Optionally add your BINUS email below. It helps staff verify your affiliation when processing claims.
                     </div>
 
                     <div className="form-group">
-                      <label htmlFor="uniEmail">BINUS email</label>
+                      <label htmlFor="uniEmail">BINUS email (optional)</label>
                       <input
                         id="uniEmail"
                         type="email"
                         name="uniEmail"
-                        placeholder={formData.affiliation === 'Student' ? 'john.doe@binus.ac.id' : 'john.doe@binus.edu'}
+                        placeholder="john.doe@binus.ac.id"
                         value={formData.uniEmail}
                         onChange={handleChange}
                         className="form-input"
                         maxLength={FIELD_LIMITS.EMAIL}
                       />
-                      <p className="form-hint">Your institutional email ending in @binus.ac.id or @binus.edu</p>
-                    </div>
-
-                    <div className="form-group">
-                      <label htmlFor="binusId">
-                        {formData.affiliation === 'Student' ? 'Student number' : 'Employee ID'}
-                      </label>
-                      <input
-                        id="binusId"
-                        type="text"
-                        name="binusId"
-                        placeholder={formData.affiliation === 'Student' ? '2702337615' : 'EMP-12345'}
-                        value={formData.binusId}
-                        onChange={handleChange}
-                        className="form-input"
-                        maxLength={FIELD_LIMITS.BINUS_ID}
-                      />
-                      <p className="form-hint">Providing this helps staff verify your identity faster at the appointment.</p>
+                      <p className="form-hint">Your institutional email ending in @binus.ac.id</p>
                     </div>
                   </>
                 )}
