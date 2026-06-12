@@ -12,6 +12,7 @@ import claimRoutes from './routes/claim.routes'
 import categoryRoutes from './routes/category.routes'
 import buildingRoutes from './routes/building.routes'
 import userRoutes from './routes/user.routes'
+import notificationRoutes from './routes/notification.routes'
 import { prisma } from './lib/prisma'
 import { issueToken, authMiddleware, requireRole, type AuthPayload } from './middleware/auth'
 import { getAuditLogs, getAuditLogsByItemId } from './services/audit.service'
@@ -222,6 +223,7 @@ app.route('/claims', claimRoutes)
 app.route('/categories', categoryRoutes)
 app.route('/buildings', buildingRoutes)
 app.route('/users', userRoutes)
+app.route('/notifications', notificationRoutes)
 
 serve({
   fetch: app.fetch,

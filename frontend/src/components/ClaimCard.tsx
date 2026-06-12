@@ -55,7 +55,9 @@ export function ClaimCard({ claim }: ClaimCardProps) {
       case 'approved':
         return 'Approved. Visit security to collect.'
       case 'rejected':
-        return 'Claim was rejected. Visit security for details.'
+        return claim.staff_notes?.trim()
+          ? 'Claim was rejected. See staff notes below.'
+          : 'Claim was rejected. No reason was provided — contact security for details.'
       case 'collected':
         return 'Item collected. Claim closed.'
       default:
@@ -111,6 +113,13 @@ export function ClaimCard({ claim }: ClaimCardProps) {
 
       <div className="claim-card-status-message">{getStatusMessage(claim)}</div>
 
+      {claim.status === 'rejected' && claim.staff_notes?.trim() && (
+        <div className="claim-card-staff-notes">
+          <span className="claim-card-staff-notes-label">Rejection reason</span>
+          <p className="claim-card-staff-notes-text">{claim.staff_notes.trim()}</p>
+        </div>
+      )}
+
       {timelineExpanded && (
         <div className="claim-card-timeline">
           <div className="timeline-event">
@@ -126,6 +135,9 @@ export function ClaimCard({ claim }: ClaimCardProps) {
               <div className="timeline-entry">
                 <span className="timeline-label">{claim.status === 'approved' ? 'Approved' : 'Rejected'}</span>
                 <span className="timeline-date">{formatDate(claim.decision_at)}</span>
+                {claim.status === 'rejected' && claim.staff_notes?.trim() && (
+                  <span className="timeline-staff-notes">{claim.staff_notes.trim()}</span>
+                )}
               </div>
             </div>
           )}

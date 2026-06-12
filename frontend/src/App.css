@@ -137,6 +137,143 @@ body {
   margin-left: auto;
 }
 
+/* Notification bell */
+.notification-bell-wrapper {
+  position: relative;
+}
+
+.notification-bell-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 2px solid #e8ecf0;
+  border-radius: 50%;
+  background: #fff;
+  color: #004a87;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.notification-bell-btn:hover {
+  border-color: #004a87;
+  box-shadow: 0 2px 8px rgba(0, 74, 135, 0.15);
+}
+
+.notification-badge {
+  position: absolute;
+  top: -0.2rem;
+  right: -0.2rem;
+  min-width: 1.1rem;
+  height: 1.1rem;
+  padding: 0 0.25rem;
+  border-radius: 999px;
+  background: #c62828;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  line-height: 1.1rem;
+  text-align: center;
+}
+
+.notification-dropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  width: min(22rem, calc(100vw - 2rem));
+  background: #fff;
+  border: 1px solid #e8ecf0;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(44, 62, 80, 0.15);
+  z-index: 1001;
+  overflow: hidden;
+}
+
+.notification-dropdown-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e8ecf0;
+  font-weight: 600;
+  color: #004a87;
+}
+
+.notification-mark-all {
+  background: none;
+  border: none;
+  color: #546e7a;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+}
+
+.notification-mark-all:hover {
+  color: #004a87;
+}
+
+.notification-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 20rem;
+  overflow-y: auto;
+}
+
+.notification-item {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
+  padding: 0.85rem 1rem;
+  border: none;
+  border-bottom: 1px solid #f1f5f9;
+  background: #fff;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.notification-item:hover {
+  background: #f8fafb;
+}
+
+.notification-item.unread {
+  background: #f0f7ff;
+}
+
+.notification-item.unread:hover {
+  background: #e8f2f8;
+}
+
+.notification-item-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.notification-item-message {
+  font-size: 0.82rem;
+  color: #546e7a;
+  line-height: 1.4;
+}
+
+.notification-item-time {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.notification-empty {
+  padding: 1.25rem 1rem;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 0.9rem;
+}
+
 .navbar-btn {
   background: none;
   border: none;
@@ -4746,6 +4883,39 @@ input.form-input {
   padding: 0.6rem 1rem;
   border-top: 1px solid #f0f2f5;
   background: #fafbfc;
+}
+
+.claim-card-staff-notes {
+  padding: 0.75rem 1rem;
+  border-top: 1px solid #fecaca;
+  background: #fef2f2;
+}
+
+.claim-card-staff-notes-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #991b1b;
+  margin-bottom: 0.35rem;
+}
+
+.claim-card-staff-notes-text {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: #7f1d1d;
+  white-space: pre-wrap;
+}
+
+.timeline-staff-notes {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: #546e7a;
+  white-space: pre-wrap;
 }
 
 .claim-card-footer {

@@ -285,6 +285,39 @@ export async function getUserClaims(): Promise<PaginatedResponse<Claim>> {
   return apiFetch('/user/claims')
 }
 
+export interface Notification {
+  notification_id: string
+  type: 'CLAIM_SUBMITTED' | 'CLAIM_APPROVED' | 'CLAIM_REJECTED' | 'CLAIM_COLLECTED'
+  title: string
+  message: string
+  claim_id?: string | null
+  read_at?: string | null
+  created_at: string
+}
+
+export async function getNotifications(filters?: {
+  limit?: number
+  offset?: number
+}): Promise<PaginatedResponse<Notification>> {
+  const queryParams = new URLSearchParams()
+  if (filters?.limit) queryParams.append('limit', String(filters.limit))
+  if (filters?.offset) queryParams.append('offset', String(filters.offset))
+  const qs = queryParams.toString()
+  return apiFetch(`/notifications${qs ? `?${qs}` : ''}`)
+}
+
+export async function getUnreadNotificationCount(): Promise<{ count: number }> {
+  return apiFetch('/notifications/unread-count')
+}
+
+export async function markNotificationRead(notificationId: string): Promise<Notification> {
+  return apiFetch(`/notifications/${notificationId}/read`, { method: 'PATCH' })
+}
+
+export async function markAllNotificationsRead(): Promise<{ updated: number }> {
+  return apiFetch('/notifications/read-all', { method: 'PATCH' })
+}
+
 // Get all claims in the system (staff/admin only)
 export async function getAllClaims(filters?: {
   limit?: number

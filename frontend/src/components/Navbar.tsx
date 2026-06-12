@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { UserRole } from '../App'
+import { NotificationBell } from './NotificationBell'
 
 interface NavbarProps {
   isSignedIn?: boolean;
@@ -207,6 +208,8 @@ export function Navbar({ isSignedIn = false, userName = '', userRole = 'public',
               )}
             </>
           ) : (
+            <>
+            <NotificationBell isSignedIn={isSignedIn} userRole={userRole} />
             <div className="navbar-profile-wrapper">
               <div className="navbar-profile-section">
                 {(userRole === 'staff' || userRole === 'superadmin') && (
@@ -236,6 +239,7 @@ export function Navbar({ isSignedIn = false, userName = '', userRole = 'public',
                 </div>
               )}
             </div>
+            </>
           )}
         </div>
       </div>

@@ -43,6 +43,13 @@ enum AuditAction {
   CLAIM
 }
 
+enum NotificationType {
+  CLAIM_SUBMITTED
+  CLAIM_APPROVED
+  CLAIM_REJECTED
+  CLAIM_COLLECTED
+}
+
 // Models
 model User {
   user_id        String   @id @default(uuid())
@@ -59,6 +66,7 @@ model User {
   itemsApproved  Item[]   @relation("ApprovedBy")
   claims         ClaimRequest[]
   auditLogs      AuditLog[]
+  notifications  Notification[]
 
   created_at     DateTime @default(now())
   updated_at     DateTime @updatedAt
@@ -189,6 +197,8 @@ model ClaimRequest {
   decision_at    DateTime?  // When approved or rejected
   resolved_at    DateTime?  // When collected
 
+  notifications  Notification[]
+
   @@index([item_id])
   @@index([claimer_id])
   @@index([status])
@@ -213,4 +223,21 @@ model AuditLog {
 
   @@index([item_id])
   @@index([changed_by])
+}
+
+model Notification {
+  notification_id String           @id @default(uuid())
+  user_id         String
+  user            User             @relation(fields: [user_id], references: [user_id])
+  type            NotificationType
+  title           String
+  message         String
+  claim_id        String?
+  claim           ClaimRequest?    @relation(fields: [claim_id], references: [claim_id])
+  read_at         DateTime?
+  created_at      DateTime         @default(now())
+
+  @@index([user_id])
+  @@index([user_id, read_at])
+  @@index([claim_id])
 }

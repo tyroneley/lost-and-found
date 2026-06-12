@@ -2,6 +2,7 @@ import { prisma } from '../lib/prisma'
 import { logAudit } from './audit.service'
 import { AppError } from '../utils/errorHandler'
 import { sendClaimInvoiceEmail, sendClaimStatusEmail } from './email.service'
+import { createClaimNotification } from './notification.service'
 
 export const createClaim = async (data: any) => {
   const item = await prisma.item.findUnique({ where: { item_id: data.item_id } })
@@ -24,6 +25,7 @@ export const createClaim = async (data: any) => {
   })
 
   sendClaimInvoiceEmail(claim)
+  await createClaimNotification(data.claimer_id, 'CLAIM_SUBMITTED', claim)
   return claim
 }
 
@@ -145,6 +147,7 @@ export const updateClaimStatus = async (id: string, data: any, changed_by: strin
     })
 
     sendClaimStatusEmail(claim)
+    await createClaimNotification(claim.claimer_id, 'CLAIM_APPROVED', claim)
   } else if (data.status === 'REJECTED') {
     await logAudit({
       item_id: claim.item_id,
@@ -155,6 +158,7 @@ export const updateClaimStatus = async (id: string, data: any, changed_by: strin
     })
 
     sendClaimStatusEmail(claim)
+    await createClaimNotification(claim.claimer_id, 'CLAIM_REJECTED', claim)
   } else if (data.status === 'COLLECTED') {
     await prisma.item.update({
       where: { item_id: claim.item_id },
@@ -168,6 +172,8 @@ export const updateClaimStatus = async (id: string, data: any, changed_by: strin
       old_status: existing.item.status,
       new_status: 'COLLECTED'
     })
+
+    await createClaimNotification(claim.claimer_id, 'CLAIM_COLLECTED', claim)
   }
 
   return claim
