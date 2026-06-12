@@ -1,6 +1,6 @@
 import './App.css'
-import { useState, useEffect } from 'react'
-import { Routes } from 'react-router-dom'
+import { useState, useEffect, useCallback } from 'react'
+import { Routes, useNavigate } from 'react-router-dom'
 import { Navbar } from './components/Navbar'
 import * as api from './services/api'
 import { transformBackendItems } from './utils/transformData'
@@ -36,6 +36,7 @@ export interface Item {
 }
 
 function App() {
+  const navigate = useNavigate()
   const [isSignedIn, setIsSignedIn] = useState(false)
   const [userName, setUserName] = useState('')
   const [userEmail, setUserEmail] = useState('')
@@ -44,7 +45,49 @@ function App() {
   const [, setLoading] = useState(true)
   const [, setError] = useState<string | null>(null)
 
-  // Restore login session from localStorage (token + user)
+  const handleLogout = useCallback(() => {
+    api.logout()
+    setIsSignedIn(false)
+    setUserName('')
+    setUserEmail('')
+    setUserRole('public')
+  }, [])
+
+  const forceLogoutDeactivated = useCallback(() => {
+    handleLogout()
+    navigate('/login?deactivated=1', { replace: true })
+  }, [handleLogout, navigate])
+
+  const verifySession = useCallback(async () => {
+    if (!localStorage.getItem('auth_token')) return
+
+    try {
+      const session = await api.getSession()
+      if (!session.active) {
+        forceLogoutDeactivated()
+        return
+      }
+      setUserName(session.user.name)
+      setUserEmail(session.user.email)
+      setUserRole(session.user.role)
+      setIsSignedIn(true)
+      api.storeAuthSession(localStorage.getItem('auth_token')!, {
+        id: session.user.id,
+        name: session.user.name,
+        email: session.user.email,
+        role: session.user.role,
+      })
+    } catch {
+      handleLogout()
+    }
+  }, [forceLogoutDeactivated, handleLogout])
+
+  useEffect(() => {
+    api.setSessionInvalidatedHandler(forceLogoutDeactivated)
+    return () => api.setSessionInvalidatedHandler(null)
+  }, [forceLogoutDeactivated])
+
+  // Restore and verify session from backend (not just localStorage)
   useEffect(() => {
     const saved = api.loadAuthSession()
     if (saved && localStorage.getItem('auth_token')) {
@@ -52,8 +95,20 @@ function App() {
       setUserEmail(saved.email)
       setUserRole(saved.role)
       setIsSignedIn(true)
+      verifySession()
     }
-  }, [])
+  }, [verifySession])
+
+  useEffect(() => {
+    if (!isSignedIn) return
+    const interval = window.setInterval(verifySession, 30_000)
+    const onFocus = () => verifySession()
+    window.addEventListener('focus', onFocus)
+    return () => {
+      window.clearInterval(interval)
+      window.removeEventListener('focus', onFocus)
+    }
+  }, [isSignedIn, verifySession])
 
   // Fetch items from backend on component mount
   useEffect(() => {
@@ -79,14 +134,6 @@ function App() {
 
     fetchItems()
   }, [])
-
-  const handleLogout = () => {
-    api.logout()
-    setIsSignedIn(false)
-    setUserName('')
-    setUserEmail('')
-    setUserRole('public')
-  }
 
   const handleLoginSuccess = (name: string, email: string, role: UserRole = 'public') => {
     setUserName(name)

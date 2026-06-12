@@ -8,11 +8,12 @@ import {
   approveClaimHandler,
   rejectClaimHandler
 } from '../controllers/claim.controller'
-import { authMiddleware, requireRole } from '../middleware/auth'
+import { authMiddleware, requireActiveAccount, requireRole } from '../middleware/auth'
 
 const claimRoutes = new Hono()
 
 claimRoutes.use('/*', authMiddleware)
+claimRoutes.use('/*', requireActiveAccount)
 claimRoutes.post('/', createClaimHandler)
 claimRoutes.get('/', getClaimsHandler)
 claimRoutes.get('/:id', getClaimByIdHandler)

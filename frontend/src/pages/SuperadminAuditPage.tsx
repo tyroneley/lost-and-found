@@ -98,7 +98,7 @@ export function SuperadminAuditPage() {
           <h1 className="staff-dashboard-title">Audit log</h1>
           <p className="staff-dashboard-subtitle">
             {total} recorded event{total === 1 ? '' : 's'}
-            {filtersActive ? ' matching filters' : ' · item creates, updates, claims, and reviews'}
+            {filtersActive ? ' matching filters' : ' · items, claims, and account changes'}
           </p>
         </div>
 

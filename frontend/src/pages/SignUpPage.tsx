@@ -79,6 +79,7 @@ export function SignUpPage({
 
       const role = response.user.role as UserRole
       storeAuthSession(response.token, {
+        id: response.user.id,
         name: response.user.name,
         email: response.user.email,
         role,

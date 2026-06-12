@@ -6,12 +6,13 @@ import {
   updateCategoryHandler,
   deleteCategoryHandler,
 } from '../controllers/category.controller'
-import { authMiddleware, requireRole } from '../middleware/auth'
+import { authMiddleware, requireActiveAccount, requireRole } from '../middleware/auth'
 
 const categoryRoutes = new Hono()
 
 categoryRoutes.get('/', getCategoriesHandler)
 categoryRoutes.use('/*', authMiddleware)
+categoryRoutes.use('/*', requireActiveAccount)
 categoryRoutes.get('/:id/usage', requireRole(['STAFF', 'SUPERADMIN']), getCategoryUsageHandler)
 categoryRoutes.post('/', requireRole(['STAFF', 'SUPERADMIN']), createCategoryHandler)
 categoryRoutes.put('/:id', requireRole(['STAFF', 'SUPERADMIN']), updateCategoryHandler)

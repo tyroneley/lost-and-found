@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { UserRole } from '../App'
 import { login, storeAuthSession } from '../services/api'
@@ -16,6 +16,13 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    if (params.get('deactivated') === '1') {
+      setError('Your account has been deactivated. Contact an administrator if you need access restored.')
+    }
+  }, [location.search])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -37,6 +44,7 @@ export function LoginPage({ onLoginSuccess }: LoginPageProps) {
       const response = await login(email, password)
       // Save token for future requests
       storeAuthSession(response.token, {
+        id: response.user.id,
         name: response.user.name,
         email: response.user.email,
         role: response.user.role as UserRole,

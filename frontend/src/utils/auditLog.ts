@@ -8,6 +8,8 @@ export const AUDIT_ACTION_FILTER_OPTIONS: { value: '' | AuditLogAction; label: s
   { value: 'CLAIM', label: 'Claim submitted' },
   { value: 'APPROVE', label: 'Claim approved' },
   { value: 'REJECT', label: 'Claim rejected' },
+  { value: 'DEACTIVATE', label: 'Account deactivated' },
+  { value: 'REACTIVATE', label: 'Account reactivated' },
 ]
 
 export function auditActionLabel(entry: AuditLogApiEntry): string {
@@ -25,6 +27,14 @@ export function auditActionLabel(entry: AuditLogApiEntry): string {
       return `Claim rejected — ${itemName}`
     case 'CLAIM':
       return `Claim submitted — ${itemName}`
+    case 'DEACTIVATE': {
+      const account = entry.target_user?.name ?? 'User'
+      return `Account deactivated — ${account}`
+    }
+    case 'REACTIVATE': {
+      const account = entry.target_user?.name ?? 'User'
+      return `Account reactivated — ${account}`
+    }
     default:
       return `${entry.action} — ${itemName}`
   }
@@ -40,9 +50,12 @@ export function auditDotColor(action: string): string {
     case 'REJECT':
       return '#dc2626'
     case 'DELETE':
+    case 'DEACTIVATE':
       return '#dc2626'
     case 'UPDATE':
       return '#ca8a04'
+    case 'REACTIVATE':
+      return '#16a34a'
     default:
       return '#5b21b6'
   }

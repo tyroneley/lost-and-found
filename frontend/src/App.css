@@ -6032,7 +6032,7 @@ input.form-input {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 1100;
   padding: 2rem;
 }
 
@@ -6776,6 +6776,194 @@ input.form-input {
 .admin-user-badge-public {
   background: #e8f2f8;
   color: #004a87;
+}
+
+.admin-users-table-card {
+  overflow: hidden;
+}
+
+.admin-users-table-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 110px 110px 130px;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.65rem 1rem;
+  background: #f8fafb;
+  border-bottom: 1px solid #e8ecf0;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #90a4ae;
+  position: relative;
+}
+
+.admin-users-table-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-users-table-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 110px 110px 130px;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e8ecf0;
+}
+
+.admin-users-table-row:last-child {
+  border-bottom: none;
+}
+
+.admin-users-col-user {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.admin-users-user-text {
+  min-width: 0;
+}
+
+.admin-users-user-text .staff-cr-name,
+.admin-users-user-text .staff-cr-meta {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-users-col-role,
+.admin-users-col-status,
+.admin-users-col-actions {
+  display: flex;
+  align-items: center;
+}
+
+.admin-users-col-actions {
+  justify-content: flex-start;
+}
+
+.admin-users-self-label {
+  font-size: 0.75rem;
+  color: #90a4ae;
+  font-style: italic;
+}
+
+.admin-users-table-message {
+  color: #90a4ae;
+  font-size: 0.85rem;
+  padding: 1.5rem 1rem;
+  margin: 0;
+}
+
+.admin-users-refreshing {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #004a87;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+@media (max-width: 768px) {
+  .admin-users-table-header {
+    display: none;
+  }
+
+  .admin-users-table-row {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+    padding: 1rem;
+  }
+
+  .admin-users-col-role,
+  .admin-users-col-status,
+  .admin-users-col-actions {
+    padding-left: calc(36px + 0.65rem);
+  }
+
+  .admin-users-user-text .staff-cr-name,
+  .admin-users-user-text .staff-cr-meta {
+    white-space: normal;
+  }
+}
+
+.admin-user-row-badges {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.admin-user-status-badge {
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 0.15rem 0.45rem;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.admin-user-status-badge.active {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.admin-user-status-badge.deactivated {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.admin-user-status-btn {
+  border: none;
+  border-radius: 6px;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-family: inherit;
+  transition: background 0.15s ease;
+}
+
+.admin-user-status-btn.deactivate {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.admin-user-status-btn.deactivate:hover {
+  background: #fecaca;
+}
+
+.admin-user-status-btn.reactivate {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.admin-user-status-btn.reactivate:hover {
+  background: #bbf7d0;
+}
+
+.admin-user-reason-input {
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #e8ecf0;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 4.5rem;
+}
+
+.admin-user-reason-input:focus {
+  outline: none;
+  border-color: #004a87;
+  box-shadow: 0 0 0 2px rgba(0, 74, 135, 0.12);
 }
 
 .admin-empty-msg {

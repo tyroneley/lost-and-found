@@ -1,5 +1,5 @@
-import { createUser, getUsers, getUserById, updateUser } from '../services/user.service'
-import { createUserSchema, updateUserSchema } from '../validators/user.validator'
+import { createUser, getUsers, getUserById, updateUser, setUserActiveStatus } from '../services/user.service'
+import { createUserSchema, setUserActiveSchema, updateUserSchema } from '../validators/user.validator'
 import { handleError } from '../utils/errorHandler'
 import { idParamSchema, userQuerySchema } from '../validators/common.validator'
 import type { AuthPayload } from '../middleware/auth'
@@ -62,6 +62,32 @@ export const updateUserHandler = async (c: any) => {
 
     const user = await updateUser(params.id, isAdmin ? { role, ...profileFields } : profileFields)
 
+    return c.json(user)
+  } catch (error) {
+    return handleError(c, error)
+  }
+}
+
+export const deactivateUserHandler = async (c: any) => {
+  try {
+    const payload = c.get('jwtPayload') as AuthPayload
+    const params = idParamSchema.parse({ id: c.req.param('id') })
+    const body = await c.req.json().catch(() => ({}))
+    const { reason } = setUserActiveSchema.parse(body)
+    const user = await setUserActiveStatus(params.id, false, payload.sub, reason)
+    return c.json(user)
+  } catch (error) {
+    return handleError(c, error)
+  }
+}
+
+export const reactivateUserHandler = async (c: any) => {
+  try {
+    const payload = c.get('jwtPayload') as AuthPayload
+    const params = idParamSchema.parse({ id: c.req.param('id') })
+    const body = await c.req.json().catch(() => ({}))
+    const { reason } = setUserActiveSchema.parse(body)
+    const user = await setUserActiveStatus(params.id, true, payload.sub, reason)
     return c.json(user)
   } catch (error) {
     return handleError(c, error)

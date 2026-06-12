@@ -1,5 +1,6 @@
 import type { MiddlewareHandler } from 'hono'
 import { jwt, sign } from 'hono/jwt'
+import { prisma } from '../lib/prisma'
 
 export type AuthPayload = {
   sub: string
@@ -19,6 +20,20 @@ export const requireRole = (roles: AuthPayload['role'][]): MiddlewareHandler =>
     }
     await next()
   }
+
+export const requireActiveAccount: MiddlewareHandler = async (c, next) => {
+  const payload = c.get('jwtPayload') as AuthPayload
+  const user = await prisma.user.findUnique({
+    where: { user_id: payload.sub },
+    select: { deleted_at: true },
+  })
+
+  if (!user || user.deleted_at) {
+    return c.json({ error: 'This account has been deactivated' }, 403)
+  }
+
+  await next()
+}
 
 export const issueToken = (user_id: string, role: AuthPayload['role']) =>
   sign(

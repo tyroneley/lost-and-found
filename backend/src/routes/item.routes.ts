@@ -13,7 +13,7 @@ import {
   deletePhotoHandler,
   uploadPhotoHandler
 } from '../controllers/photo.controller'
-import { authMiddleware, requireRole } from '../middleware/auth'
+import { authMiddleware, requireActiveAccount, requireRole } from '../middleware/auth'
 
 const itemRoutes = new Hono()
 
@@ -23,6 +23,7 @@ itemRoutes.get('/:id', getItemByIdHandler)
 
 // Protected endpoints - require auth
 itemRoutes.use('/*', authMiddleware)
+itemRoutes.use('/*', requireActiveAccount)
 itemRoutes.post('/', requireRole(['STAFF', 'SUPERADMIN']), createItemHandler)
 
 // Photo sub-routes registered before /:id to avoid pattern ambiguity

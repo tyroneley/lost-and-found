@@ -3,15 +3,20 @@ import {
   createUserHandler,
   getUsersHandler,
   getUserByIdHandler,
-  updateUserHandler
+  updateUserHandler,
+  deactivateUserHandler,
+  reactivateUserHandler,
 } from '../controllers/user.controller'
-import { authMiddleware, requireRole } from '../middleware/auth'
+import { authMiddleware, requireActiveAccount, requireRole } from '../middleware/auth'
 
 const userRoutes = new Hono()
 
 userRoutes.use('/*', authMiddleware)
+userRoutes.use('/*', requireActiveAccount)
 userRoutes.post('/', requireRole(['SUPERADMIN']), createUserHandler)
 userRoutes.get('/', requireRole(['STAFF', 'SUPERADMIN']), getUsersHandler)
+userRoutes.patch('/:id/deactivate', requireRole(['SUPERADMIN']), deactivateUserHandler)
+userRoutes.patch('/:id/reactivate', requireRole(['SUPERADMIN']), reactivateUserHandler)
 userRoutes.get('/:id', getUserByIdHandler)
 userRoutes.patch('/:id', updateUserHandler)
 

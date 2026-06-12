@@ -10,12 +10,13 @@ import {
   updateRoomHandler,
   deleteRoomHandler,
 } from '../controllers/building.controller'
-import { authMiddleware, requireRole } from '../middleware/auth'
+import { authMiddleware, requireActiveAccount, requireRole } from '../middleware/auth'
 
 const buildingRoutes = new Hono()
 
 buildingRoutes.get('/', getBuildingsHandler)
 buildingRoutes.use('/*', authMiddleware)
+buildingRoutes.use('/*', requireActiveAccount)
 buildingRoutes.post('/', requireRole(['STAFF', 'SUPERADMIN']), createBuildingHandler)
 // More specific /rooms/* routes before the generic /:id routes
 buildingRoutes.get('/rooms/:roomId/usage', requireRole(['STAFF', 'SUPERADMIN']), getRoomUsageHandler)

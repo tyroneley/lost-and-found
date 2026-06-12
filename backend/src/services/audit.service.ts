@@ -24,6 +24,14 @@ export const logAudit = (params: {
 }) =>
   prisma.auditLog.create({ data: params })
 
+export const logUserAudit = (params: {
+  target_user_id: string
+  changed_by: string
+  action: Extract<AuditAction, 'DEACTIVATE' | 'REACTIVATE'>
+  notes?: string
+}) =>
+  prisma.auditLog.create({ data: params })
+
 export const getAuditLogsByItemId = async (item_id: string) =>
   prisma.auditLog.findMany({
     where: { item_id },
@@ -31,6 +39,7 @@ export const getAuditLogsByItemId = async (item_id: string) =>
     include: {
       user: { select: { name: true } },
       item: { select: { name: true } },
+      target_user: { select: { name: true, personal_email: true } },
     },
   })
 
@@ -69,6 +78,8 @@ function buildAuditLogWhere(query?: AuditLogQuery): Prisma.AuditLogWhereInput {
       { notes: { contains: term, mode: 'insensitive' } },
       { item: { name: { contains: term, mode: 'insensitive' } } },
       { user: { name: { contains: term, mode: 'insensitive' } } },
+      { target_user: { name: { contains: term, mode: 'insensitive' } } },
+      { target_user: { personal_email: { contains: term, mode: 'insensitive' } } },
     ]
   }
 
@@ -91,6 +102,7 @@ export const getAuditLogs = async (query?: AuditLogQuery) => {
       include: {
         user: { select: { name: true } },
         item: { select: { name: true } },
+        target_user: { select: { name: true, personal_email: true } },
       },
     }),
   ])

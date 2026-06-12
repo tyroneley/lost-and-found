@@ -1,9 +1,12 @@
-import { useState, useEffect, useCallback } from 'react'
-import { createUser, getUsers } from '../services/api'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { createUser, deactivateUser, getUsers, loadAuthSession, reactivateUser } from '../services/api'
 import type { ApiUser } from '../services/api'
+import { ConfirmationDialog, ConfirmRow } from '../components/ConfirmationDialog'
 import { StaffBannerActionBtn, StaffPageBanner } from '../components/StaffPageBanner'
 import { AFFILIATION_OPTIONS, allowedRolesForAffiliation, roleForUserAffiliation } from '../utils/affiliation'
 import { clampField, FIELD_LIMITS } from '../utils/fieldLimits'
+
+const SEARCH_DEBOUNCE_MS = 350
 
 function initials(name: string): string {
   return name
@@ -54,31 +57,68 @@ const ROLE_LABELS: Record<ApiUser['role'], string> = {
   SUPERADMIN: 'Superadmin',
 }
 
+function isUserActive(user: ApiUser): boolean {
+  return !user.deleted_at
+}
+
 export function SuperadminUsersPage() {
+  const currentSession = loadAuthSession()
   const [users, setUsers] = useState<ApiUser[]>([])
   const [total, setTotal] = useState(0)
   const [search, setSearch] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
   const [roleFilter, setRoleFilter] = useState('')
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'deactivated'>('all')
   const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const [showAddUser, setShowAddUser] = useState(false)
+  const [showAddConfirmDialog, setShowAddConfirmDialog] = useState(false)
   const [addForm, setAddForm] = useState(EMPTY_ADD_FORM)
   const [addError, setAddError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [pendingAction, setPendingAction] = useState<{
+    user: ApiUser
+    action: 'deactivate' | 'reactivate'
+  } | null>(null)
+  const [actionReason, setActionReason] = useState('')
+  const [actionError, setActionError] = useState<string | null>(null)
+  const [actionLoading, setActionLoading] = useState(false)
+  const isFirstLoad = useRef(true)
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDebouncedSearch(search.trim()), SEARCH_DEBOUNCE_MS)
+    return () => window.clearTimeout(timer)
+  }, [search])
 
   const loadUsers = useCallback(() => {
-    setLoading(true)
+    if (isFirstLoad.current) {
+      setLoading(true)
+    } else {
+      setRefreshing(true)
+    }
+    setLoadError(null)
+
     getUsers({
       limit: 100,
-      q: search.trim() || undefined,
+      q: debouncedSearch || undefined,
       role: roleFilter || undefined,
+      status: statusFilter,
     })
       .then((res) => {
         setUsers(res.data ?? [])
         setTotal(res.total ?? res.data?.length ?? 0)
       })
-      .catch(console.error)
-      .finally(() => setLoading(false))
-  }, [search, roleFilter])
+      .catch((err) => {
+        setLoadError(err instanceof Error ? err.message : 'Failed to load users')
+        if (isFirstLoad.current) setUsers([])
+      })
+      .finally(() => {
+        setLoading(false)
+        setRefreshing(false)
+        isFirstLoad.current = false
+      })
+  }, [debouncedSearch, roleFilter, statusFilter])
 
   useEffect(() => {
     loadUsers()
@@ -87,12 +127,47 @@ export function SuperadminUsersPage() {
   const resetAddModal = () => {
     setAddForm(EMPTY_ADD_FORM)
     setAddError(null)
+    setShowAddConfirmDialog(false)
     setShowAddUser(false)
   }
 
   const closeAddModal = () => {
     if (saving) return
     resetAddModal()
+  }
+
+  const validateAddForm = (): string | null => {
+    const name = addForm.name.trim()
+    const personal_email = addForm.personal_email.trim()
+    const password = addForm.password
+
+    if (!name || !personal_email || !password) {
+      return 'Name, personal email, and password are required'
+    }
+    if (password.length < FIELD_LIMITS.PASSWORD_MIN) {
+      return `Password must be at least ${FIELD_LIMITS.PASSWORD_MIN} characters`
+    }
+    return null
+  }
+
+  const isAddFormComplete =
+    Boolean(addForm.name.trim()) &&
+    Boolean(addForm.personal_email.trim()) &&
+    addForm.password.length >= FIELD_LIMITS.PASSWORD_MIN
+
+  const handleOpenAddConfirm = () => {
+    const validationError = validateAddForm()
+    if (validationError) {
+      setAddError(validationError)
+      return
+    }
+    setAddError(null)
+    setShowAddConfirmDialog(true)
+  }
+
+  const handleCancelAddConfirm = () => {
+    if (saving) return
+    setShowAddConfirmDialog(false)
   }
 
   const handleAffiliationChange = (affiliation: string) => {
@@ -105,20 +180,56 @@ export function SuperadminUsersPage() {
 
   const roleOptions = allowedRolesForAffiliation(addForm.affiliation)
 
-  const handleAddUser = async () => {
+  const closeStatusDialog = () => {
+    setPendingAction(null)
+    setActionReason('')
+    setActionError(null)
+  }
+
+  const cancelStatusDialog = () => {
+    if (actionLoading) return
+    closeStatusDialog()
+  }
+
+  const handleConfirmStatusChange = async () => {
+    if (!pendingAction) return
+
+    setActionLoading(true)
+    setActionError(null)
+    try {
+      const reason = actionReason.trim() || undefined
+      if (pendingAction.action === 'deactivate') {
+        await deactivateUser(pendingAction.user.user_id, reason)
+      } else {
+        await reactivateUser(pendingAction.user.user_id, reason)
+      }
+      closeStatusDialog()
+      loadUsers()
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : 'Failed to update account status')
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  const isCurrentUser = (user: ApiUser) => {
+    if (currentSession?.id) return user.user_id === currentSession.id
+    return user.personal_email.toLowerCase() === (currentSession?.email?.toLowerCase() ?? '')
+  }
+
+  const handleConfirmAddUser = async () => {
+    const validationError = validateAddForm()
+    if (validationError) {
+      setAddError(validationError)
+      setShowAddConfirmDialog(false)
+      return
+    }
+
     const name = addForm.name.trim()
     const personal_email = addForm.personal_email.trim()
     const password = addForm.password
 
-    if (!name || !personal_email || !password) {
-      setAddError('Name, personal email, and password are required')
-      return
-    }
-    if (password.length < FIELD_LIMITS.PASSWORD_MIN) {
-      setAddError(`Password must be at least ${FIELD_LIMITS.PASSWORD_MIN} characters`)
-      return
-    }
-
+    setShowAddConfirmDialog(false)
     setSaving(true)
     setAddError(null)
     try {
@@ -179,32 +290,201 @@ export function SuperadminUsersPage() {
                 <option value="SUPERADMIN">Superadmin</option>
               </select>
             </div>
+            <div className="staff-items-filter-group">
+              <label className="staff-items-filter-label">Status</label>
+              <select
+                className="staff-items-select"
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value as 'all' | 'active' | 'deactivated')}
+              >
+                <option value="all">All accounts</option>
+                <option value="active">Active only</option>
+                <option value="deactivated">Deactivated only</option>
+              </select>
+            </div>
           </div>
 
-          <div className="staff-card">
+          <div className="staff-card admin-users-table-card">
+            <div className="admin-users-table-header">
+              <span className="admin-users-col-user">User</span>
+              <span className="admin-users-col-role">Role</span>
+              <span className="admin-users-col-status">Status</span>
+              <span className="admin-users-col-actions">Actions</span>
+              {refreshing && <span className="admin-users-refreshing">Updating…</span>}
+            </div>
+
+            {loadError && (
+              <div className="staff-manage-error" style={{ margin: '1rem' }}>
+                {loadError}
+              </div>
+            )}
+
             {loading ? (
-              <p style={{ color: '#90a4ae', fontSize: '0.85rem', padding: '1.5rem 1rem' }}>Loading users…</p>
+              <p className="admin-users-table-message">Loading users…</p>
             ) : users.length === 0 ? (
-              <p style={{ color: '#90a4ae', fontSize: '0.85rem', padding: '1.5rem 1rem' }}>No users match your filters</p>
+              <p className="admin-users-table-message">No users match your filters</p>
             ) : (
-              users.map((user) => (
-                <div key={user.user_id} className="staff-claim-row">
-                  <div className={`admin-user-avatar admin-user-avatar-${user.role === 'PUBLIC' ? 'public' : 'staff'}`}>
-                    {initials(user.name)}
-                  </div>
-                  <div className="staff-cr-info">
-                    <div className="staff-cr-name">{user.name}</div>
-                    <div className="staff-cr-meta">{userMeta(user)}</div>
-                  </div>
-                  <span className={`staff-cr-badge ${roleBadgeClass(user.role)}`} style={user.role === 'SUPERADMIN' ? { background: '#ede9fe', color: '#5b21b6' } : undefined}>
-                    {userRoleLabel(user.role)}
-                  </span>
-                </div>
-              ))
+              <div className="admin-users-table-body">
+                {users.map((user) => {
+                  const active = isUserActive(user)
+                  const isSelf = isCurrentUser(user)
+
+                  return (
+                    <div key={user.user_id} className="admin-users-table-row">
+                      <div className="admin-users-col-user">
+                        <div className={`admin-user-avatar admin-user-avatar-${user.role === 'PUBLIC' ? 'public' : 'staff'}`}>
+                          {initials(user.name)}
+                        </div>
+                        <div className="admin-users-user-text">
+                          <div className="staff-cr-name">{user.name}</div>
+                          <div className="staff-cr-meta">{userMeta(user)}</div>
+                        </div>
+                      </div>
+
+                      <div className="admin-users-col-role">
+                        <span
+                          className={`staff-cr-badge ${roleBadgeClass(user.role)}`}
+                          style={user.role === 'SUPERADMIN' ? { background: '#ede9fe', color: '#5b21b6' } : undefined}
+                        >
+                          {userRoleLabel(user.role)}
+                        </span>
+                      </div>
+
+                      <div className="admin-users-col-status">
+                        <span className={`admin-user-status-badge ${active ? 'active' : 'deactivated'}`}>
+                          {active ? 'Active' : 'Deactivated'}
+                        </span>
+                      </div>
+
+                      <div className="admin-users-col-actions">
+                        {isSelf ? (
+                          <span className="admin-users-self-label">Your account</span>
+                        ) : (
+                          <button
+                            type="button"
+                            className={`admin-user-status-btn ${active ? 'deactivate' : 'reactivate'}`}
+                            onClick={() => {
+                              setActionError(null)
+                              setActionReason('')
+                              setPendingAction({
+                                user,
+                                action: active ? 'deactivate' : 'reactivate',
+                              })
+                            }}
+                          >
+                            {active ? 'Deactivate' : 'Reactivate'}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
             )}
           </div>
         </div>
       </div>
+
+      <ConfirmationDialog
+        isOpen={showAddConfirmDialog}
+        title="Confirm new account"
+        sections={[
+          {
+            title: 'Account details',
+            content: (
+              <>
+                <ConfirmRow label="Full name:" value={addForm.name.trim()} />
+                <ConfirmRow label="Affiliation:" value={addForm.affiliation} />
+                <ConfirmRow label="Role:" value={ROLE_LABELS[addForm.role]} />
+              </>
+            ),
+          },
+          {
+            title: 'Contact',
+            content: (
+              <>
+                <ConfirmRow label="Personal email:" value={addForm.personal_email.trim()} />
+                {addForm.uni_email.trim() && (
+                  <ConfirmRow label="University email:" value={addForm.uni_email.trim()} />
+                )}
+                {addForm.phone.trim() && (
+                  <ConfirmRow label="Phone:" value={addForm.phone.trim()} />
+                )}
+              </>
+            ),
+          },
+          {
+            title: 'Security',
+            content: (
+              <ConfirmRow
+                label="Password:"
+                value={`${addForm.password.length} characters (not shown)`}
+              />
+            ),
+          },
+        ]}
+        onCancel={handleCancelAddConfirm}
+        onConfirm={handleConfirmAddUser}
+        cancelText="Back to form"
+        confirmText={saving ? 'Creating…' : 'Confirm & create account'}
+        confirmVariant="primary"
+        isConfirmDisabled={saving}
+      />
+
+      <ConfirmationDialog
+        isOpen={pendingAction !== null}
+        title={pendingAction?.action === 'deactivate' ? 'Deactivate account' : 'Reactivate account'}
+        sections={[
+          {
+            title: 'Account',
+            content: pendingAction ? (
+              <p>
+                <strong>{pendingAction.user.name}</strong> ({pendingAction.user.personal_email})
+              </p>
+            ) : null,
+          },
+          {
+            title: pendingAction?.action === 'deactivate' ? 'What happens' : 'Restore access',
+            content:
+              pendingAction?.action === 'deactivate' ? (
+                <p>
+                  This user will be signed out and unable to log in until the account is reactivated.
+                  Their claims and history are kept.
+                </p>
+              ) : (
+                <p>This user will be able to sign in and use the system again.</p>
+              ),
+          },
+          {
+            title: 'Reason (optional)',
+            content: (
+              <>
+                <textarea
+                  className="admin-user-reason-input"
+                  placeholder="e.g. Policy violation, duplicate account, requested by user…"
+                  value={actionReason}
+                  onChange={(e) => setActionReason(clampField(e.target.value, FIELD_LIMITS.STAFF_NOTES))}
+                  maxLength={FIELD_LIMITS.STAFF_NOTES}
+                  rows={3}
+                />
+                {actionError && <div className="staff-manage-error" style={{ marginTop: '0.75rem' }}>{actionError}</div>}
+              </>
+            ),
+          },
+        ]}
+        onCancel={cancelStatusDialog}
+        onConfirm={handleConfirmStatusChange}
+        cancelText="Cancel"
+        confirmText={
+          actionLoading
+            ? 'Saving…'
+            : pendingAction?.action === 'deactivate'
+              ? 'Deactivate account'
+              : 'Reactivate account'
+        }
+        confirmVariant={pendingAction?.action === 'deactivate' ? 'reject' : 'approve'}
+        isConfirmDisabled={actionLoading}
+      />
 
       {showAddUser && (
         <div
@@ -369,10 +649,10 @@ export function SuperadminUsersPage() {
               <button
                 type="button"
                 className="admin-form-modal-submit"
-                onClick={handleAddUser}
-                disabled={saving || !addForm.name.trim() || !addForm.personal_email.trim() || !addForm.password}
+                onClick={handleOpenAddConfirm}
+                disabled={saving || !isAddFormComplete}
               >
-                {saving ? 'Creating…' : 'Create account →'}
+                {saving ? 'Creating…' : 'Review & create →'}
               </button>
             </div>
           </div>

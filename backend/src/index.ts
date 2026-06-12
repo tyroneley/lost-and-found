@@ -14,7 +14,7 @@ import buildingRoutes from './routes/building.routes'
 import userRoutes from './routes/user.routes'
 import notificationRoutes from './routes/notification.routes'
 import { prisma } from './lib/prisma'
-import { issueToken, authMiddleware, requireRole, type AuthPayload } from './middleware/auth'
+import { issueToken, authMiddleware, requireActiveAccount, requireRole, type AuthPayload } from './middleware/auth'
 import { getAuditLogs, getAuditLogsByItemId } from './services/audit.service'
 import { handleError } from './utils/errorHandler'
 import { FIELD_LIMITS } from './validators/fieldLimits'
@@ -138,6 +138,10 @@ app.post('/auth/login', async (c) => {
     if (!user) {
       return c.json({ error: 'Invalid email or password' }, 401)
     }
+
+    if (user.deleted_at) {
+      return c.json({ error: 'This account has been deactivated. Contact an administrator.' }, 403)
+    }
     
     // Compare passwords
     const passwordMatch = await bcrypt.compare(password, user.password)
@@ -177,8 +181,41 @@ app.post('/auth/token', async (c) => {
   }
 })
 
+// Session check — works even for deactivated accounts (returns active: false)
+app.get('/auth/session', authMiddleware, async (c) => {
+  try {
+    const jwtPayload = c.get('jwtPayload') as AuthPayload
+    const user = await prisma.user.findUnique({
+      where: { user_id: jwtPayload.sub },
+      select: {
+        user_id: true,
+        name: true,
+        personal_email: true,
+        role: true,
+        deleted_at: true,
+      },
+    })
+
+    if (!user) {
+      return c.json({ error: 'User not found' }, 404)
+    }
+
+    return c.json({
+      user: {
+        id: user.user_id,
+        name: user.name,
+        email: user.personal_email,
+        role: user.role.toLowerCase(),
+      },
+      active: user.deleted_at === null,
+    })
+  } catch (error) {
+    return handleError(c, error)
+  }
+})
+
 // Get current user's claims
-app.get('/user/claims', authMiddleware, async (c) => {
+app.get('/user/claims', authMiddleware, requireActiveAccount, async (c) => {
   try {
     const jwtPayload = c.get('jwtPayload') as AuthPayload
     if (!jwtPayload) {
@@ -192,7 +229,7 @@ app.get('/user/claims', authMiddleware, async (c) => {
   }
 })
 
-app.get('/audit-log', authMiddleware, requireRole(['STAFF', 'SUPERADMIN']), async (c) => {
+app.get('/audit-log', authMiddleware, requireActiveAccount, requireRole(['STAFF', 'SUPERADMIN']), async (c) => {
   try {
     const item_id = c.req.query('item_id')
     if (item_id) {
@@ -203,8 +240,8 @@ app.get('/audit-log', authMiddleware, requireRole(['STAFF', 'SUPERADMIN']), asyn
     const offset = parseInt(c.req.query('offset') || '0', 10) || 0
     const actionRaw = c.req.query('action')
     const action =
-      actionRaw && ['CREATE', 'UPDATE', 'DELETE', 'APPROVE', 'REJECT', 'CLAIM'].includes(actionRaw)
-        ? (actionRaw as 'CREATE' | 'UPDATE' | 'DELETE' | 'APPROVE' | 'REJECT' | 'CLAIM')
+      actionRaw && ['CREATE', 'UPDATE', 'DELETE', 'APPROVE', 'REJECT', 'CLAIM', 'DEACTIVATE', 'REACTIVATE'].includes(actionRaw)
+        ? (actionRaw as 'CREATE' | 'UPDATE' | 'DELETE' | 'APPROVE' | 'REJECT' | 'CLAIM' | 'DEACTIVATE' | 'REACTIVATE')
         : undefined
     const sortRaw = c.req.query('sort')
     const sort = sortRaw === 'oldest' ? 'oldest' : 'newest'

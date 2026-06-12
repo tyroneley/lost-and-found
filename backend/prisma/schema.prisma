@@ -41,6 +41,8 @@ enum AuditAction {
   APPROVE
   REJECT
   CLAIM
+  DEACTIVATE
+  REACTIVATE
 }
 
 enum NotificationType {
@@ -64,9 +66,10 @@ model User {
   // Relations
   itemsRecorded  Item[]   @relation("RecordedBy")
   itemsApproved  Item[]   @relation("ApprovedBy")
-  claims         ClaimRequest[]
-  auditLogs      AuditLog[]
-  notifications  Notification[]
+  claims              ClaimRequest[]
+  auditLogs           AuditLog[]       @relation("AuditChangedBy")
+  auditLogsAsTarget   AuditLog[]       @relation("AuditTargetUser")
+  notifications       Notification[]
 
   created_at     DateTime @default(now())
   updated_at     DateTime @updatedAt
@@ -207,11 +210,14 @@ model ClaimRequest {
 model AuditLog {
   log_id      String      @id @default(uuid())
 
-  item_id     String
-  item        Item        @relation(fields: [item_id], references: [item_id])
+  item_id     String?
+  item        Item?       @relation(fields: [item_id], references: [item_id])
+
+  target_user_id String?
+  target_user    User?    @relation("AuditTargetUser", fields: [target_user_id], references: [user_id])
 
   changed_by  String
-  user        User        @relation(fields: [changed_by], references: [user_id])
+  user        User        @relation("AuditChangedBy", fields: [changed_by], references: [user_id])
 
   action      AuditAction
   old_status  ItemStatus?
@@ -223,6 +229,7 @@ model AuditLog {
 
   @@index([item_id])
   @@index([changed_by])
+  @@index([target_user_id])
 }
 
 model Notification {

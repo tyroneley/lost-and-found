@@ -58,11 +58,26 @@ function clearAuthToken(): void {
   localStorage.removeItem('auth_token')
 }
 
+type ApiFetchOptions = RequestInit & {
+  skipSessionInvalidation?: boolean
+}
+
+let onSessionInvalidated: (() => void) | null = null
+
+export function setSessionInvalidatedHandler(handler: (() => void) | null): void {
+  onSessionInvalidated = handler
+}
+
+function isDeactivatedError(status: number, message: string): boolean {
+  return status === 403 && message.toLowerCase().includes('deactivated')
+}
+
 // Main fetch function - handles headers, auth token, errors, and responses
 async function apiFetch<T>(
   endpoint: string,
-  options: RequestInit = {}
+  options: ApiFetchOptions = {}
 ): Promise<T> {
+  const { skipSessionInvalidation, ...fetchOptions } = options
   const url = `${API_URL}${endpoint}`
   
   // Build headers as a proper object
@@ -84,7 +99,7 @@ async function apiFetch<T>(
   
   try {
     const response = await fetch(url, {
-      ...options,
+      ...fetchOptions,
       headers,
     })
     
@@ -98,6 +113,16 @@ async function apiFetch<T>(
           ? 'Validation failed — check your input'
           : null) ||
         `HTTP ${response.status}`
+
+      if (
+        !skipSessionInvalidation &&
+        getAuthToken() &&
+        isDeactivatedError(response.status, msg) &&
+        onSessionInvalidated
+      ) {
+        onSessionInvalidated()
+      }
+
       throw new Error(msg)
     }
     
@@ -147,9 +172,24 @@ export async function register(
 const AUTH_USER_KEY = 'auth_user'
 
 export interface StoredAuthUser {
+  id: string
   name: string
   email: string
   role: 'public' | 'staff' | 'superadmin'
+}
+
+export interface SessionResponse {
+  user: {
+    id: string
+    name: string
+    email: string
+    role: 'public' | 'staff' | 'superadmin'
+  }
+  active: boolean
+}
+
+export async function getSession(): Promise<SessionResponse> {
+  return apiFetch('/auth/session', { skipSessionInvalidation: true })
 }
 
 // Log out - clear token and saved user
@@ -363,6 +403,7 @@ export interface AuditLogApiEntry {
   new_status?: string | null
   user?: { name: string }
   item?: { name: string }
+  target_user?: { name: string; personal_email?: string }
 }
 
 export type AuditLogAction =
@@ -372,6 +413,8 @@ export type AuditLogAction =
   | 'APPROVE'
   | 'REJECT'
   | 'CLAIM'
+  | 'DEACTIVATE'
+  | 'REACTIVATE'
 
 export type AuditLogSort = 'newest' | 'oldest'
 
@@ -516,21 +559,38 @@ export interface ApiUser {
   role: 'PUBLIC' | 'STAFF' | 'SUPERADMIN'
   affiliation?: string | null
   created_at: string
+  deleted_at?: string | null
 }
 
 export async function getUsers(filters?: {
   limit?: number
   offset?: number
   role?: string
+  status?: 'active' | 'deactivated' | 'all'
   q?: string
 }): Promise<PaginatedResponse<ApiUser>> {
   const queryParams = new URLSearchParams()
   if (filters?.limit) queryParams.append('limit', String(filters.limit))
   if (filters?.offset) queryParams.append('offset', String(filters.offset))
   if (filters?.role) queryParams.append('role', filters.role.toUpperCase())
+  if (filters?.status) queryParams.append('status', filters.status)
   if (filters?.q) queryParams.append('q', filters.q)
   const qs = queryParams.toString()
   return apiFetch(`/users${qs ? `?${qs}` : ''}`)
+}
+
+export async function deactivateUser(userId: string, reason?: string): Promise<ApiUser> {
+  return apiFetch(`/users/${userId}/deactivate`, {
+    method: 'PATCH',
+    body: JSON.stringify(reason ? { reason } : {}),
+  })
+}
+
+export async function reactivateUser(userId: string, reason?: string): Promise<ApiUser> {
+  return apiFetch(`/users/${userId}/reactivate`, {
+    method: 'PATCH',
+    body: JSON.stringify(reason ? { reason } : {}),
+  })
 }
 
 export async function createUser(data: {

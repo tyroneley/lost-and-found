@@ -23,6 +23,10 @@ export const createUserSchema = z.object({
   affiliation: z.string().max(FIELD_LIMITS.AFFILIATION).optional(),
 })
 
+export const setUserActiveSchema = z.object({
+  reason: z.string().max(FIELD_LIMITS.STAFF_NOTES).optional(),
+})
+
 export const updateUserSchema = z.object({
   name: z.string().min(1).max(FIELD_LIMITS.USER_NAME).optional(),
   phone: z.string().max(FIELD_LIMITS.PHONE).optional(),
