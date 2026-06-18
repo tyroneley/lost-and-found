@@ -5,6 +5,7 @@ import { prisma } from '../lib/prisma'
 export type AuthPayload = {
   sub: string
   role: 'PUBLIC' | 'STAFF' | 'SUPERADMIN'
+  mcp: boolean  // must_change_password
   exp: number
 }
 
@@ -21,6 +22,16 @@ export const requireRole = (roles: AuthPayload['role'][]): MiddlewareHandler =>
     await next()
   }
 
+// Blocks all authenticated requests when must_change_password is true.
+// Apply after authMiddleware on any route that should be gated.
+export const requirePasswordChanged: MiddlewareHandler = async (c, next) => {
+  const payload = c.get('jwtPayload') as AuthPayload
+  if (payload?.mcp) {
+    return c.json({ error: 'You must change your password before continuing.', must_change_password: true }, 403)
+  }
+  await next()
+}
+
 export const requireActiveAccount: MiddlewareHandler = async (c, next) => {
   const payload = c.get('jwtPayload') as AuthPayload
   const user = await prisma.user.findUnique({
@@ -35,9 +46,9 @@ export const requireActiveAccount: MiddlewareHandler = async (c, next) => {
   await next()
 }
 
-export const issueToken = (user_id: string, role: AuthPayload['role']) =>
+export const issueToken = (user_id: string, role: AuthPayload['role'], mustChangePassword = false) =>
   sign(
-    { sub: user_id, role, exp: Math.floor(Date.now() / 1000) + 86400 },
+    { sub: user_id, role, mcp: mustChangePassword, exp: Math.floor(Date.now() / 1000) + 86400 },
     JWT_SECRET,
     'HS256'
   )

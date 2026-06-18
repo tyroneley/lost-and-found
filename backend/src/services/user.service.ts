@@ -1,7 +1,8 @@
+import { randomBytes } from 'crypto'
 import { prisma } from '../lib/prisma'
 import * as bcrypt from 'bcryptjs'
 import type { Prisma } from '../../generated/prisma'
-import { sendWelcomeEmail } from './email.service'
+import { sendTempPasswordEmail } from './email.service'
 import { logUserAudit } from './audit.service'
 import { AppError } from '../utils/errorHandler'
 
@@ -13,22 +14,47 @@ const userListSelect = {
   uni_email: true,
   role: true,
   affiliation: true,
+  email_verified: true,
+  must_change_password: true,
   created_at: true,
   deleted_at: true,
 } as const
 
-export const createUser = async (data: any) => {
-  const salt = await bcrypt.genSalt(10)
-  const hashedPassword = await bcrypt.hash(data.password, salt)
+function generateTempPassword(): string {
+  // 12 random hex chars — readable, hard enough to guess
+  return randomBytes(6).toString('hex')
+}
 
-  const { password, ...rest } = data
+// Admin-created accounts: system generates temp password, user must change on first login
+export const createUser = async (data: any) => {
+  const existing = await prisma.user.findUnique({ where: { uni_email: data.uni_email } })
+  if (existing) throw new AppError(409, 'A user with this university email already exists')
+
+  const tempPassword = generateTempPassword()
+  const salt = await bcrypt.genSalt(10)
+  const hashedPassword = await bcrypt.hash(tempPassword, salt)
+
   const user = await prisma.user.create({
-    data: { ...rest, password: hashedPassword, role: data.role ?? 'PUBLIC' },
+    data: {
+      name: data.name,
+      uni_email: data.uni_email,
+      personal_email: data.personal_email ?? null,
+      phone: data.phone ?? null,
+      affiliation: data.affiliation ?? null,
+      role: data.role ?? 'PUBLIC',
+      password: hashedPassword,
+      email_verified: true,       // admin vouches for the address
+      must_change_password: true,
+    },
+    select: userListSelect,
   })
 
-  const { password: _, ...safeUser } = user
-  sendWelcomeEmail(safeUser)
-  return safeUser
+  sendTempPasswordEmail(
+    { name: user.name, uni_email: user.uni_email! },
+    tempPassword
+  )
+
+  return user
 }
 
 export const getUserById = async (id: string) => {
@@ -44,8 +70,8 @@ export const updateUser = async (id: string, data: any) => {
       personal_email: data.personal_email,
       uni_email: data.uni_email,
       affiliation: data.affiliation,
-      role: data.role
-    }
+      role: data.role,
+    },
   })
 }
 

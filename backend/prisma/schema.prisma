@@ -57,11 +57,19 @@ model User {
   user_id        String   @id @default(uuid())
   name           String
   phone          String?
-  personal_email String   @unique
+  personal_email String?  @unique
   password       String
-  uni_email      String? @unique
+  uni_email      String?  @unique
   role           UserRole @default(PUBLIC)
   affiliation    String?
+
+  // Email verification (for self-registered accounts)
+  email_verified             Boolean   @default(false)
+  email_verification_token   String?   @unique
+  email_verification_expires DateTime?
+
+  // Forces password change on next login (admin-created accounts)
+  must_change_password Boolean @default(false)
 
   // Relations
   itemsRecorded  Item[]   @relation("RecordedBy")
